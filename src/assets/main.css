@@ -1,25 +1,18 @@
 @import './base.css';
-
+body {
+  margin: 0px;
+  min-height: 100vh;
+}
 #app {
+  height: 100%;
 }
-
-a,
-.green {
-}
-
-@media (hover: hover) {
-  a:hover {
-  }
-}
-
 @media (min-width: 1024px) {
   body {
     margin: 0px;
+    min-height: 100vh;
   }
 
   #app {
+    height: 100vh;
   }
-}
-body {
-  margin: 0px;
 }
