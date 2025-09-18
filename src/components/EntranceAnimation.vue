@@ -59,7 +59,7 @@ const createStars = (count: number = 200) => {
 const createStarTunnelEffect = () => {
   if (!stars.length) return
 
-  stars.forEach((star, index) => {
+  stars.forEach((star) => {
     // 设置初始状态
     gsap.set(star, {
       scale: 0.1,
