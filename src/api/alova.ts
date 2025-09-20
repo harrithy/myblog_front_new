@@ -20,11 +20,27 @@ export interface RequestData {
 
 const alova = createAlova({
   // 基础URL
-  baseURL: 'http://localhost:3000',
+  baseURL: '/api',
   // 请求超时时间,单位为毫秒,默认为0,永不超时,10000为10秒
   timeout: 10000,
   // 全局共享请求
   shareRequest: false,
+  // 缓存模式
+  // cacheFor: {
+  //   // 设置缓存模式为内存模式
+  //   mode: 'memory',
+  //   // 单位为毫秒
+  //   // 设置缓存时间为10分钟
+  //   // 当设置为 'Infinity' 时，表示永不过期
+  //   // 当设置为 0 时，表示不缓存
+  //   expire: 60 * 10 * 1000,
+  // },
+  cacheFor: {
+    // GET请求缓存10分钟
+    GET: 60 * 10 * 1000,
+    // POST请求缓存10分钟
+    POST: 60 * 10 * 1000,
+  },
   // 全局的请求拦截器 可以设置成异步函数
   beforeRequest(request) {
     // 检查meta数据，如果skipAuth为true，则跳过添加token
@@ -49,8 +65,9 @@ const alova = createAlova({
       // 如果json.code不等于200，表示请求失败
       if (json.code !== 200) {
         // 抛出错误或返回reject状态的Promise实例时,此请求将抛出错误
-        throw new Error(json.message)
+        throw new Error(json.msg)
       }
+      console.log(json)
       // 解析的响应数据将传给request实例的transform钩子函数
       return json.data
     },
@@ -59,7 +76,7 @@ const alova = createAlova({
     // 第一个参数接收 Error 对象
     // 第二个参数为当前请求的 request 实例，可以同步请求前后的配置信息
     onError: (error) => {
-      console.error('Request failed:', error.message)
+      console.error('Request failed:', error.msg)
     },
     // 请求完成的拦截器
     // 当请求不论是成功还是失败还是命中缓存都需要执行的逻辑时，可以设置该拦截器,例如关闭loading

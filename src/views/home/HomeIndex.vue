@@ -11,6 +11,27 @@
 
 <script setup lang="ts">
 // import { navigateTo } from '@/utils/navigation'
+import { onMounted } from 'vue'
+import { visitApi } from '@/api/index'
+import { ref } from 'vue'
+import type { VisitRecord } from '@/api/visit'
+
+// 创建分页
+const page = ref(1)
+const pageSize = ref(10)
+// 访问记录
+const visits = ref<VisitRecord[]>([])
+
+onMounted(() => {
+  // visitApi.addVisit({ visit_time: new Date().toISOString() }).then(() => {
+  //   console.log('Visit recorded successfully')
+  // })
+  visitApi.getVisits(page.value, pageSize.value).then((res) => {
+    // console.log(res)
+    visits.value = res as VisitRecord[]
+    console.log(visits.value)
+  })
+})
 </script>
 <style lang="scss" scoped>
 .home {
@@ -32,8 +53,8 @@
     opacity: 0.8;
   }
   .myblog-box {
-    width: 50%;
-    height: 50%;
+    width: 70%;
+    height: 70%;
     // 透明边框与背景
     border: 2px solid rgba(255, 255, 255, 0.5);
     background-color: rgba(255, 255, 255, 0.5);
