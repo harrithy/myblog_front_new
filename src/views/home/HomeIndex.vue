@@ -51,22 +51,32 @@ const visits = ref<VisitRecord[]>([])
 const myblogBox = ref<HTMLElement | null>(null)
 const character = ref<InstanceType<typeof WalkingCharacter> | null>(null)
 
-// 格式化访问时间
-const formatVisitTime = (timeString: string) => {
-  const date = new Date(timeString)
-  return date.toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+// 记录访问
+const addVisitRecord = async () => {
+  const data = {
+    visit_time: new Date()
+      .toLocaleString('zh-CN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      })
+      .replace(/\//g, '-'),
+    content: '访问记录',
+  }
+  const res = await visitApi.addVisit(data)
+  console.log(res)
 }
 
 onMounted(async () => {
   await nextTick()
 
   if (!myblogBox.value || !character.value) return
+
+  await addVisitRecord()
 
   const box = myblogBox.value as HTMLElement
   const charEl = character.value.$el
