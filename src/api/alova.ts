@@ -8,19 +8,26 @@ import VueHook from 'alova/vue'
 
 // 类型定义
 export interface RequestConfig {
+  // 请求头
   headers?: Record<string, string>
+  // 请求参数
   params?: Record<string, string | number>
+  // 请求超时时间
   timeout?: number
+  // 其他配置
   [key: string]: unknown
 }
 
 export interface RequestData {
+  // 请求数据
   [key: string]: unknown
 }
 
 const alova = createAlova({
-  // 基础URL
-  baseURL: '/api',
+  // 基础URL - 从环境变量读取
+  // 开发环境: /api (通过Vite代理转发)
+  // 生产环境: http://harrio.xyz:8080/api (直接访问)
+  baseURL: import.meta.env.VITE_API_BASE_URL,
   // 请求超时时间,单位为毫秒,默认为0,永不超时,10000为10秒
   timeout: 10000,
   // 全局共享请求
@@ -67,7 +74,7 @@ const alova = createAlova({
         // 抛出错误或返回reject状态的Promise实例时,此请求将抛出错误
         throw new Error(json.msg)
       }
-      console.log(json)
+      // console.log(json)
       // 解析的响应数据将传给request实例的transform钩子函数
       return json.data
     },
