@@ -16,6 +16,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.16",
     "alova": "^3.3.4",
     "gsap": "^3.13.0",
     "pinia": "^3.0.3",
