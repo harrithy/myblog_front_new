@@ -14,44 +14,13 @@
       <div class="left-section">
         <!-- 头像区域 -->
         <div class="avatar-section">
-          <div class="avatar-frame">
-            <img src="../../assets/logo.svg" alt="头像" class="avatar" />
-          </div>
-        </div>
-        <!-- 时间记录表 -->
-        <div class="time-record-section">
-          <h3>访问记录</h3>
-          <div class="visit-list">
-            <div v-for="visit in visits" :key="visit.id" class="visit-item">
-              <span class="visit-time">{{ formatVisitTime(visit.visit_time) }}</span>
-              <span class="visit-ip">{{ visit.ip_address || '未知IP' }}</span>
-            </div>
-            <div v-if="visits.length === 0" class="no-visits">暂无访问记录</div>
-          </div>
+          <AvatarGlow :avatarSrc="avatarImage" />
         </div>
       </div>
       <!-- 右侧区域 - 占2/3 -->
       <div class="right-section">
         <div class="project-intro">
           <ContributionGraph />
-          <h2>项目介绍</h2>
-          <div class="project-content">
-            <p>欢迎来到我的个人博客项目！这是一个基于 Vue 3 + TypeScript 构建的现代化博客系统。</p>
-            <h3>技术栈：</h3>
-            <ul>
-              <li>前端：Vue 3, TypeScript, Vite, Pinia</li>
-              <li>动画：GSAP</li>
-              <li>样式：SCSS</li>
-              <li>构建工具：Vite</li>
-            </ul>
-            <h3>功能特性：</h3>
-            <ul>
-              <li>响应式设计</li>
-              <li>平滑动画效果</li>
-              <li>访问记录统计</li>
-              <li>博客文章管理</li>
-            </ul>
-          </div>
         </div>
       </div>
     </div>
@@ -61,6 +30,8 @@
 <script setup lang="ts">
 import ContributionGraph from './components/ContributionGraph.vue'
 import WalkingCharacter from './components/WalkingCharacter.vue'
+import AvatarGlow from './components/AvatarGlow.vue'
+import avatarImage from '@/assets/source/avatar.jpg'
 // import { navigateTo } from '@/utils/navigation'
 import { onMounted, ref, nextTick } from 'vue'
 import { visitApi } from '@/api/index'
@@ -206,8 +177,8 @@ onMounted(async () => {
   }
   .myblog-box {
     position: relative; // 为SVG和角色定位
-    width: 70%;
-    height: 70%;
+    width: 60%;
+    height: 65%;
     // 透明边框与背景
     border: 2px solid rgba(255, 255, 255, 0.5);
     background-color: rgba(255, 255, 255, 0.5);
@@ -237,36 +208,17 @@ onMounted(async () => {
 
     // 左侧区域 - 占1/3
     .left-section {
-      width: 33.33%;
+      width: 20%;
       height: 100%;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid rgba(255, 255, 255, 0.3);
 
       // 头像区域
       .avatar-section {
-        height: 40%;
         display: flex;
         justify-content: center;
         align-items: center;
         padding: 20px;
-
-        .avatar-frame {
-          width: 120px;
-          height: 120px;
-          border-radius: 50%;
-          border: 3px solid rgba(255, 255, 255, 0.8);
-          padding: 5px;
-          background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
-          box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
-
-          .avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-          }
-        }
       }
 
       // 时间记录表区域
@@ -294,7 +246,6 @@ onMounted(async () => {
             justify-content: space-between;
             align-items: center;
             padding: 8px 5px;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             font-size: 12px;
 
             .visit-time {
@@ -322,12 +273,16 @@ onMounted(async () => {
 
     // 右侧区域 - 占2/3
     .right-section {
-      width: 66.67%;
+      width: 80%;
+      // flex: 1;
       height: 100%;
       padding: 25px;
+      display: flex;
 
       .project-intro {
+        width: 100%;
         height: 100%;
+        display: flex;
 
         h2 {
           margin: 0 0 20px 0;

@@ -255,10 +255,21 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 .contribution-graph {
-  // padding: 15px;
   border-radius: 6px;
   width: 100%;
+  height: 100%;
   box-sizing: border-box;
+  container-type: inline-size;
+  display: flex;
+  flex-direction: column;
+
+  // 基于容器宽度的响应式单位 (cqw = container query width)
+  // 计算：容器宽度 / (53列 + 标签宽度 + 间距) ≈ 1.5cqw
+  --cell-size: clamp(8px, 1.3cqw, 25px);
+  --cell-gap: clamp(3px, 0.5cqw, 6px);
+  --label-width: clamp(20px, 3cqw, 40px);
+  --font-size-small: clamp(8px, 1cqw, 13px);
+  --font-size-medium: clamp(9px, 1.1cqw, 14px);
 
   h4 {
     font-size: 14px;
@@ -268,17 +279,18 @@ onUnmounted(() => {
   }
 
   .graph-container {
-    display: inline-block;
+    display: block;
     position: relative;
+    width: 100%;
   }
 
   .months-header {
     display: grid;
-    grid-template-columns: repeat(53, 11px);
-    grid-gap: 4px;
+    grid-template-columns: repeat(53, var(--cell-size));
+    grid-gap: var(--cell-gap);
     margin-bottom: 5px;
-    padding-left: 25px;
-    font-size: 10px;
+    padding-left: var(--label-width);
+    font-size: var(--font-size-small);
     color: #555;
     .month {
       grid-column-end: span 4;
@@ -287,16 +299,18 @@ onUnmounted(() => {
 
   .days-grid {
     display: grid;
-    grid-template-columns: 25px repeat(53, 11px);
-    grid-template-rows: repeat(7, 11px);
+    grid-template-columns: var(--label-width) repeat(53, var(--cell-size));
+    grid-template-rows: repeat(7, var(--cell-size));
     grid-auto-flow: column;
-    grid-gap: 4px;
+    grid-gap: var(--cell-gap);
 
     .day-label {
-      font-size: 10px;
+      font-size: var(--font-size-small);
       color: #555;
       grid-column: 1;
       text-align: left;
+      display: flex;
+      align-items: center;
       &:nth-child(1) {
         grid-row: 2;
       }
@@ -309,8 +323,8 @@ onUnmounted(() => {
     }
 
     .day-square {
-      width: 11px;
-      height: 11px;
+      width: var(--cell-size);
+      height: var(--cell-size);
       border: 1px solid rgba(255, 255, 255, 0.1);
       background-color: rgba(255, 255, 255, 0.15);
       border-radius: 2px;
@@ -326,7 +340,7 @@ onUnmounted(() => {
         color: #fff;
         padding: 5px 8px;
         border-radius: 4px;
-        font-size: 12px;
+        font-size: var(--font-size-medium);
         white-space: nowrap;
         z-index: 10;
       }
@@ -337,15 +351,16 @@ onUnmounted(() => {
     margin-top: 10px;
     display: flex;
     align-items: center;
-    font-size: 12px;
+    flex-wrap: wrap;
+    font-size: var(--font-size-medium);
     color: #555;
 
     span {
       margin: 0 5px;
     }
     .day-square {
-      width: 11px;
-      height: 11px;
+      width: var(--cell-size);
+      height: var(--cell-size);
       background-color: #ebedf0;
       border-radius: 2px;
       margin: 0 2px;
