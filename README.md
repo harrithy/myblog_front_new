@@ -11,3 +11,4 @@
 3. gsap 动画库
 4. element-plus
 5. ~~axios~~ alova
+6. tailwindcss
