@@ -4,6 +4,8 @@ import { createAlova } from 'alova'
 import adapterFetch from 'alova/fetch'
 // 使用 VueHook
 import VueHook from 'alova/vue'
+// 引入element-plus的message
+import { ElMessage } from 'element-plus'  // 或其他UI库
 // GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH 7 种请求类型
 
 // 类型定义
@@ -83,7 +85,8 @@ const alova = createAlova({
     // 第一个参数接收 Error 对象
     // 第二个参数为当前请求的 request 实例，可以同步请求前后的配置信息
     onError: (error) => {
-      console.error('Request failed:', error.msg)
+      // console.error('Request failed:', error.msg)
+      ElMessage.error(error.msg)
     },
     // 请求完成的拦截器
     // 当请求不论是成功还是失败还是命中缓存都需要执行的逻辑时，可以设置该拦截器,例如关闭loading
