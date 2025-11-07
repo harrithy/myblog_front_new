@@ -15,6 +15,7 @@
         <!-- 头像区域 -->
         <div class="avatar-section">
           <AvatarGlow :avatarSrc="avatarImage" />
+          <SocialLinks />
           <VisitTimeline :page-size="10" :auto-load="true" />
         </div>
       </div>
@@ -32,7 +33,8 @@
 import ContributionGraph from './components/ContributionGraph.vue'
 import WalkingCharacter from './components/WalkingCharacter.vue'
 import AvatarGlow from './components/AvatarGlow.vue'
-import VisitTimeline from '@/components/VisitTimeline.vue'
+import SocialLinks from './components/SocialLinks.vue'
+import VisitTimeline from '@/views/home/components/VisitTimeline.vue'
 import avatarImage from '@/assets/source/avatar.gif'
 import { onMounted, ref, nextTick } from 'vue'
 import { visitApi } from '@/api/index'
