@@ -15,6 +15,7 @@
         <!-- 头像区域 -->
         <div class="avatar-section">
           <AvatarGlow :avatarSrc="avatarImage" />
+          <VisitTimeline :page-size="10" :auto-load="true" />
         </div>
       </div>
       <!-- 右侧区域 - 占2/3 -->
@@ -31,21 +32,15 @@
 import ContributionGraph from './components/ContributionGraph.vue'
 import WalkingCharacter from './components/WalkingCharacter.vue'
 import AvatarGlow from './components/AvatarGlow.vue'
+import VisitTimeline from '@/components/VisitTimeline.vue'
 import avatarImage from '@/assets/source/avatar.gif'
-// import { navigateTo } from '@/utils/navigation'
 import { onMounted, ref, nextTick } from 'vue'
 import { visitApi } from '@/api/index'
-import type { VisitRecord } from '@/api/visit'
 import gsap from 'gsap'
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin'
+import welcomeObj from '@/constants/welcome'
 
 gsap.registerPlugin(MotionPathPlugin)
-
-// 创建分页
-const page = ref(1)
-const pageSize = ref(10)
-// 访问记录
-const visits = ref<VisitRecord[]>([])
 
 // 获取myblog-box的引用
 const myblogBox = ref<HTMLElement | null>(null)
@@ -53,6 +48,9 @@ const character = ref<InstanceType<typeof WalkingCharacter> | null>(null)
 
 // 记录访问
 const addVisitRecord = async () => {
+  // 随机选择欢迎语
+  const randomIndex = Math.floor(Math.random() * Object.keys(welcomeObj.visitTextMap).length)
+  const visitText = welcomeObj.visitTextMap[randomIndex + 1]
   const data = {
     visit_time: new Date()
       .toLocaleString('zh-CN', {
@@ -65,10 +63,9 @@ const addVisitRecord = async () => {
         hour12: false,
       })
       .replace(/\//g, '-'),
-    content: '访问记录',
+    content: visitText,
   }
-  const res = await visitApi.addVisit(data)
-  console.log(res)
+  await visitApi.addVisit(data)
 }
 
 onMounted(async () => {
@@ -141,11 +138,6 @@ onMounted(async () => {
       '>',
     ) // ">"表示紧接着上一个动画结束时开始
   }
-
-  visitApi.getVisits(page.value, pageSize.value).then((res) => {
-    visits.value = res as VisitRecord[]
-    console.log(visits.value)
-  })
 
   gsap.set(myblogBox.value, {
     scaleX: 0,
@@ -225,9 +217,11 @@ onMounted(async () => {
 
       // 头像区域
       .avatar-section {
+        height: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
+        flex-direction: column;
         padding: 20px;
       }
 
