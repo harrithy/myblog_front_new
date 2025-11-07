@@ -21,6 +21,18 @@ const routes: RouteRecordRaw[] = [
       title: '博客',
     },
   },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('../views/login/ownerLogin.vue'),
+    meta: {
+      title: 'Owner Login',
+    },
+  },
+  {
+    path: '/ownerlogin',
+    redirect: '/login',
+  },
 ]
 
 const router = createRouter({

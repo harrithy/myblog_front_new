@@ -137,7 +137,7 @@ onUnmounted(() => {
     z-index: 1;
     box-shadow: 0 0 30px rgba(254, 240, 138, 0.5), 0 0 60px rgba(253, 230, 138, 0.4),
       0 0 90px rgba(252, 211, 77, 0.3);
-    animation: avatar-pulse 2s ease-in-out infinite;
+    animation: avatar-pulse 2s ease-in-out infinite, avatar-rotate 20s linear infinite;
   }
 
   @keyframes avatar-pulse {
@@ -149,6 +149,15 @@ onUnmounted(() => {
     50% {
       box-shadow: 0 0 40px rgba(254, 240, 138, 0.7), 0 0 80px rgba(253, 230, 138, 0.6),
         0 0 120px rgba(252, 211, 77, 0.4);
+    }
+  }
+
+  @keyframes avatar-rotate {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
     }
   }
 }

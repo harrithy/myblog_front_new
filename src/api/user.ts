@@ -12,7 +12,7 @@ export interface UserUpdateData {
 
 // 登录请求数据接口
 export interface LoginCredentials {
-  username: string
+  account: string
   password: string
   [key: string]: unknown
 }

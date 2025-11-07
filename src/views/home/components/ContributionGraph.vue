@@ -44,6 +44,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { visitApi } from '@/api/visit'
 
 interface ContributionDay {
   date: string
@@ -97,7 +98,7 @@ const getColor = (day: ContributionDay): string => {
   return colors[4]
 }
 
-const generateData = () => {
+const generateData = async () => {
   const data: ContributionDay[] = []
   const monthNames = [
     'Jan',
@@ -126,6 +127,43 @@ const generateData = () => {
   const dayOffset = startDate.getDay()
   startDate.setDate(startDate.getDate() - dayOffset)
 
+  // 创建日期到访问次数的映射
+  const visitCountMap = new Map<string, number>()
+  
+  try {
+    // 获取访问统计数据
+    const response = await visitApi.getOwnerVisits(365)
+    
+    // Alova 会自动解包响应，检查多种可能的结构
+    let visitStats: any[] = []
+    
+    if (response && typeof response === 'object') {
+      // 情况1: response.data.visit_stats (完整响应)
+      if ('code' in response && 'data' in response && response.data && response.data.visit_stats) {
+        visitStats = response.data.visit_stats
+      }
+      // 情况2: response.visit_stats (Alova已解包data层)
+      else if ('visit_stats' in response && response.visit_stats) {
+        visitStats = response.visit_stats
+      }
+      // 情况3: response 本身就是数组
+      else if (Array.isArray(response)) {
+        visitStats = response
+      }
+    }
+    
+    if (visitStats && visitStats.length > 0) {
+      visitStats.forEach((stat: any) => {
+        // 后端返回的 visit_date 格式是 "2025-11-08"，直接使用
+        const dateStr = stat.visit_date
+        visitCountMap.set(dateStr, stat.visit_count)
+      })
+      console.log(`✅ Loaded ${visitStats.length} visit records`)
+    }
+  } catch (error) {
+    console.error('Failed to fetch owner visit stats:', error)
+  }
+
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     const dayOfWeek = d.getDay() // 0=Sun, 1=Mon, ..., 6=Sat
 
@@ -139,9 +177,12 @@ const generateData = () => {
       monthHeaders.push({ name: monthNames[lastMonth], start: currentWeek })
     }
 
+    const dateStr = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA') // 使用 'en-CA' 格式 (YYYY-MM-DD)
+    const count = visitCountMap.get(dateStr) || 0
+    
     data.push({
-      date: new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA'), // 使用 'en-CA' 格式 (YYYY-MM-DD)
-      count: 0, // Temporarily set to 0 until API is ready
+      date: dateStr,
+      count: count, // 使用API返回的数据，如果没有则为0
       dayOfWeek: dayOfWeek + 1, // CSS grid-row starts at 1
       weekOfYear: currentWeek,
       isSnake: false,
@@ -240,8 +281,8 @@ const moveSnake = () => {
   }
 }
 
-onMounted(() => {
-  generateData()
+onMounted(async () => {
+  await generateData()
   initializeSnake()
   gameInterval = window.setInterval(moveSnake, 300)
 })

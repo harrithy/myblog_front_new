@@ -31,7 +31,7 @@
 import ContributionGraph from './components/ContributionGraph.vue'
 import WalkingCharacter from './components/WalkingCharacter.vue'
 import AvatarGlow from './components/AvatarGlow.vue'
-import avatarImage from '@/assets/source/avatar.jpg'
+import avatarImage from '@/assets/source/avatar.gif'
 // import { navigateTo } from '@/utils/navigation'
 import { onMounted, ref, nextTick } from 'vue'
 import { visitApi } from '@/api/index'
