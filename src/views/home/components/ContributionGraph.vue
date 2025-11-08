@@ -139,11 +139,11 @@ const generateData = async () => {
     
     if (response && typeof response === 'object') {
       // 情况1: response.data.visit_stats (完整响应)
-      if ('code' in response && 'data' in response && response.data && response.data.visit_stats) {
+      if ('code' in response && 'data' in response && response.data && typeof response.data === 'object' && 'visit_stats' in response.data && Array.isArray(response.data.visit_stats)) {
         visitStats = response.data.visit_stats
       }
       // 情况2: response.visit_stats (Alova已解包data层)
-      else if ('visit_stats' in response && response.visit_stats) {
+      else if ('visit_stats' in response && Array.isArray(response.visit_stats)) {
         visitStats = response.visit_stats
       }
       // 情况3: response 本身就是数组
