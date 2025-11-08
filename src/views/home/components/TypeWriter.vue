@@ -54,9 +54,11 @@ onMounted(() => {
           const colorIndex = arrayPos % colors.length
           const currentColor = colors[colorIndex]
           typedElement.value.style.color = currentColor
-          
+
           // 同时改变光标颜色
-          const cursor = typedElement.value.parentElement?.querySelector('.typed-cursor') as HTMLElement
+          const cursor = typedElement.value.parentElement?.querySelector(
+            '.typed-cursor',
+          ) as HTMLElement
           if (cursor) {
             cursor.style.color = currentColor
           }
@@ -81,7 +83,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   // justify-content: center;
-  padding: 20px;
+  padding: 20px 20px 20px 0;
   box-sizing: border-box;
   text-align: center;
   // min-height: 80px; // 给打字区域一个最小高度

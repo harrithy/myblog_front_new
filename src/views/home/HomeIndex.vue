@@ -24,7 +24,12 @@
         <div class="project-intro">
           <ContributionGraph />
           <TypeWriter />
-          <div>123</div>
+          <!-- 第二部分：个人主页跳转卡片 -->
+          <ProfileLinkCard />
+          <!-- 第一部分：技能介绍 -->
+          <SkillsSection />
+          <!-- 第三部分：卡片列表 -->
+          <CardList />
         </div>
       </div>
     </div>
@@ -34,6 +39,9 @@
 <script setup lang="ts">
 import ContributionGraph from './components/ContributionGraph.vue'
 import TypeWriter from './components/TypeWriter.vue'
+import SkillsSection from './components/SkillsSection.vue'
+import ProfileLinkCard from './components/ProfileLinkCard.vue'
+import CardList from './components/CardList.vue'
 import WalkingCharacter from './components/WalkingCharacter.vue'
 import AvatarGlow from './components/AvatarGlow.vue'
 import SocialLinks from './components/SocialLinks.vue'
