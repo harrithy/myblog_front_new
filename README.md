@@ -13,3 +13,4 @@
 5. ~~axios~~ alova
 6. tailwindcss
 7. element-plus
+8. typed.js // 打字效果

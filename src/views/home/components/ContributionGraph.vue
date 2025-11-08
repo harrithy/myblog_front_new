@@ -276,7 +276,7 @@ onUnmounted(() => {
 .contribution-graph {
   border-radius: 6px;
   width: 100%;
-  height: 100%;
+  // height: 100%;
   box-sizing: border-box;
   container-type: inline-size;
   display: flex;

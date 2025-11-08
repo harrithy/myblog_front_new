@@ -23,6 +23,8 @@
       <div class="right-section">
         <div class="project-intro">
           <ContributionGraph />
+          <TypeWriter />
+          <div>123</div>
         </div>
       </div>
     </div>
@@ -31,6 +33,7 @@
 
 <script setup lang="ts">
 import ContributionGraph from './components/ContributionGraph.vue'
+import TypeWriter from './components/TypeWriter.vue'
 import WalkingCharacter from './components/WalkingCharacter.vue'
 import AvatarGlow from './components/AvatarGlow.vue'
 import SocialLinks from './components/SocialLinks.vue'
@@ -289,6 +292,7 @@ onMounted(async () => {
         width: 100%;
         height: 100%;
         display: flex;
+        flex-direction: column;
 
         h2 {
           margin: 0 0 20px 0;
