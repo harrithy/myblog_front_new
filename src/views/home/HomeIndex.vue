@@ -193,7 +193,7 @@ onMounted(async () => {
   .myblog-box {
     position: relative; // 为SVG和角色定位
     width: 60%;
-    height: 65%;
+    // height: 65%;
     // 透明边框与背景
     border: 2px solid rgba(255, 255, 255, 0.5);
     background-color: rgba(255, 255, 255, 0.5);
