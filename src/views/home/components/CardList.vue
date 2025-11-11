@@ -196,9 +196,20 @@ const handleCardClick = (card: Card) => {
 .card-wrapper {
   perspective: 1000px; // 3D透视效果
   animation: fadeInUp 0.6s ease-out both;
+  width: 100%;
   flex: 1;
   max-width: 250px;
   min-width: 200px;
+}
+@media (max-width: 768px) {
+  .card-wrapper {
+    perspective: 1000px; // 3D透视效果
+    animation: fadeInUp 0.6s ease-out both;
+    width: 100%;
+    // 取消flex: 1;
+    max-width: 100%;
+    min-width: 100%;
+  }
 }
 
 .card-flip {

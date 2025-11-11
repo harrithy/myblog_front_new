@@ -16,13 +16,15 @@
         <div class="avatar-section">
           <AvatarGlow :avatarSrc="avatarImage" />
           <SocialLinks />
-          <VisitTimeline :page-size="10" :auto-load="true" />
+          <div class="hide-on-mobile">
+            <VisitTimeline :page-size="10" :auto-load="true" />
+          </div>
         </div>
       </div>
       <!-- 右侧区域 - 占2/3 -->
       <div class="right-section">
         <div class="project-intro">
-          <ContributionGraph />
+          <ContributionGraph class="hide-on-mobile" />
           <TypeWriter />
           <!-- 第二部分：个人主页跳转卡片 -->
           <ProfileLinkCard />
@@ -338,6 +340,42 @@ onMounted(async () => {
             }
           }
         }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .home {
+    .myblog-box {
+      width: 90%;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 10px;
+      margin:  20px 0;
+
+      .walking-character {
+        display: none;
+      }
+
+      .left-section,
+      .right-section {
+        width: 100%;
+      }
+
+      .left-section {
+        padding: 10px 0;
+        .avatar-section {
+          padding: 10px;
+        }
+      }
+
+      .right-section {
+        padding: 0 15px 15px 15px;
+      }
+
+      .hide-on-mobile {
+        display: none;
       }
     }
   }
