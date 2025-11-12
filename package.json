@@ -20,6 +20,7 @@
     "alova": "^3.3.4",
     "element-plus": "^2.11.7",
     "gsap": "^3.13.0",
+    "markdown-it": "^14.1.0",
     "pinia": "^3.0.3",
     "typed.js": "^2.1.0",
     "vue": "^3.5.18",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.2",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.16.5",
     "@vitejs/plugin-vue": "^6.0.1",
     "@vue/eslint-config-prettier": "^10.2.0",
