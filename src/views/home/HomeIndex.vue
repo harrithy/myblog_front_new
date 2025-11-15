@@ -16,9 +16,7 @@
         <div class="avatar-section">
           <AvatarGlow :avatarSrc="avatarImage" />
           <SocialLinks />
-          <div class="hide-on-mobile">
-            <VisitTimeline :page-size="10" :auto-load="true" />
-          </div>
+          <VisitTimeline :page-size="10" :auto-load="true" />
         </div>
       </div>
       <!-- 右侧区域 - 占2/3 -->
@@ -350,9 +348,9 @@ onMounted(async () => {
     .myblog-box {
       width: 90%;
       flex-direction: column;
-      overflow-y: auto;
+      // overflow-y: auto;
       padding: 10px;
-      margin:  20px 0;
+      margin: 20px 0;
 
       .walking-character {
         display: none;

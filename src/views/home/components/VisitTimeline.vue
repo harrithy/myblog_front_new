@@ -208,6 +208,7 @@ const getShapeType = (index: number) => {
   background: transparent;
   border-radius: 8px;
   margin-top: 20px;
+  max-height: 400px;
   // padding: 10px;
 
   .timeline-header {
