@@ -1,80 +1,67 @@
 <template>
-  <div class="blog-detail-wrapper">
-    <article class="blog-detail" v-loading="loading">
-      <!-- 博客头部 -->
-      <header class="blog-detail__header" v-if="detail">
-        <div class="blog-detail__category-wrapper">
-          <span class="blog-detail__category">{{ detail.category }}</span>
-        </div>
-        <h1 class="blog-detail__title">{{ detail.title }}</h1>
-        <div class="blog-detail__meta">
-          <time class="blog-detail__time" :datetime="detail.created_at">
-            <svg class="blog-detail__icon" viewBox="0 0 16 16" fill="currentColor">
-              <path
-                d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0z"
-              />
-              <path d="M7.5 3.5v5h4" />
-            </svg>
-            {{ formatDate(detail.created_at) }}
-          </time>
-          <span class="blog-detail__separator">·</span>
-          <time class="blog-detail__time" :datetime="detail.updated_at">
-            <svg class="blog-detail__icon" viewBox="0 0 16 16" fill="currentColor">
-              <path d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z" />
-              <path
-                d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"
-              />
-            </svg>
-            {{ formatDate(detail.updated_at) }}
-          </time>
-        </div>
-      </header>
+  <div class="blog-container">
+    <!-- 背景视频 (保持不变，作为整体风格的一部分) -->
+    <video autoplay loop muted class="video-background">
+      <source src="../../assets/source/kkl.mp4" type="video/mp4" />
+    </video>
 
-      <!-- 博客内容 -->
-      <main class="blog-detail__content" v-if="detail">
-        <div v-if="detail.description" class="blog-detail__description">
-          <p>{{ detail.description }}</p>
-        </div>
+    <div class="content-wrapper">
+      <article class="blog-paper" v-loading="loading">
+        <!-- 装饰性元素：顶部回形针/胶带效果 -->
+        <div class="paper-decoration"></div>
 
-        <div class="blog-detail__divider"></div>
-
-        <transition name="fade" mode="out-in">
-          <MarkdownRenderer v-if="content" class="blog-detail__body" :content="content" />
-          <div v-else class="blog-detail__loading">
-            <div class="blog-detail__loading-spinner"></div>
-            <p>正在加载博客内容...</p>
+        <header class="paper-header" v-if="detail">
+          <div class="header-meta">
+            <span class="meta-tag">{{ detail.category }}</span>
+            <span class="meta-divider">/</span>
+            <span class="meta-date">{{ formatDate(detail.created_at) }}</span>
           </div>
-        </transition>
 
-        <div class="blog-detail__footer">
-          <a class="blog-detail__link" :href="detail.url" target="_blank" rel="noopener">
-            <svg class="blog-detail__link-icon" viewBox="0 0 16 16" fill="currentColor">
+          <h1 class="paper-title">{{ detail.title }}</h1>
+
+          <div class="header-decoration">
+            <span class="decoration-line"></span>
+            <span class="decoration-icon">❦</span>
+            <span class="decoration-line"></span>
+          </div>
+        </header>
+
+        <main class="paper-content" v-if="detail">
+          <div v-if="detail.description" class="paper-quote">
+            <p>{{ detail.description }}</p>
+          </div>
+
+          <transition name="fade" mode="out-in">
+            <MarkdownRenderer v-if="content" class="markdown-body" :content="content" />
+            <div v-else class="loading-state">
+              <div class="spinner"></div>
+              <p>正在翻阅篇章...</p>
+            </div>
+          </transition>
+        </main>
+
+        <footer class="paper-footer" v-if="detail">
+          <div class="footer-divider"></div>
+          <a class="read-original-btn" :href="detail.url" target="_blank" rel="noopener">
+            <span>阅读原文</span>
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
               <path
-                d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"
-              />
-              <path
-                d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0v-5z"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M14 5l7 7m0 0l-7 7m7-7H3"
               />
             </svg>
-            阅读原文
           </a>
-        </div>
-      </main>
+          <div class="footer-note">End of Article</div>
+        </footer>
 
-      <!-- 空状态 -->
-      <div class="blog-detail__empty" v-else-if="!loading">
-        <svg class="blog-detail__empty-icon" viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="2" />
-          <path
-            d="M32 20v16M32 44h.01"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-          />
-        </svg>
-        <p>暂无博客内容</p>
-      </div>
-    </article>
+        <!-- 空状态 -->
+        <div class="empty-state" v-else-if="!loading">
+          <p>暂无内容</p>
+        </div>
+      </article>
+    </div>
   </div>
 </template>
 
@@ -91,9 +78,6 @@ const content = ref('')
 const loading = ref(false)
 
 // ==================== API Calls ====================
-/**
- * 获取博客正文内容
- */
 const fetchBlogContent = async (url: string): Promise<void> => {
   try {
     const response = await fetch(url)
@@ -108,9 +92,6 @@ const fetchBlogContent = async (url: string): Promise<void> => {
   }
 }
 
-/**
- * 获取博客详情
- */
 const fetchBlogDetail = async (): Promise<void> => {
   loading.value = true
   try {
@@ -130,17 +111,12 @@ const fetchBlogDetail = async (): Promise<void> => {
 }
 
 // ==================== Utilities ====================
-/**
- * 格式化日期
- */
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr)
   return new Intl.DateTimeFormat('zh-CN', {
     year: 'numeric',
     month: '2-digit',
     day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
   }).format(date)
 }
 
@@ -151,242 +127,232 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-.blog-detail-wrapper {
+// 字体引入（如果是全局已有则不需要，这里假设使用系统衬线字体）
+$font-serif: 'Georgia', 'Times New Roman', 'Songti SC', serif;
+$font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+.blog-container {
   width: 100%;
-  padding: 40px 20px;
-  background-color: #f8fafc;
   min-height: 100vh;
+  position: relative;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: 40px 20px;
 }
 
-.blog-detail {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 48px 32px;
-  background: linear-gradient(to bottom, #ffffff 0%, #fafafa 100%);
-  border-radius: 20px;
+.video-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+  // 加一层暖色遮罩，让视频看起来更温馨
+  filter: brightness(0.9) sepia(0.2);
+}
+
+.content-wrapper {
+  width: 100%;
+  max-width: 800px;
+  z-index: 1;
+}
+
+.blog-paper {
+  background-color: #fffcf9; // 暖白色/米色背景
+  border-radius: 4px;
   box-shadow:
-    0 4px 6px rgba(0, 0, 0, 0.05),
-    0 10px 20px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
-  min-height: 400px;
-  transition: box-shadow 0.3s ease;
+    0 2px 4px rgba(0, 0, 0, 0.05),
+    0 15px 30px rgba(0, 0, 0, 0.1); // 柔和的阴影
+  padding: 60px 50px;
+  position: relative;
+  color: #433422; // 深棕灰色文字
+  transition: transform 0.3s ease;
 
-  &:hover {
-    box-shadow:
-      0 8px 12px rgba(0, 0, 0, 0.08),
-      0 16px 32px rgba(0, 0, 0, 0.12),
-      0 0 0 1px rgba(0, 0, 0, 0.06);
+  // 纸张纹理效果
+  background-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    transparent 98%,
+    rgba(0, 0, 0, 0.02) 100%
+  );
+  background-size: 100% 20px; // 模拟信纸横线（非常淡）
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(to right, #d4a373, #faedcd, #d4a373); // 顶部装饰条
+    border-radius: 4px 4px 0 0;
   }
+}
 
-  // ==================== Header ====================
-  &__header {
-    margin-bottom: 40px;
-    padding-bottom: 32px;
-    border-bottom: 2px solid #f0f0f0;
-  }
+// 头部样式
+.paper-header {
+  text-align: center;
+  margin-bottom: 50px;
 
-  &__category-wrapper {
-    margin-bottom: 16px;
-  }
-
-  &__category {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 6px 16px;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
-    color: #2563eb;
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.1) 0%, rgba(59, 130, 246, 0.15) 100%);
-    border: 1px solid rgba(37, 99, 235, 0.2);
-    border-radius: 999px;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: linear-gradient(135deg, rgba(37, 99, 235, 0.15) 0%, rgba(59, 130, 246, 0.2) 100%);
-      transform: translateY(-2px);
-    }
-  }
-
-  &__title {
-    font-size: 36px;
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 20px;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e3a8a 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    color: #0f172a; // fallback for browsers that don't support background-clip
-  }
-
-  &__meta {
-    display: flex;
-    align-items: center;
-    gap: 12px;
+  .header-meta {
     font-size: 14px;
-    color: #64748b;
-    flex-wrap: wrap;
+    color: #9c826b;
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+    font-family: $font-sans;
+    text-transform: uppercase;
+
+    .meta-tag {
+      color: #b5835a;
+      font-weight: 600;
+    }
+
+    .meta-divider {
+      margin: 0 10px;
+      color: #e0d0c0;
+    }
   }
 
-  &__time {
+  .paper-title {
+    font-family: $font-serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #2c1810;
+    margin-bottom: 25px;
+    letter-spacing: -0.5px;
+  }
+
+  .header-decoration {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 12px;
-    background-color: #f8fafc;
-    border-radius: 8px;
-    transition: all 0.2s ease;
+    justify-content: center;
+    gap: 15px;
+    color: #d4a373;
+    opacity: 0.6;
 
-    &:hover {
-      background-color: #f1f5f9;
-      color: #475569;
+    .decoration-line {
+      height: 1px;
+      width: 60px;
+      background-color: currentColor;
+    }
+
+    .decoration-icon {
+      font-size: 20px;
     }
   }
+}
 
-  &__icon {
-    width: 14px;
-    height: 14px;
-    opacity: 0.7;
-  }
+// 内容区域
+.paper-content {
+  font-family: $font-sans;
+  line-height: 1.8;
+  font-size: 16px;
 
-  &__separator {
-    color: #cbd5e1;
-    font-weight: 300;
-  }
-
-  // ==================== Content ====================
-  &__content {
-    font-size: 16px;
-    color: #1f2937;
-    line-height: 1.8;
-  }
-
-  &__description {
-    padding: 20px 24px;
-    margin-bottom: 32px;
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border-left: 4px solid #3b82f6;
-    border-radius: 0 12px 12px 0;
-    font-size: 16px;
-    line-height: 1.7;
-    color: #334155;
+  .paper-quote {
+    background-color: #f4efe9;
+    padding: 20px 30px;
+    border-left: 3px solid #d4a373;
+    margin-bottom: 40px;
+    font-family: $font-serif;
     font-style: italic;
-
-    p {
-      margin: 0;
-    }
+    color: #5d4037;
+    border-radius: 0 8px 8px 0;
   }
 
-  &__divider {
-    height: 2px;
-    margin: 40px 0;
-    background: linear-gradient(
-      90deg,
-      transparent,
-      #cbd5e1 20%,
-      #94a3b8 50%,
-      #cbd5e1 80%,
-      transparent
-    );
+  .markdown-body {
+    color: #333;
+    // 这里可以添加更多针对markdown内容的样式调整
+  }
+}
+
+// 底部区域
+.paper-footer {
+  margin-top: 60px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .footer-divider {
+    width: 40px;
+    height: 4px;
+    background-color: #e0d0c0;
+    margin-bottom: 30px;
     border-radius: 2px;
   }
 
-  &__body {
-    margin-bottom: 40px;
-  }
-
-  // ==================== Loading ====================
-  &__loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 20px;
-    color: #9ca3af;
-
-    p {
-      margin-top: 16px;
-      font-size: 15px;
-    }
-  }
-
-  &__loading-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid #e5e7eb;
-    border-top-color: #3b82f6;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-  }
-
-  // ==================== Footer ====================
-  &__footer {
-    margin-top: 48px;
-    padding-top: 32px;
-    border-top: 2px solid #f0f0f0;
-    display: flex;
-    justify-content: center;
-  }
-
-  &__link {
+  .read-original-btn {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
-    padding: 12px 28px;
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    border-radius: 12px;
+    gap: 8px;
+    padding: 12px 30px;
+    background-color: white;
+    border: 1px solid #d4a373;
+    color: #8d6e63;
+    border-radius: 30px;
     text-decoration: none;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    font-size: 15px;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(212, 163, 115, 0.1);
 
     &:hover {
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+      background-color: #d4a373;
+      color: white;
       transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(212, 163, 115, 0.2);
     }
 
-    &:active {
-      transform: translateY(0);
-    }
-  }
-
-  &__link-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  // ==================== Empty State ====================
-  &__empty {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 100px 20px;
-    text-align: center;
-    color: #9ca3af;
-
-    p {
-      margin-top: 20px;
-      font-size: 16px;
-      font-weight: 500;
+    .icon {
+      width: 16px;
+      height: 16px;
     }
   }
 
-  &__empty-icon {
-    width: 80px;
-    height: 80px;
-    color: #d1d5db;
+  .footer-note {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #cfbdaf;
+    font-family: $font-serif;
+    font-style: italic;
   }
 }
 
-// ==================== Animations ====================
+// Loading状态
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  color: #a1887f;
+
+  .spinner {
+    width: 30px;
+    height: 30px;
+    border: 2px solid #e0d0c0;
+    border-top-color: #8d6e63;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 15px;
+  }
+}
+
+// 响应式
+@media (max-width: 768px) {
+  .blog-paper {
+    padding: 40px 20px;
+  }
+
+  .paper-header {
+    .paper-title {
+      font-size: 28px;
+    }
+  }
+}
+
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -395,32 +361,10 @@ onMounted(() => {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.3s ease;
+  transition: opacity 0.4s ease;
 }
-
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-// ==================== Responsive ====================
-@media (max-width: 768px) {
-  .blog-detail {
-    padding: 32px 20px;
-    border-radius: 16px;
-
-    &__title {
-      font-size: 28px;
-    }
-
-    &__meta {
-      font-size: 13px;
-    }
-
-    &__header {
-      margin-bottom: 32px;
-      padding-bottom: 24px;
-    }
-  }
 }
 </style>

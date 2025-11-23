@@ -18,24 +18,42 @@ const renderedHtml = computed(() => {
 </script>
 
 <style scoped lang="scss">
-.markdown-body {
-  color: #24292f;
-  font-size: 16px;
-  line-height: 1.75;
-  word-wrap: break-word;
+// 字体变量
+$font-serif: 'Georgia', 'Times New Roman', 'Songti SC', serif;
+$font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+$font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
 
-  // 标题样式 - 增强视觉层次
+// 颜色变量
+$color-text-primary: #433422;
+$color-text-secondary: #5d4037;
+$color-accent: #d4a373;
+$color-link: #b5835a;
+$color-link-hover: #8d6e63;
+$color-border: #e0d0c0;
+$color-bg-code: #f4efe9;
+$color-bg-quote: #faf6f1;
+
+.markdown-body {
+  color: $color-text-primary;
+  font-size: 17px; // 稍微大一点的字体，提高阅读体验
+  line-height: 1.85;
+  word-wrap: break-word;
+  font-family: $font-sans;
+
+  // 标题样式 - 衬线字体，文学感
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    margin-top: 32px;
-    margin-bottom: 16px;
+    margin-top: 40px;
+    margin-bottom: 24px;
     font-weight: 700;
     line-height: 1.3;
-    color: #1f2937;
+    color: #2c1810;
+    font-family: $font-serif;
+    position: relative;
 
     &:first-child {
       margin-top: 0;
@@ -43,92 +61,104 @@ const renderedHtml = computed(() => {
   }
 
   h1 {
-    font-size: 2.25em;
-    border-bottom: 2px solid #e5e7eb;
-    padding-bottom: 0.4em;
-    margin-bottom: 24px;
+    font-size: 2.4em;
+    border-bottom: 2px solid $color-border;
+    padding-bottom: 0.3em;
+    text-align: center;
   }
 
   h2 {
-    font-size: 1.75em;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 0.35em;
-    margin-bottom: 20px;
+    font-size: 1.8em;
+    padding-bottom: 0.3em;
+    border-bottom: 1px dashed $color-border;
+
+    &::before {
+      content: '§';
+      margin-right: 10px;
+      color: $color-accent;
+      font-weight: normal;
+      opacity: 0.7;
+    }
   }
 
   h3 {
     font-size: 1.5em;
+    color: $color-text-secondary;
   }
 
   h4 {
     font-size: 1.25em;
+    font-weight: 600;
   }
 
   h5 {
     font-size: 1.1em;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: $color-text-secondary;
   }
 
   h6 {
     font-size: 1em;
-    color: #6b7280;
+    color: #8d6e63;
+    font-style: italic;
   }
 
   // 段落样式 - 改善可读性
   p {
     margin-top: 0;
-    margin-bottom: 20px;
-    line-height: 1.8;
+    margin-bottom: 24px;
+    text-align: justify; // 两端对齐，像书本一样
   }
 
-  // 链接样式 - 现代化设计
+  // 链接样式 - 温馨色调
   a {
-    color: #2563eb;
+    color: $color-link;
     text-decoration: none;
-    font-weight: 500;
-    transition: all 0.2s ease;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s ease;
+    padding-bottom: 1px;
 
     &:hover {
-      color: #1d4ed8;
-      text-decoration: underline;
-      text-decoration-thickness: 2px;
-      text-underline-offset: 3px;
+      color: $color-link-hover;
+      border-bottom-color: $color-link-hover;
+      background-color: rgba(212, 163, 115, 0.1);
     }
   }
 
   // 强调样式
   strong {
     font-weight: 700;
-    color: #111827;
+    color: #2c1810;
   }
 
   em {
     font-style: italic;
-    color: #374151;
+    font-family: $font-serif;
+    color: $color-text-secondary;
   }
 
-  // 代码块样式 - 优化可读性和美观度
+  // 代码块样式 - 暖色调背景
   code {
-    padding: 0.25em 0.5em;
-    margin: 0;
+    padding: 0.2em 0.5em;
+    margin: 0 0.2em;
     font-size: 0.9em;
-    background-color: #f3f4f6;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
-    color: #dc2626;
-    font-weight: 500;
+    background-color: $color-bg-code;
+    border-radius: 4px;
+    font-family: $font-mono;
+    color: #c05850; // 暖红色
   }
 
   pre {
-    padding: 20px;
-    margin: 20px 0;
+    padding: 24px;
+    margin: 32px 0;
     overflow-x: auto;
-    font-size: 0.9em;
+    font-size: 0.95em;
     line-height: 1.6;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    background-color: #2d2a2e; // 深色背景对比度更好
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    position: relative;
 
     code {
       display: block;
@@ -139,150 +169,212 @@ const renderedHtml = computed(() => {
       word-wrap: normal;
       background-color: transparent;
       border: 0;
-      color: #1f2937;
-      font-weight: 400;
+      color: #fcfcfa; // 浅色文字
+    }
+
+    // 滚动条样式
+    &::-webkit-scrollbar {
+      height: 8px;
+      background-color: #2d2a2e;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: #5d5a5e;
+      border-radius: 4px;
     }
   }
 
-  // 列表样式 - 增强层次感
+  // 列表样式
   ul,
   ol {
-    padding-left: 2em;
-    margin-top: 0;
-    margin-bottom: 20px;
-
-    ul,
-    ol {
-      margin-top: 8px;
-      margin-bottom: 8px;
-    }
+    padding-left: 1.5em;
+    margin-bottom: 24px;
   }
 
   ul {
-    list-style-type: disc;
+    list-style-type: none;
 
-    ul {
-      list-style-type: circle;
+    li {
+      position: relative;
+      padding-left: 1.2em;
 
-      ul {
-        list-style-type: square;
+      &::before {
+        content: '•';
+        position: absolute;
+        left: 0;
+        color: $color-accent;
+        font-size: 1.2em;
+        line-height: 1.6;
+      }
+    }
+  }
+
+  ol {
+    list-style-type: decimal;
+
+    li {
+      padding-left: 0.5em;
+      &::marker {
+        color: $color-text-secondary;
+        font-weight: 600;
+        font-family: $font-serif;
       }
     }
   }
 
   li {
-    margin-top: 8px;
-    margin-bottom: 8px;
-    line-height: 1.7;
+    margin-bottom: 10px;
 
     > p {
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
   }
 
-  // 引用样式 - 现代化设计
+  // 引用样式 - 书本批注感
   blockquote {
-    padding: 16px 20px;
-    margin: 20px 0;
-    color: #4b5563;
-    background-color: #f9fafb;
-    border-left: 4px solid #3b82f6;
-    border-radius: 0 8px 8px 0;
+    padding: 20px 24px;
+    margin: 32px 0;
+    color: $color-text-secondary;
+    background-color: $color-bg-quote;
+    border-left: none;
+    position: relative;
+    font-family: $font-serif;
     font-style: italic;
+    border-radius: 8px;
 
-    > :first-child {
-      margin-top: 0;
-    }
-
-    > :last-child {
-      margin-bottom: 0;
+    &::before {
+      content: '“';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 40px;
+      line-height: 1;
+      color: $color-accent;
+      opacity: 0.3;
+      font-family: serif;
     }
 
     p {
       margin-bottom: 12px;
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
   }
 
-  // 表格样式 - 优雅设计
+  // 表格样式 - 简约暖色
   table {
     border-spacing: 0;
     border-collapse: collapse;
-    margin: 24px 0;
+    margin: 32px 0;
     width: 100%;
     overflow: auto;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    font-size: 0.95em;
 
     thead {
-      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      border-bottom: 2px solid $color-accent;
 
       th {
-        color: #fff;
+        color: #2c1810;
         font-weight: 700;
+        padding: 12px 16px;
+        text-align: left;
+        font-family: $font-serif;
       }
-    }
-
-    th {
-      padding: 12px 16px;
-      text-align: left;
-      border: 1px solid #e5e7eb;
-      background-color: #f9fafb;
     }
 
     td {
       padding: 12px 16px;
-      border: 1px solid #e5e7eb;
+      border-bottom: 1px solid $color-border;
     }
 
     tr {
-      background-color: #fff;
       transition: background-color 0.2s ease;
 
-      &:nth-child(2n) {
-        background-color: #f9fafb;
-      }
-
       &:hover {
-        background-color: #f3f4f6;
+        background-color: rgba(212, 163, 115, 0.05);
       }
     }
   }
 
-  // 水平线样式 - 精致分隔
+  // 水平线样式 - 装饰性
   hr {
-    height: 2px;
+    height: 1px;
     padding: 0;
-    margin: 32px 0;
-    background: linear-gradient(90deg, transparent, #e5e7eb 50%, transparent);
+    margin: 48px auto;
+    background: transparent;
     border: 0;
+    border-top: 1px solid $color-border;
+    width: 60%;
+    position: relative;
+
+    &::after {
+      content: '❦';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #fffcf9; // 需要匹配背景色
+      padding: 0 10px;
+      color: $color-accent;
+      font-size: 20px;
+    }
   }
 
-  // 图片样式 - 优化展示
+  // 图片样式 - 拍立得风格/相框感
   img {
     max-width: 100%;
     height: auto;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    margin: 20px 0;
-    transition:
-      transform 0.3s ease,
-      box-shadow 0.3s ease;
+    display: block;
+    margin: 40px auto;
+    border-radius: 2px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border: 8px solid white; // 相框效果
+    transition: transform 0.3s ease;
 
     &:hover {
-      transform: scale(1.02);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      transform: scale(1.01);
     }
   }
 
   // 任务列表样式
   input[type='checkbox'] {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border: 1px solid $color-accent;
+    border-radius: 3px;
     margin-right: 8px;
+    position: relative;
+    top: 2px;
+    cursor: pointer;
+
+    &:checked {
+      background-color: $color-accent;
+
+      &::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-size: 12px;
+      }
+    }
   }
 
   // 删除线
   del {
-    color: #9ca3af;
-    text-decoration-thickness: 2px;
+    color: #a1887f;
+    text-decoration-color: $color-accent;
+  }
+
+  // 脚注
+  sup {
+    color: $color-accent;
+    font-size: 0.75em;
+    margin-left: 2px;
   }
 }
 </style>
