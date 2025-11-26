@@ -11,6 +11,7 @@ export interface BlogDetail {
   description: string
   created_at: string
   updated_at: string
+  author?: string
 }
 
 // 查询博客详情接口
