@@ -50,6 +50,7 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import boqiImage from '@/assets/source/boqi.png'
 import hongxiaImage from '@/assets/source/hongxia.png'
 import liangImage from '@/assets/source/liang.png'
@@ -62,6 +63,8 @@ interface Card {
   themeColor: string // 角色主题色
   link?: string
 }
+
+const router = useRouter()
 
 const cards = ref<Card[]>([
   {
@@ -114,8 +117,7 @@ const handleMouseLeave = (index: number) => {
 const handleCardClick = (card: Card) => {
   if (card.link) {
     console.log('Navigate to:', card.link)
-    // 这里可以添加路由跳转逻辑
-    // router.push(card.link)
+    router.push(card.link)
   }
 }
 </script>
