@@ -2,8 +2,16 @@
   <!-- 个人主页 -->
   <div class="home">
     <!-- 视频背景 -->
-    <video autoplay loop muted class="video-background">
-      <source src="../../assets/source/kkl.mp4" type="video/mp4" />
+    <video
+      autoplay
+      loop
+      muted
+      playsinline
+      preload="auto"
+      class="video-background"
+      :poster="posterImage"
+    >
+      <source :src="videoSource" type="video/mp4" />
     </video>
     <div class="myblog-box" ref="myblogBox">
       <WalkingCharacter ref="character" class="walking-character" />
@@ -47,6 +55,8 @@ import AvatarGlow from './components/AvatarGlow.vue'
 import SocialLinks from './components/SocialLinks.vue'
 import VisitTimeline from '@/views/home/components/VisitTimeline.vue'
 import avatarImage from '@/assets/source/avatar.gif'
+import posterImage from '@/assets/source/k-on.png'
+import videoSource from '@/assets/source/kkl.mp4'
 import { onMounted, ref, nextTick } from 'vue'
 import { visitApi } from '@/api/index'
 import gsap from 'gsap'
