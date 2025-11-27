@@ -20,32 +20,52 @@
               <img :src="card.image" :alt="card.title" />
             </div>
           </div>
-
           <!-- 卡片背面 -->
           <div
             class="card-back"
             :style="{
               background: `linear-gradient(135deg, ${card.themeColor}15 0%, ${card.themeColor}30 100%)`,
               borderColor: `${card.themeColor}60`,
+              '--card-theme-color': card.themeColor,
             }"
             @click="handleCardClick(card)"
           >
-            <!-- <div class="card-back-content">
-            <h3 :style="{ color: card.themeColor }">{{ card.title }}</h3>
-            <p class="card-description">{{ card.description }}</p>
-            <div class="card-details">
-              <div class="detail-item" v-for="(detail, idx) in card.details" :key="idx">
-                <span class="detail-icon">{{ detail.icon }}</span>
-                <span class="detail-text">{{ detail.text }}</span>
+            <div class="border-animation"></div>
+            <div class="card-back-content">
+              <h3 :style="{ color: card.themeColor }">{{ card.title }}</h3>
+              <div class="description-wrapper">
+                <p
+                  class="card-description"
+                  :style="{ color: card.themeColor, filter: 'brightness(0.6)' }"
+                >
+                  {{ card.description }}
+                </p>
+                <div
+                  class="description-tooltip"
+                  :style="{
+                    background: card.themeColor,
+                    '--tooltip-bg': card.themeColor,
+                    color: '#fff',
+                    textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                  }"
+                >
+                  {{ card.description }}
+                </div>
+              </div>
+              <div class="card-spacer" style="flex: 1"></div>
+              <div class="card-action">
+                <button
+                  class="learn-more"
+                  :class="{ 'is-active': flippedCards[index] }"
+                  :style="{ '--btn-color': card.themeColor }"
+                >
+                  <span class="circle" aria-hidden="true">
+                    <span class="icon arrow"></span>
+                  </span>
+                  <span class="button-text">前往查看</span>
+                </button>
               </div>
             </div>
-            <div
-              class="card-action"
-              :style="{ color: card.themeColor, background: `${card.themeColor}20` }"
-            >
-              点击查看更多 →
-            </div>
-          </div> -->
           </div>
         </div>
       </div>
@@ -55,72 +75,49 @@
 
 <script setup lang="ts">
 import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
 import boqiImage from '@/assets/source/boqi.png'
 import hongxiaImage from '@/assets/source/hongxia.png'
 import liangImage from '@/assets/source/liang.png'
 import xiduoImage from '@/assets/source/xiduo.png'
 
-interface CardDetail {
-  icon: string
-  text: string
-}
-
 interface Card {
   title: string
   description: string
   image: string
-  details: CardDetail[]
   themeColor: string // 角色主题色
   link?: string
 }
 
+const router = useRouter()
+
 const cards = ref<Card[]>([
   {
     title: '我の博客',
-    description: '记录技术成长与生活感悟的个人空间',
+    description: '记录着异世界冒险谭与魔法咏唱的绝对领域',
     image: boqiImage,
     themeColor: '#FFB6C1', // 波奇粉色
-    details: [
-      { icon: '💻', text: '技术文章分享' },
-      { icon: '📚', text: '学习笔记记录' },
-      { icon: '🎨', text: '创意灵感展示' },
-    ],
     link: '/blog',
   },
   {
     title: '资源の小屋',
-    description: '精选工具与资源的收藏库',
+    description: '收纳着传说级宝具与禁忌知识的藏宝阁',
     image: hongxiaImage,
     themeColor: '#FFD700', // 虹夏粉红色
-    details: [
-      { icon: '🔧', text: '开发工具推荐' },
-      { icon: '📦', text: '实用资源整理' },
-      { icon: '🌟', text: '优质内容分享' },
-    ],
     link: '/resources',
   },
   {
     title: '家父の伟业',
-    description: '传承家族故事与珍贵回忆',
+    description: '铭刻着家族荣耀与羁绊的英灵座',
     image: liangImage,
     themeColor: '#4A90E2', // 凉蓝色
-    details: [
-      { icon: '👨‍👦', text: '家族历史记录' },
-      { icon: '📖', text: '人生经历分享' },
-      { icon: '💝', text: '珍贵回忆保存' },
-    ],
     link: '/family',
   },
   {
     title: '神秘&未知',
-    description: '探索未知领域的奇妙旅程',
+    description: '通往不可视境界线的彼方之门',
     image: xiduoImage,
     themeColor: '#FF6B9D', // 喜多金黄色
-    details: [
-      { icon: '🔮', text: '神秘事件探索' },
-      { icon: '🌌', text: '未知领域研究' },
-      { icon: '✨', text: '奇妙发现分享' },
-    ],
     link: '/mystery',
   },
 ])
@@ -145,8 +142,7 @@ const handleMouseLeave = (index: number) => {
 const handleCardClick = (card: Card) => {
   if (card.link) {
     console.log('Navigate to:', card.link)
-    // 这里可以添加路由跳转逻辑
-    // router.push(card.link)
+    router.push(card.link)
   }
 }
 </script>
@@ -312,7 +308,145 @@ const handleCardClick = (card: Card) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 12px;
+}
+
+.border-animation {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 16px;
+  padding: 2px;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.border-animation::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 150%;
+  height: 150%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    transparent 270deg,
+    var(--card-theme-color) 360deg
+  );
+  transform: translate(-50%, -50%);
+  animation: borderRotate 4s linear infinite;
+}
+
+@keyframes borderRotate {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+button {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  outline: none;
+  border: 0;
+  vertical-align: middle;
+  text-decoration: none;
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+button.learn-more {
+  width: 10rem;
+  height: auto;
+}
+
+button.learn-more .circle {
+  transition: all 1s cubic-bezier(0.65, 0, 0.076, 1);
+  position: relative;
+  display: block;
+  margin: 0;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: var(--btn-color);
+  border-radius: 1.625rem;
+}
+
+button.learn-more .circle .icon {
+  transition: all 1s cubic-bezier(0.65, 0, 0.076, 1);
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  margin: auto;
+  background: #fff;
+}
+
+button.learn-more .circle .icon.arrow {
+  transition: all 1s cubic-bezier(0.65, 0, 0.076, 1);
+  left: 0.625rem;
+  width: 1.125rem;
+  height: 0.125rem;
+  background: none;
+}
+
+button.learn-more .circle .icon.arrow::before {
+  position: absolute;
+  content: '';
+  top: -0.25rem;
+  right: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  border-top: 0.125rem solid #fff;
+  border-right: 0.125rem solid #fff;
+  transform: rotate(45deg);
+}
+
+button.learn-more .button-text {
+  transition: all 1s cubic-bezier(0.65, 0, 0.076, 1);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0.5rem 0;
+  margin: 0 0 0 1.5rem;
+  color: var(--btn-color);
+  font-weight: 700;
+  line-height: 1.6;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+}
+
+button:hover .button-text,
+button.is-active .button-text {
+  color: #fff;
+}
+
+button:hover .circle,
+button.is-active .circle {
+  width: 100%;
+}
+
+button:hover .circle .icon.arrow,
+button.is-active .circle .icon.arrow {
+  background: #fff;
+  transform: translate(1rem, 0);
 }
 
 .card-back-content {
@@ -320,26 +454,78 @@ const handleCardClick = (card: Card) => {
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
 
   h3 {
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
     // color 由内联样式动态设置
-    margin: 0 0 12px 0;
+    margin: 0 0 8px 0;
     text-align: center;
     font-family:
       'Helvetica Neue', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', 'Microsoft Yahei', sans-serif;
   }
 }
 
+.description-wrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.description-tooltip {
+  position: absolute;
+  bottom: 100%; /* Above the text */
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--tooltip-bg);
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  width: max-content;
+  max-width: 230px;
+  white-space: normal;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Arrow */
+.description-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: var(--tooltip-bg) transparent transparent transparent;
+}
+
+.description-wrapper:hover .description-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(-5px);
+}
+
 .card-description {
-  font-size: 14px;
+  font-size: 12px;
   color: #555;
-  line-height: 1.6;
+  line-height: 1.4;
   text-align: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
   font-family:
     'Helvetica Neue', 'Hiragino Sans GB', 'WenQuanYi Micro Hei', 'Microsoft Yahei', sans-serif;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
 }
 
 .card-details {

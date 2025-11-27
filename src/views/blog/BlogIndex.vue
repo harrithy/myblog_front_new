@@ -1,94 +1,137 @@
 <template>
-  <div class="blog-container">
-    <!-- 背景视频 (保持不变，作为整体风格的一部分) -->
-    <video autoplay loop muted class="video-background">
-      <source src="../../assets/source/kkl.mp4" type="video/mp4" />
-    </video>
+  <div class="blog-layout">
+    <!-- 左侧导航 -->
+    <aside class="blog-sidebar-left">
+      <nav class="category-nav">
+        <ul class="category-list">
+          <li
+            v-for="(item, index) in categories"
+            :key="index"
+            class="category-item"
+            :class="{ active: currentCategory === item.id }"
+            @click="currentCategory = item.id"
+          >
+            <span class="category-name">{{ item.name }}</span>
+            <span class="category-arrow" v-if="item.children">▶</span>
+          </li>
+        </ul>
+      </nav>
+    </aside>
 
-    <div class="content-wrapper">
-      <article class="blog-paper" v-loading="loading">
-        <!-- 装饰性元素：顶部回形针/胶带效果 -->
-        <div class="paper-decoration"></div>
-
-        <header class="paper-header" v-if="detail">
-          <div class="header-meta">
-            <span class="meta-tag">{{ detail.category }}</span>
-            <span class="meta-divider">/</span>
-            <span class="meta-date">{{ formatDate(detail.created_at) }}</span>
-          </div>
-
-          <h1 class="paper-title">{{ detail.title }}</h1>
-
-          <div class="header-decoration">
-            <span class="decoration-line"></span>
-            <span class="decoration-icon">❦</span>
-            <span class="decoration-line"></span>
+    <!-- 中间内容 -->
+    <main class="blog-main-content" v-loading="loading">
+      <article class="blog-article" v-if="detail">
+        <header class="article-header">
+          <h1 class="article-title">{{ detail.title }}</h1>
+          <div class="article-meta">
+            <span class="author">
+              <i class="iconfont icon-user"></i> {{ detail.author || '千古壹号' }}
+            </span>
           </div>
         </header>
 
-        <main class="paper-content" v-if="detail">
-          <div v-if="detail.description" class="paper-quote">
+        <div class="article-body">
+          <div v-if="detail.description" class="article-description">
             <p>{{ detail.description }}</p>
           </div>
 
           <transition name="fade" mode="out-in">
-            <MarkdownRenderer v-if="content" class="markdown-body" :content="content" />
+            <MarkdownRenderer
+              v-if="content"
+              ref="markdownRef"
+              class="markdown-content"
+              :content="content"
+            />
             <div v-else class="loading-state">
               <div class="spinner"></div>
-              <p>正在翻阅篇章...</p>
+              <p>正在加载内容...</p>
             </div>
           </transition>
-        </main>
-
-        <footer class="paper-footer" v-if="detail">
-          <div class="footer-divider"></div>
-          <a class="read-original-btn" :href="detail.url" target="_blank" rel="noopener">
-            <span>阅读原文</span>
-            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M14 5l7 7m0 0l-7 7m7-7H3"
-              />
-            </svg>
-          </a>
-          <div class="footer-note">End of Article</div>
-        </footer>
-
-        <!-- 空状态 -->
-        <div class="empty-state" v-else-if="!loading">
-          <p>暂无内容</p>
         </div>
       </article>
-    </div>
+
+      <!-- 空状态 -->
+      <div class="empty-state" v-else-if="!loading">
+        <p>暂无内容</p>
+      </div>
+    </main>
+
+    <!-- 右侧目录 -->
+    <aside class="blog-sidebar-right">
+      <div class="toc-container" v-if="toc.length > 0">
+        <ul class="toc-list">
+          <li
+            v-for="(item, index) in toc"
+            :key="index"
+            class="toc-item"
+            :class="{ ['toc-level-' + item.level]: true, active: activeHeading === item.id }"
+            @click="scrollToHeading(item.id)"
+          >
+            {{ item.text }}
+          </li>
+        </ul>
+      </div>
+    </aside>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, nextTick, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
 import type { BlogDetail } from '@/api/blog'
 import { blogApi } from '@/api'
 
+// ==================== Types ====================
+interface Category {
+  id: string
+  name: string
+  children?: Category[]
+}
+
+interface TocItem {
+  id: string
+  text: string
+  level: number
+}
+
 // ==================== State ====================
 const detail = ref<BlogDetail | null>(null)
 const content = ref('')
 const loading = ref(false)
+const markdownRef = ref(null)
+const toc = ref<TocItem[]>([])
+const activeHeading = ref('')
+const currentCategory = ref('03') // Default active category
+
+// Mock Categories based on user image
+const categories = ref<Category[]>([
+  { id: '00', name: '00-前端工具' },
+  { id: '01', name: '01-HTML' },
+  { id: '02', name: '02-CSS基础' },
+  { id: '03', name: '03-CSS进阶' },
+  { id: '04', name: '04-JavaScript基础' },
+  { id: '05', name: '05-JavaScript基础：ES6语法' },
+  { id: '06', name: '06-JavaScript基础：异步编程' },
+  { id: '07', name: '07-JavaScript进阶' },
+  { id: '08', name: '08-前端基本功：CSS和DOM练习' },
+  { id: '09', name: '09-移动Web开发' },
+  { id: '10', name: '10-MySQL数据库' },
+  { id: '11', name: '11-Node.js' },
+  { id: '12', name: '12-Vue基础' },
+  { id: '13', name: '13-React基础' },
+])
 
 // ==================== API Calls ====================
 const fetchBlogContent = async (url: string): Promise<void> => {
   try {
     const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(`Failed to load blog content: ${response.status}`)
-    }
+    if (!response.ok) throw new Error(`Failed: ${response.status}`)
     content.value = await response.text()
   } catch (error) {
-    console.error('Failed to fetch blog content:', error)
+    console.error('Failed to fetch content:', error)
     content.value = ''
-    ElMessage.error('获取博客正文失败')
+    ElMessage.error('获取正文失败')
   }
 }
 
@@ -96,275 +139,236 @@ const fetchBlogDetail = async (): Promise<void> => {
   loading.value = true
   try {
     const data = await blogApi.getBlogDetail(1)
-    const blogData = data as BlogDetail
-    detail.value = blogData
-
-    if (blogData.url) {
-      await fetchBlogContent(blogData.url)
+    detail.value = data as BlogDetail
+    if (detail.value.url) {
+      await fetchBlogContent(detail.value.url)
     }
   } catch (error) {
-    console.error('Failed to fetch blog detail:', error)
-    ElMessage.error('获取博客详情失败')
+    console.error('Failed detail:', error)
+    ElMessage.error('获取详情失败')
   } finally {
     loading.value = false
   }
 }
 
-// ==================== Utilities ====================
-const formatDate = (dateStr: string): string => {
-  const date = new Date(dateStr)
-  return new Intl.DateTimeFormat('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date)
+// ==================== Logic ====================
+// Generating TOC and handling scroll
+const generateTOC = () => {
+  toc.value = []
+  const headings = document.querySelectorAll(
+    '.markdown-content h1, .markdown-content h2, .markdown-content h3',
+  )
+
+  headings.forEach((heading, index) => {
+    const id = `heading-${index}`
+    heading.id = id
+    toc.value.push({
+      id,
+      text: heading.textContent || '',
+      level: parseInt(heading.tagName.charAt(1)),
+    })
+  })
 }
 
-// ==================== Lifecycle ====================
+const scrollToHeading = (id: string) => {
+  const element = document.getElementById(id)
+  if (element) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    activeHeading.value = id
+  }
+}
+
+// Watch content change to regenerate TOC
+watch(content, async () => {
+  await nextTick()
+  generateTOC()
+})
+
+// Setup IntersectionObserver for active heading
 onMounted(() => {
   fetchBlogDetail()
+
+  // Simple intersection observer for TOC highlighting
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          activeHeading.value = entry.target.id
+        }
+      })
+    },
+    { rootMargin: '-100px 0px -60% 0px' },
+  )
+
+  watch(toc, () => {
+    setTimeout(() => {
+      document
+        .querySelectorAll('.markdown-content h1, .markdown-content h2, .markdown-content h3')
+        .forEach((el) => {
+          observer.observe(el)
+        })
+    }, 100)
+  })
 })
 </script>
 
 <style lang="scss" scoped>
-// 字体引入（如果是全局已有则不需要，这里假设使用系统衬线字体）
-$font-serif: 'Georgia', 'Times New Roman', 'Songti SC', serif;
-$font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-
-.blog-container {
+.blog-layout {
+  display: flex;
   width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
   min-height: 100vh;
-  position: relative;
+  background-color: #fff;
+  padding-top: 20px;
+}
+
+// Left Sidebar
+.blog-sidebar-left {
+  width: 280px;
+  flex-shrink: 0;
+  padding: 20px;
+  border-right: 1px solid #eee;
+  height: calc(100vh - 20px);
+  position: sticky;
+  top: 20px;
   overflow-y: auto;
-  display: flex;
-  justify-content: center;
-  padding: 40px 20px;
-}
 
-.video-background {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -1;
-  // 加一层暖色遮罩，让视频看起来更温馨
-  filter: brightness(0.9) sepia(0.2);
-}
-
-.content-wrapper {
-  width: 100%;
-  max-width: 800px;
-  z-index: 1;
-}
-
-.blog-paper {
-  background-color: #fffcf9; // 暖白色/米色背景
-  border-radius: 4px;
-  box-shadow:
-    0 2px 4px rgba(0, 0, 0, 0.05),
-    0 15px 30px rgba(0, 0, 0, 0.1); // 柔和的阴影
-  padding: 60px 50px;
-  position: relative;
-  color: #433422; // 深棕灰色文字
-  transition: transform 0.3s ease;
-
-  // 纸张纹理效果
-  background-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    transparent 98%,
-    rgba(0, 0, 0, 0.02) 100%
-  );
-  background-size: 100% 20px; // 模拟信纸横线（非常淡）
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(to right, #d4a373, #faedcd, #d4a373); // 顶部装饰条
-    border-radius: 4px 4px 0 0;
+  &::-webkit-scrollbar {
+    width: 4px;
   }
-}
-
-// 头部样式
-.paper-header {
-  text-align: center;
-  margin-bottom: 50px;
-
-  .header-meta {
-    font-size: 14px;
-    color: #9c826b;
-    margin-bottom: 16px;
-    letter-spacing: 1px;
-    font-family: $font-sans;
-    text-transform: uppercase;
-
-    .meta-tag {
-      color: #b5835a;
-      font-weight: 600;
-    }
-
-    .meta-divider {
-      margin: 0 10px;
-      color: #e0d0c0;
-    }
-  }
-
-  .paper-title {
-    font-family: $font-serif;
-    font-size: 42px;
-    font-weight: 700;
-    line-height: 1.3;
-    color: #2c1810;
-    margin-bottom: 25px;
-    letter-spacing: -0.5px;
-  }
-
-  .header-decoration {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    color: #d4a373;
-    opacity: 0.6;
-
-    .decoration-line {
-      height: 1px;
-      width: 60px;
-      background-color: currentColor;
-    }
-
-    .decoration-icon {
-      font-size: 20px;
-    }
-  }
-}
-
-// 内容区域
-.paper-content {
-  font-family: $font-sans;
-  line-height: 1.8;
-  font-size: 16px;
-
-  .paper-quote {
-    background-color: #f4efe9;
-    padding: 20px 30px;
-    border-left: 3px solid #d4a373;
-    margin-bottom: 40px;
-    font-family: $font-serif;
-    font-style: italic;
-    color: #5d4037;
-    border-radius: 0 8px 8px 0;
-  }
-
-  .markdown-body {
-    color: #333;
-    // 这里可以添加更多针对markdown内容的样式调整
-  }
-}
-
-// 底部区域
-.paper-footer {
-  margin-top: 60px;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
-  .footer-divider {
-    width: 40px;
-    height: 4px;
-    background-color: #e0d0c0;
-    margin-bottom: 30px;
+  &::-webkit-scrollbar-thumb {
+    background-color: #ddd;
     border-radius: 2px;
   }
-
-  .read-original-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 30px;
-    background-color: white;
-    border: 1px solid #d4a373;
-    color: #8d6e63;
-    border-radius: 30px;
-    text-decoration: none;
-    font-size: 15px;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(212, 163, 115, 0.1);
-
-    &:hover {
-      background-color: #d4a373;
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(212, 163, 115, 0.2);
-    }
-
-    .icon {
-      width: 16px;
-      height: 16px;
-    }
-  }
-
-  .footer-note {
-    margin-top: 20px;
-    font-size: 12px;
-    color: #cfbdaf;
-    font-family: $font-serif;
-    font-style: italic;
-  }
 }
 
-// Loading状态
-.loading-state {
+.category-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.category-item {
+  padding: 12px 16px;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  padding: 60px 0;
-  color: #a1887f;
+  font-size: 14px;
+  color: #333;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  margin-bottom: 4px;
 
-  .spinner {
-    width: 30px;
-    height: 30px;
-    border: 2px solid #e0d0c0;
-    border-top-color: #8d6e63;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 15px;
+  &:hover {
+    background-color: #f5f5f5;
+    color: #42b983; // Vue green theme or matching user style
+  }
+
+  &.active {
+    color: #42b983;
+    background-color: #e8f5e9;
+    font-weight: 600;
   }
 }
 
-// 响应式
-@media (max-width: 768px) {
-  .blog-paper {
-    padding: 40px 20px;
+.category-arrow {
+  font-size: 10px;
+  color: #999;
+}
+
+// Main Content
+.blog-main-content {
+  flex: 1;
+  padding: 20px 60px;
+  max-width: 900px; // Limit line length for readability
+  margin: 0 auto;
+}
+
+.article-header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.article-title {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.article-meta {
+  color: #999;
+  font-size: 14px;
+}
+
+.article-body {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #2c3e50;
+}
+
+// Right Sidebar (TOC)
+.blog-sidebar-right {
+  width: 240px;
+  flex-shrink: 0;
+  padding: 20px;
+  height: calc(100vh - 20px);
+  position: sticky;
+  top: 20px;
+  overflow-y: auto;
+}
+
+.toc-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-left: 2px solid #eee;
+}
+
+.toc-item {
+  padding: 4px 16px;
+  font-size: 13px;
+  color: #666;
+  cursor: pointer;
+  line-height: 1.5;
+  position: relative;
+  transition: all 0.2s;
+
+  &:hover {
+    color: #42b983;
   }
 
-  .paper-header {
-    .paper-title {
-      font-size: 28px;
-    }
+  &.active {
+    color: #42b983;
+    font-weight: 600;
+    border-left: 2px solid #42b983;
+    margin-left: -2px; // Overlay the border
+  }
+
+  // Indentation for hierarchy
+  &.toc-level-2 {
+    padding-left: 16px;
+  }
+  &.toc-level-3 {
+    padding-left: 32px;
   }
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
+// Responsive
+@media (max-width: 1200px) {
+  .blog-sidebar-right {
+    display: none; // Hide TOC on smaller screens
   }
 }
 
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.4s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+@media (max-width: 900px) {
+  .blog-sidebar-left {
+    display: none; // Hide Nav on mobile/tablet
+  }
+  .blog-main-content {
+    padding: 20px;
+  }
 }
 </style>
