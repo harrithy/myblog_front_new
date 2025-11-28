@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/image-proxy/:path*",
+      "destination": "https://image.harrio.xyz/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
