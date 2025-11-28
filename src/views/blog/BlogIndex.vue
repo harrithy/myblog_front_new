@@ -2,8 +2,7 @@
   <div class="blog-layout">
     <!-- 左侧分类导航 -->
     <CategorySidebar @select="handleCategorySelect" />
-
-    <!-- 右侧内容区 -->
+    <!-- 中间内容区 -->
     <main class="main-content">
       <div class="content-wrapper">
         <!-- 未选择文章时显示欢迎卡片 -->
@@ -30,6 +29,10 @@
         </article>
       </div>
     </main>
+    <!-- 右侧目录 -->
+    <TableOfContents v-if="currentCategory && !loading" :content="articleContent" />
+    <!-- 右侧评论 -->
+    <CommentSection v-if="currentCategory && !loading" />
   </div>
 </template>
 
@@ -38,6 +41,8 @@ import { ref } from 'vue'
 import CategorySidebar from './components/CategorySidebar.vue'
 import type { Category } from './components/CategorySidebar.vue'
 import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
+import TableOfContents from './components/TableOfContents.vue'
+import CommentSection from './components/CommentSection.vue'
 
 // 当前选中的分类
 const currentCategory = ref<Category | null>(null)
@@ -45,6 +50,15 @@ const currentCategory = ref<Category | null>(null)
 const articleContent = ref('')
 // 加载状态
 const loading = ref(false)
+
+// 将外部URL转换为代理URL
+const getProxiedUrl = (url: string): string => {
+  const imageHost = 'https://image.harrio.xyz'
+  if (url.startsWith(imageHost)) {
+    return url.replace(imageHost, '/image-proxy')
+  }
+  return url
+}
 
 // 处理分类选择
 const handleCategorySelect = async (category: Category) => {
@@ -55,7 +69,8 @@ const handleCategorySelect = async (category: Category) => {
   if (category.url) {
     loading.value = true
     try {
-      const response = await fetch(category.url)
+      const fetchUrl = getProxiedUrl(category.url)
+      const response = await fetch(fetchUrl)
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
@@ -92,8 +107,8 @@ $shadow-soft: rgba(232, 160, 191, 0.15);
 
 // 主内容区
 .main-content {
-  flex: 1;
-  padding: 40px;
+  // flex: 1;
+  padding: 10px;
   overflow-y: auto;
 }
 

@@ -63,29 +63,22 @@ $color-bg-quote: #faf6f1;
     }
 
     h1 {
-      font-size: 2.4em;
+      font-size: 2.2em;
       border-bottom: 2px solid $color-border;
       padding-bottom: 0.3em;
-      text-align: center;
+      text-align: left;
+      color: $color-text-primary;
     }
 
     h2 {
-      font-size: 1.8em;
+      font-size: 1.7em;
       padding-bottom: 0.3em;
-      border-bottom: 1px dashed $color-border;
-
-      &::before {
-        content: '§';
-        margin-right: 10px;
-        color: $color-accent;
-        font-weight: normal;
-        opacity: 0.7;
-      }
+      border-bottom: 1px solid rgba($color-border, 0.5);
     }
 
     h3 {
-      font-size: 1.5em;
-      color: $color-text-secondary;
+      font-size: 1.4em;
+      color: $color-text-primary;
     }
 
     h4 {
@@ -140,27 +133,59 @@ $color-bg-quote: #faf6f1;
       color: $color-text-secondary;
     }
 
+    // 引用样式
+    blockquote {
+      padding: 16px 20px;
+      margin: 24px 0;
+      color: $color-text-secondary;
+      background-color: rgba($color-accent, 0.1);
+      border-left: 4px solid $color-accent;
+      border-radius: 4px;
+      font-family: $font-serif;
+
+      p {
+        margin-bottom: 8px;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
     // 代码块样式
     code {
-      padding: 0.2em 0.5em;
+      padding: 0.2em 0.4em;
       margin: 0 0.2em;
-      font-size: 0.9em;
-      background-color: $color-bg-code;
+      font-size: 0.85em;
+      background-color: rgba($color-accent, 0.15);
       border-radius: 4px;
       font-family: $font-mono;
       color: #c05850;
     }
 
     pre {
-      padding: 24px;
-      margin: 32px 0;
+      padding: 40px 20px 20px;
+      margin: 24px 0;
       overflow-x: auto;
-      font-size: 0.95em;
+      font-size: 0.9em;
       line-height: 1.6;
-      background-color: #2d2a2e;
+      background-color: #282c34;
       border-radius: 8px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 14px;
+        left: 16px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #ff5f56;
+        box-shadow:
+          18px 0 0 #ffbd2e,
+          36px 0 0 #27c93f;
+      }
 
       code {
         display: block;
@@ -171,12 +196,13 @@ $color-bg-quote: #faf6f1;
         word-wrap: normal;
         background-color: transparent;
         border: 0;
-        color: #fcfcfa;
+        color: #abb2bf;
+        font-family: $font-mono;
       }
 
       &::-webkit-scrollbar {
         height: 8px;
-        background-color: #2d2a2e;
+        background-color: #282c34;
       }
 
       &::-webkit-scrollbar-thumb {
@@ -228,38 +254,6 @@ $color-bg-quote: #faf6f1;
 
       > p {
         margin-bottom: 10px;
-      }
-    }
-
-    // 引用样式
-    blockquote {
-      padding: 20px 24px;
-      margin: 32px 0;
-      color: $color-text-secondary;
-      background-color: $color-bg-quote;
-      border-left: none;
-      position: relative;
-      font-family: $font-serif;
-      font-style: italic;
-      border-radius: 8px;
-
-      &::before {
-        content: '"';
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        font-size: 40px;
-        line-height: 1;
-        color: $color-accent;
-        opacity: 0.3;
-        font-family: serif;
-      }
-
-      p {
-        margin-bottom: 12px;
-        &:last-child {
-          margin-bottom: 0;
-        }
       }
     }
 
@@ -327,7 +321,7 @@ $color-bg-quote: #faf6f1;
       max-width: 100%;
       height: auto;
       display: block;
-      margin: 40px auto;
+      margin: 10px auto;
       border-radius: 2px;
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
       border: 8px solid white;

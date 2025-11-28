@@ -23,9 +23,9 @@
     </nav>
 
     <!-- 底部装饰 -->
-    <div class="sidebar-footer">
+    <!-- <div class="sidebar-footer">
       <div class="footer-text">✨ 记录美好生活</div>
-    </div>
+    </div> -->
   </aside>
 </template>
 

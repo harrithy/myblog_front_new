@@ -38,6 +38,12 @@ export default defineConfig(({ mode }) => {
           // 重写路径
           rewrite: (path) => path.replace(/^\/api/, ''),
         },
+        // 代理图片/文件服务器，解决CORS问题
+        '/image-proxy': {
+          target: 'https://image.harrio.xyz',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/image-proxy/, ''),
+        },
       },
     },
   }
