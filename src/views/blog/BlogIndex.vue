@@ -53,9 +53,13 @@ const loading = ref(false)
 
 // 将外部URL转换为代理URL
 const getProxiedUrl = (url: string): string => {
-  const imageHost = 'https://image.harrio.xyz'
-  if (url.startsWith(imageHost)) {
-    return url.replace(imageHost, '/image-proxy')
+  // 只在开发环境使用代理，生产环境直接访问
+  // 注意：vite.config.ts 中的 proxy 配置仅在开发服务器(npm run dev)下生效
+  if (import.meta.env.DEV) {
+    const imageHost = 'https://image.harrio.xyz'
+    if (url.startsWith(imageHost)) {
+      return url.replace(imageHost, '/image-proxy')
+    }
   }
   return url
 }
