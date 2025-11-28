@@ -35,346 +35,348 @@ $color-bg-quote: #faf6f1;
 
 .markdown-body {
   color: $color-text-primary;
-  font-size: 17px; // 稍微大一点的字体，提高阅读体验
+  font-size: 17px;
   line-height: 1.85;
   word-wrap: break-word;
   font-family: $font-sans;
 
-  // 标题样式 - 衬线字体，文学感
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    margin-top: 40px;
-    margin-bottom: 24px;
-    font-weight: 700;
-    line-height: 1.3;
-    color: #2c1810;
-    font-family: $font-serif;
-    position: relative;
-
-    &:first-child {
-      margin-top: 0;
-    }
-  }
-
-  h1 {
-    font-size: 2.4em;
-    border-bottom: 2px solid $color-border;
-    padding-bottom: 0.3em;
-    text-align: center;
-  }
-
-  h2 {
-    font-size: 1.8em;
-    padding-bottom: 0.3em;
-    border-bottom: 1px dashed $color-border;
-
-    &::before {
-      content: '§';
-      margin-right: 10px;
-      color: $color-accent;
-      font-weight: normal;
-      opacity: 0.7;
-    }
-  }
-
-  h3 {
-    font-size: 1.5em;
-    color: $color-text-secondary;
-  }
-
-  h4 {
-    font-size: 1.25em;
-    font-weight: 600;
-  }
-
-  h5 {
-    font-size: 1.1em;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: $color-text-secondary;
-  }
-
-  h6 {
-    font-size: 1em;
-    color: #8d6e63;
-    font-style: italic;
-  }
-
-  // 段落样式 - 改善可读性
-  p {
-    margin-top: 0;
-    margin-bottom: 24px;
-    text-align: justify; // 两端对齐，像书本一样
-  }
-
-  // 链接样式 - 温馨色调
-  a {
-    color: $color-link;
-    text-decoration: none;
-    border-bottom: 1px solid transparent;
-    transition: all 0.3s ease;
-    padding-bottom: 1px;
-
-    &:hover {
-      color: $color-link-hover;
-      border-bottom-color: $color-link-hover;
-      background-color: rgba(212, 163, 115, 0.1);
-    }
-  }
-
-  // 强调样式
-  strong {
-    font-weight: 700;
-    color: #2c1810;
-  }
-
-  em {
-    font-style: italic;
-    font-family: $font-serif;
-    color: $color-text-secondary;
-  }
-
-  // 代码块样式 - 暖色调背景
-  code {
-    padding: 0.2em 0.5em;
-    margin: 0 0.2em;
-    font-size: 0.9em;
-    background-color: $color-bg-code;
-    border-radius: 4px;
-    font-family: $font-mono;
-    color: #c05850; // 暖红色
-  }
-
-  pre {
-    padding: 24px;
-    margin: 32px 0;
-    overflow-x: auto;
-    font-size: 0.95em;
-    line-height: 1.6;
-    background-color: #2d2a2e; // 深色背景对比度更好
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-    position: relative;
-
-    code {
-      display: block;
-      padding: 0;
-      margin: 0;
-      overflow: visible;
-      line-height: inherit;
-      word-wrap: normal;
-      background-color: transparent;
-      border: 0;
-      color: #fcfcfa; // 浅色文字
-    }
-
-    // 滚动条样式
-    &::-webkit-scrollbar {
-      height: 8px;
-      background-color: #2d2a2e;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background-color: #5d5a5e;
-      border-radius: 4px;
-    }
-  }
-
-  // 列表样式
-  ul,
-  ol {
-    padding-left: 1.5em;
-    margin-bottom: 24px;
-  }
-
-  ul {
-    list-style-type: none;
-
-    li {
+  // 使用 :deep() 穿透 scoped，让样式应用到 v-html 生成的内容
+  :deep() {
+    // 标题样式 - 衬线字体，文学感
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      margin-top: 40px;
+      margin-bottom: 24px;
+      font-weight: 700;
+      line-height: 1.3;
+      color: #2c1810;
+      font-family: $font-serif;
       position: relative;
-      padding-left: 1.2em;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    h1 {
+      font-size: 2.4em;
+      border-bottom: 2px solid $color-border;
+      padding-bottom: 0.3em;
+      text-align: center;
+    }
+
+    h2 {
+      font-size: 1.8em;
+      padding-bottom: 0.3em;
+      border-bottom: 1px dashed $color-border;
 
       &::before {
-        content: '•';
-        position: absolute;
-        left: 0;
+        content: '§';
+        margin-right: 10px;
         color: $color-accent;
-        font-size: 1.2em;
-        line-height: 1.6;
+        font-weight: normal;
+        opacity: 0.7;
       }
     }
-  }
 
-  ol {
-    list-style-type: decimal;
-
-    li {
-      padding-left: 0.5em;
-      &::marker {
-        color: $color-text-secondary;
-        font-weight: 600;
-        font-family: $font-serif;
-      }
-    }
-  }
-
-  li {
-    margin-bottom: 10px;
-
-    > p {
-      margin-bottom: 10px;
-    }
-  }
-
-  // 引用样式 - 书本批注感
-  blockquote {
-    padding: 20px 24px;
-    margin: 32px 0;
-    color: $color-text-secondary;
-    background-color: $color-bg-quote;
-    border-left: none;
-    position: relative;
-    font-family: $font-serif;
-    font-style: italic;
-    border-radius: 8px;
-
-    &::before {
-      content: '“';
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      font-size: 40px;
-      line-height: 1;
-      color: $color-accent;
-      opacity: 0.3;
-      font-family: serif;
+    h3 {
+      font-size: 1.5em;
+      color: $color-text-secondary;
     }
 
+    h4 {
+      font-size: 1.25em;
+      font-weight: 600;
+    }
+
+    h5 {
+      font-size: 1.1em;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: $color-text-secondary;
+    }
+
+    h6 {
+      font-size: 1em;
+      color: #8d6e63;
+      font-style: italic;
+    }
+
+    // 段落样式
     p {
-      margin-bottom: 12px;
-      &:last-child {
-        margin-bottom: 0;
-      }
-    }
-  }
-
-  // 表格样式 - 简约暖色
-  table {
-    border-spacing: 0;
-    border-collapse: collapse;
-    margin: 32px 0;
-    width: 100%;
-    overflow: auto;
-    font-size: 0.95em;
-
-    thead {
-      border-bottom: 2px solid $color-accent;
-
-      th {
-        color: #2c1810;
-        font-weight: 700;
-        padding: 12px 16px;
-        text-align: left;
-        font-family: $font-serif;
-      }
+      margin-top: 0;
+      margin-bottom: 24px;
+      text-align: justify;
     }
 
-    td {
-      padding: 12px 16px;
-      border-bottom: 1px solid $color-border;
-    }
-
-    tr {
-      transition: background-color 0.2s ease;
+    // 链接样式
+    a {
+      color: $color-link;
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+      transition: all 0.3s ease;
+      padding-bottom: 1px;
 
       &:hover {
-        background-color: rgba(212, 163, 115, 0.05);
+        color: $color-link-hover;
+        border-bottom-color: $color-link-hover;
+        background-color: rgba(212, 163, 115, 0.1);
       }
     }
-  }
 
-  // 水平线样式 - 装饰性
-  hr {
-    height: 1px;
-    padding: 0;
-    margin: 48px auto;
-    background: transparent;
-    border: 0;
-    border-top: 1px solid $color-border;
-    width: 60%;
-    position: relative;
-
-    &::after {
-      content: '❦';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: #fffcf9; // 需要匹配背景色
-      padding: 0 10px;
-      color: $color-accent;
-      font-size: 20px;
+    // 强调样式
+    strong {
+      font-weight: 700;
+      color: #2c1810;
     }
-  }
 
-  // 图片样式 - 拍立得风格/相框感
-  img {
-    max-width: 100%;
-    height: auto;
-    display: block;
-    margin: 40px auto;
-    border-radius: 2px;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-    border: 8px solid white; // 相框效果
-    transition: transform 0.3s ease;
-
-    &:hover {
-      transform: scale(1.01);
+    em {
+      font-style: italic;
+      font-family: $font-serif;
+      color: $color-text-secondary;
     }
-  }
 
-  // 任务列表样式
-  input[type='checkbox'] {
-    appearance: none;
-    width: 16px;
-    height: 16px;
-    border: 1px solid $color-accent;
-    border-radius: 3px;
-    margin-right: 8px;
-    position: relative;
-    top: 2px;
-    cursor: pointer;
+    // 代码块样式
+    code {
+      padding: 0.2em 0.5em;
+      margin: 0 0.2em;
+      font-size: 0.9em;
+      background-color: $color-bg-code;
+      border-radius: 4px;
+      font-family: $font-mono;
+      color: #c05850;
+    }
 
-    &:checked {
-      background-color: $color-accent;
+    pre {
+      padding: 24px;
+      margin: 32px 0;
+      overflow-x: auto;
+      font-size: 0.95em;
+      line-height: 1.6;
+      background-color: #2d2a2e;
+      border-radius: 8px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      position: relative;
+
+      code {
+        display: block;
+        padding: 0;
+        margin: 0;
+        overflow: visible;
+        line-height: inherit;
+        word-wrap: normal;
+        background-color: transparent;
+        border: 0;
+        color: #fcfcfa;
+      }
+
+      &::-webkit-scrollbar {
+        height: 8px;
+        background-color: #2d2a2e;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: #5d5a5e;
+        border-radius: 4px;
+      }
+    }
+
+    // 列表样式
+    ul,
+    ol {
+      padding-left: 1.5em;
+      margin-bottom: 24px;
+    }
+
+    ul {
+      list-style-type: none;
+
+      li {
+        position: relative;
+        padding-left: 1.2em;
+
+        &::before {
+          content: '•';
+          position: absolute;
+          left: 0;
+          color: $color-accent;
+          font-size: 1.2em;
+          line-height: 1.6;
+        }
+      }
+    }
+
+    ol {
+      list-style-type: decimal;
+
+      li {
+        padding-left: 0.5em;
+        &::marker {
+          color: $color-text-secondary;
+          font-weight: 600;
+          font-family: $font-serif;
+        }
+      }
+    }
+
+    li {
+      margin-bottom: 10px;
+
+      > p {
+        margin-bottom: 10px;
+      }
+    }
+
+    // 引用样式
+    blockquote {
+      padding: 20px 24px;
+      margin: 32px 0;
+      color: $color-text-secondary;
+      background-color: $color-bg-quote;
+      border-left: none;
+      position: relative;
+      font-family: $font-serif;
+      font-style: italic;
+      border-radius: 8px;
+
+      &::before {
+        content: '"';
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 40px;
+        line-height: 1;
+        color: $color-accent;
+        opacity: 0.3;
+        font-family: serif;
+      }
+
+      p {
+        margin-bottom: 12px;
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+
+    // 表格样式
+    table {
+      border-spacing: 0;
+      border-collapse: collapse;
+      margin: 32px 0;
+      width: 100%;
+      overflow: auto;
+      font-size: 0.95em;
+
+      thead {
+        border-bottom: 2px solid $color-accent;
+
+        th {
+          color: #2c1810;
+          font-weight: 700;
+          padding: 12px 16px;
+          text-align: left;
+          font-family: $font-serif;
+        }
+      }
+
+      td {
+        padding: 12px 16px;
+        border-bottom: 1px solid $color-border;
+      }
+
+      tr {
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          background-color: rgba(212, 163, 115, 0.05);
+        }
+      }
+    }
+
+    // 水平线样式
+    hr {
+      height: 1px;
+      padding: 0;
+      margin: 48px auto;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid $color-border;
+      width: 60%;
+      position: relative;
 
       &::after {
-        content: '✓';
+        content: '❦';
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        color: white;
-        font-size: 12px;
+        background-color: #fffcf9;
+        padding: 0 10px;
+        color: $color-accent;
+        font-size: 20px;
       }
     }
-  }
 
-  // 删除线
-  del {
-    color: #a1887f;
-    text-decoration-color: $color-accent;
-  }
+    // 图片样式
+    img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 40px auto;
+      border-radius: 2px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+      border: 8px solid white;
+      transition: transform 0.3s ease;
 
-  // 脚注
-  sup {
-    color: $color-accent;
-    font-size: 0.75em;
-    margin-left: 2px;
+      &:hover {
+        transform: scale(1.01);
+      }
+    }
+
+    // 任务列表样式
+    input[type='checkbox'] {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border: 1px solid $color-accent;
+      border-radius: 3px;
+      margin-right: 8px;
+      position: relative;
+      top: 2px;
+      cursor: pointer;
+
+      &:checked {
+        background-color: $color-accent;
+
+        &::after {
+          content: '✓';
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: white;
+          font-size: 12px;
+        }
+      }
+    }
+
+    // 删除线
+    del {
+      color: #a1887f;
+      text-decoration-color: $color-accent;
+    }
+
+    // 脚注
+    sup {
+      color: $color-accent;
+      font-size: 0.75em;
+      margin-left: 2px;
+    }
   }
 }
 </style>

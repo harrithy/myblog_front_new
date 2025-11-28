@@ -8,7 +8,7 @@ const md = new MarkdownIt({
   html: true, // 启用 HTML 标签
   linkify: true, // 自动转换 URL 为链接
   typographer: true, // 启用一些语言中立的替换和引号美化
-  breaks: false, // 转换段落里的 '\n' 到 <br>
+  breaks: true, // 转换段落里的 '\n' 到 <br>
   langPrefix: 'language-', // 给代码块的 CSS 语言前缀
 })
 
