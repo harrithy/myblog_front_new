@@ -1,3 +1,13 @@
+/*
+ * @Author: harrio@chijing.tech harrio@chijing.tech
+ * @Date: 2025-10-17 18:13:51
+ * @LastEditors: harrio@chijing.tech harrio@chijing.tech
+ * @LastEditTime: 2025-12-03 17:31:11
+ * @FilePath: \myblog_front_new\src\router\index.ts
+ * @Description:
+ *
+ * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved.
+ */
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 // 为什么使用RouteRecordRaw
 // 主要是为了TypeScript的类型安全和开发体验
@@ -32,6 +42,14 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/ownerlogin',
     redirect: '/login',
+  },
+  {
+    path: '/search',
+    name: 'search',
+    component: () => import('../views/searchpage/index.vue'),
+    meta: {
+      title: 'Search',
+    },
   },
 ]
 
