@@ -1,5 +1,11 @@
 <template>
   <div class="search-container">
+    <!-- 顶部导航栏 -->
+    <div class="top-nav">
+      <div class="avatar">
+        <img :src="avatarImage" alt="">
+      </div>
+    </div>
     <div class="search-box">
       <div class="icon-wrapper">
         <svg-icon name="search" class="search-icon" />
@@ -22,6 +28,7 @@ defineOptions({
   name: 'SearchPage',
 })
 import { ref } from 'vue'
+import avatarImage from '@/assets/source/avatar.gif'
 import { debounce, throttle } from '@/utils/debounce'
 
 const searchValue = ref('')
@@ -42,6 +49,36 @@ const search = debounce(() => {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  position: relative;
+  .top-nav {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 20px;
+    // background: white;
+    // border-radius: 50px;
+    // box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    // padding: 0 5px 0 20px;
+    // transition: all 0.3s ease;
+    // border: 2px solid transparent;
+    .avatar {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      overflow: hidden;
+      object-fit: cover;
+      cursor: pointer;
+    }
+    &:focus-within {
+      // box-shadow: 0 6px 20px rgba(64, 158, 255, 0.2);
+      // border-color: #a0cfff;
+    }
+  }
   .search-box {
     display: flex;
     align-items: center;
