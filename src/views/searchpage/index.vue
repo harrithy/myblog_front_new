@@ -11,59 +11,10 @@
           />
         </div>
         <!-- 用户信息卡片 -->
-        <Transition name="fade">
-          <div v-show="showCard" class="user-card">
-            <!-- 已登录状态 -->
-            <template v-if="userStore.isLoggedIn">
-              <div class="user-card-header">
-                <img
-                  :src="userStore.userInfo?.avatar_url"
-                  alt=""
-                  class="user-card-avatar"
-                  @error="(e: Event) => ((e.target as HTMLImageElement).src = avatarImage)"
-                />
-                <div class="user-card-info">
-                  <div class="user-card-name">
-                    {{ userStore.userInfo?.nickname || userStore.userInfo?.name }}
-                  </div>
-                  <div class="user-card-email">{{ userStore.userInfo?.account }}</div>
-                </div>
-              </div>
-              <div v-if="userStore.userInfo?.bio" class="user-card-bio">
-                {{ userStore.userInfo?.bio }}
-              </div>
-              <div class="user-card-actions">
-                <button class="logout-btn" @click="handleLogout">退出登录</button>
-              </div>
-            </template>
-            <!-- 未登录状态 -->
-            <template v-else>
-              <div class="login-prompt">
-                <div class="login-title">欢迎访问</div>
-                <div class="login-desc">登录后可以体验更多功能</div>
-                <button class="github-login-btn" @click="handleGithubLogin">
-                  <svg-icon name="github" class="github-icon" />
-                  <span>使用 GitHub 登录</span>
-                </button>
-              </div>
-            </template>
-          </div>
-        </Transition>
+        <UserCard :visible="showCard" />
       </div>
     </div>
-    <div class="search-box">
-      <div class="icon-wrapper">
-        <svg-icon name="search" class="search-icon" />
-      </div>
-      <input
-        type="text"
-        v-model="searchValue"
-        placeholder="Type to search..."
-        class="search-input"
-        @keyup.enter="search"
-      />
-      <button class="search-btn" @click="search">Search</button>
-    </div>
+    <SearchBox @search="handleSearch" />
   </div>
 </template>
 
@@ -74,8 +25,9 @@ defineOptions({
 })
 import { ref, onMounted } from 'vue'
 import avatarImage from '@/assets/source/avatar.gif'
-import { debounce } from '@/utils/debounce'
 import { useUserStore } from '@/stores/user'
+import UserCard from '@/components/UserCard.vue'
+import SearchBox from '@/views/searchpage/components/SearchBox.vue'
 
 // 用户状态
 const userStore = useUserStore()
@@ -83,34 +35,13 @@ const userStore = useUserStore()
 // 控制卡片显示
 const showCard = ref(false)
 
-// 搜索相关
-const searchValue = ref('')
-
-const search = debounce(() => {
-  console.log(searchValue.value)
-}, 300)
-
-// GitHub 登录配置
-const GITHUB_CLIENT_ID = 'Ov23liSXz8pI9Z4PcnnO'
-
-// GitHub 登录
-const handleGithubLogin = () => {
-  const redirectUri = `${window.location.origin}/callback`
-  const authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`
-  window.location.href = authUrl
-}
-
-// 退出登录
-const handleLogout = () => {
-  userStore.logout()
+const handleSearch = (value: string) => {
+  console.log('搜索内容:', value)
 }
 
 // 初始化时恢复用户信息
 onMounted(() => {
   userStore.restoreUserInfo()
-  console.log('用户信息:', userStore.userInfo)
-  console.log('是否登录:', userStore.isLoggedIn)
-  console.log('头像URL:', userStore.userInfo?.avatar_url)
 })
 </script>
 
@@ -119,7 +50,7 @@ onMounted(() => {
   height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: center;
+  // align-items: center;
   background-image: url('@/assets/source/kon.png');
   background-size: cover;
   background-position: center;
@@ -131,21 +62,16 @@ onMounted(() => {
     top: 0;
     left: 0;
     width: 100%;
-    height: 50px;
+    height: 70px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
     padding-right: 20px;
-    // background: white;
-    // border-radius: 50px;
-    // box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    // padding: 0 5px 0 20px;
-    // transition: all 0.3s ease;
-    // border: 2px solid transparent;
     .avatar-wrapper {
       position: relative;
 
       .avatar {
+        margin: 10px 20px 0 0;
         width: 50px;
         height: 50px;
         border-radius: 50%;
@@ -153,217 +79,27 @@ onMounted(() => {
         object-fit: cover;
         cursor: pointer;
         border: 2px solid transparent;
-        transition: border-color 0.3s;
+        transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
         img {
           width: 100%;
           height: 100%;
           object-fit: cover;
+          transition: transform 0.5s ease;
         }
 
         &:hover {
-          border-color: #409eff;
-        }
-      }
+          transform: scale(1.1) rotate(5deg);
+          border-color: #ffb6c1; // 浅粉色
+          box-shadow: 0 0 20px rgba(255, 182, 193, 0.6); // 粉色梦幻光晕
 
-      .user-card {
-        position: absolute;
-        top: 55px;
-        right: 0;
-        width: 280px;
-        background: white;
-        border-radius: 12px;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-        padding: 20px;
-        z-index: 100;
-
-        .user-card-header {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          margin-bottom: 12px;
-
-          .user-card-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-          }
-
-          .user-card-info {
-            flex: 1;
-
-            .user-card-name {
-              font-size: 16px;
-              font-weight: 600;
-              color: #333;
-            }
-
-            .user-card-email {
-              font-size: 12px;
-              color: #909399;
-              margin-top: 4px;
-            }
-          }
-        }
-
-        .user-card-bio {
-          font-size: 13px;
-          color: #666;
-          line-height: 1.5;
-          padding: 10px 0;
-          border-top: 1px solid #eee;
-          border-bottom: 1px solid #eee;
-        }
-
-        .user-card-actions {
-          margin-top: 12px;
-
-          .logout-btn {
-            width: 100%;
-            padding: 10px;
-            border: none;
-            background: #f56c6c;
-            color: white;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-
-            &:hover {
-              background: #f78989;
-            }
-          }
-        }
-
-        .login-prompt {
-          text-align: center;
-
-          .login-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-          }
-
-          .login-desc {
-            font-size: 13px;
-            color: #909399;
-            margin-bottom: 16px;
-          }
-
-          .github-login-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            width: 100%;
-            padding: 12px;
-            border: none;
-            background: #24292e;
-            color: white;
-            border-radius: 8px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background 0.3s;
-
-            .github-icon {
-              width: 20px;
-              height: 20px;
-            }
-
-            &:hover {
-              background: #3a3f44;
-            }
+          img {
+            transform: scale(1.1);
           }
         }
       }
     }
-
-    &:focus-within {
-      // box-shadow: 0 6px 20px rgba(64, 158, 255, 0.2);
-      // border-color: #a0cfff;
-    }
   }
-  .search-box {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 500px;
-    height: 50px;
-    background: white;
-    border-radius: 50px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    padding: 0 5px 0 20px;
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
-
-    &:focus-within {
-      box-shadow: 0 6px 20px rgba(64, 158, 255, 0.2);
-      border-color: #a0cfff;
-    }
-  }
-
-  .icon-wrapper {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 10px;
-    color: #909399;
-  }
-
-  .search-icon {
-    width: 20px;
-    height: 20px;
-    color: #04225f;
-  }
-
-  .search-input {
-    flex: 1;
-    border: none;
-    outline: none;
-    font-size: 16px;
-    color: #333;
-    background: transparent;
-
-    &::placeholder {
-      color: #c0c4cc;
-    }
-  }
-
-  .search-btn {
-    height: 40px;
-    padding: 0 25px;
-    border: none;
-    background: #409eff;
-    color: white;
-    border-radius: 40px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.3s;
-
-    &:hover {
-      background: #66b1ff;
-    }
-
-    &:active {
-      background: #3a8ee6;
-    }
-  }
-}
-
-// 过渡动画
-.fade-enter-active,
-.fade-leave-active {
-  transition:
-    opacity 0.2s ease,
-    transform 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-  transform: translateY(-10px);
 }
 </style>
