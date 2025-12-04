@@ -51,6 +51,14 @@ const routes: RouteRecordRaw[] = [
       title: 'Search',
     },
   },
+  {
+    path: '/callback',
+    name: 'githubCallback',
+    component: () => import('../views/auth/GithubCallback.vue'),
+    meta: {
+      title: 'GitHub 登录中...',
+    },
+  },
 ]
 
 const router = createRouter({
