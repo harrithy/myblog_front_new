@@ -2,6 +2,8 @@
   <div class="search-container">
     <!-- 顶部导航栏 -->
     <div class="top-nav">
+      <!-- 灵动导航菜单 -->
+      <NavMenu />
       <div class="avatar-wrapper" @mouseenter="showCard = true" @mouseleave="showCard = false">
         <div class="avatar">
           <img
@@ -28,6 +30,7 @@ import avatarImage from '@/assets/source/avatar.gif'
 import { useUserStore } from '@/stores/user'
 import UserCard from '@/components/UserCard.vue'
 import SearchBox from '@/views/searchpage/components/SearchBox.vue'
+import NavMenu from '@/views/searchpage/components/NavMenu.vue'
 
 // 用户状态
 const userStore = useUserStore()
@@ -58,7 +61,7 @@ onMounted(() => {
   background-attachment: fixed;
   position: relative;
   .top-nav {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
@@ -67,6 +70,9 @@ onMounted(() => {
     justify-content: flex-end;
     align-items: center;
     padding-right: 20px;
+    gap: 15px;
+    z-index: 1000; // 确保在最上层
+
     .avatar-wrapper {
       position: relative;
 

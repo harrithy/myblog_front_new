@@ -132,7 +132,7 @@ const generateData = async () => {
 
   try {
     // 获取访问统计数据
-    const response = (await visitApi.getOwnerVisits(365)) as OwnerVisitStatsResponse['data']
+    const response = (await visitApi.getOwnerVisits(365).send()) as OwnerVisitStatsResponse['data']
     console.log(response.visit_stats)
     const responseWithStats = response.visit_stats
     responseWithStats.forEach((stat) => {

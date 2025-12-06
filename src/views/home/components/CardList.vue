@@ -97,7 +97,7 @@ const cards = ref<Card[]>([
     description: '记录着异世界冒险谭与魔法咏唱的绝对领域',
     image: boqiImage,
     themeColor: '#FFB6C1', // 波奇粉色
-    link: '/blog',
+    link: '/search',
   },
   {
     title: '资源の小屋',

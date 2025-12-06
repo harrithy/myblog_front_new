@@ -7,33 +7,116 @@
       </div>
       <input
         type="text"
-        v-model="searchValue"
+        v-model="keyword"
         placeholder="Type to search..."
         class="search-input"
         @keyup.enter="handleSearch"
       />
       <button class="search-btn" @click="handleSearch">Search</button>
     </div>
+    <SearchResultList :results="searchResults" @item-click="handleItemClick" />
   </div>
 </template>
 
 <script setup lang="ts">
+// 组件名字
 defineOptions({
   name: 'SearchBox',
 })
-
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { debounce } from '@/utils/debounce'
+import { categoryApi } from '@/api'
+import SearchResultList, { type SearchResult } from './SearchResultList.vue'
+import gsap from 'gsap'
 
-const emit = defineEmits<{
-  search: [value: string]
-}>()
+const router = useRouter()
 
-const searchValue = ref('')
+// 定义关键词
+const keyword = ref('')
+// 搜索结果
+const searchResults = ref<SearchResult[]>([])
 
-const handleSearch = debounce(() => {
-  emit('search', searchValue.value)
-}, 300)
+// 搜索请求（带防抖）
+const searchCategories = debounce(async (value: string) => {
+  if (!value.trim()) {
+    searchResults.value = []
+    return
+  }
+  const params = { keyword: value }
+  const res = await categoryApi.getCategories(params)
+  searchResults.value = (res as SearchResult[]) || []
+}, 500)
+
+// 监听关键词变化
+watch(keyword, (newVal) => {
+  searchCategories(newVal)
+})
+
+// 监听搜索结果数量，触发动画
+watch(
+  () => searchResults.value.length,
+  (newLen, oldLen) => {
+    // 有结果且之前无结果 -> 进入搜索模式
+    if (newLen > 0 && oldLen === 0) {
+      // 1. Logo 消失
+      gsap.to('.logo-text', {
+        opacity: 0,
+        height: 0,
+        marginTop: 0,
+        marginBottom: 0,
+        duration: 0.6,
+        ease: 'power2.inOut',
+        onComplete: () => {
+          gsap.set('.logo-text', { display: 'none' })
+        },
+      })
+
+      // 2. 容器整体上移
+      gsap.to('.search-container-inner', {
+        marginTop: '90px', // 留出顶部导航栏的空间
+        duration: 0.6,
+        ease: 'power2.inOut',
+      })
+    }
+    // 无结果且之前有结果 -> 退出搜索模式
+    else if (newLen === 0 && oldLen > 0) {
+      gsap.set('.logo-text', { display: 'block' })
+
+      // 1. Logo 恢复
+      gsap.to('.logo-text', {
+        opacity: 1,
+        height: 'auto', // GSAP 会自动计算高度
+        marginTop: 0, // 恢复之前的样式如果需要
+        duration: 0.6,
+        ease: 'power2.inOut',
+      })
+
+      // 2. 容器恢复位置
+      gsap.to('.search-container-inner', {
+        marginTop: '100px', // 恢复初始 margin-top
+        duration: 0.6,
+        ease: 'power2.inOut',
+      })
+    }
+  },
+)
+
+// 手动搜索（点击按钮或回车）
+const handleSearch = () => {
+  searchCategories(keyword.value)
+}
+
+// 点击搜索结果项
+const handleItemClick = (item: SearchResult) => {
+  if (item.type === 'article' && item.url) {
+    // 跳转到文章详情页
+    router.push({ path: '/blog', query: { id: item.id, url: item.url } })
+  } else if (item.type === 'folder') {
+    // 跳转到博客列表并展开该文件夹
+    router.push({ path: '/bloglist', query: { folderId: item.id } })
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -96,6 +179,11 @@ const handleSearch = debounce(() => {
   padding: 0 6px 0 24px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 2px solid transparent;
+
+  // 吸顶效果
+  position: sticky;
+  top: 80px;
+  z-index: 900;
 
   &:focus-within {
     background: rgba(255, 255, 255, 0.95);

@@ -23,8 +23,8 @@ export const categoryApi = {
     return http.post('/categories', categoryData)
   },
 
-  // 获取分类列表（支持树形结构）
-  getCategories: (params?: { parent_id?: number | string }) => {
+  // 获取分类列表（支持树形结构）, 同时支持模糊查询
+  getCategories: (params?: { parent_id?: number | string; keyword?: string }) => {
     return http.get('/categories', { params, meta: { skipAuth: true } })
   },
 

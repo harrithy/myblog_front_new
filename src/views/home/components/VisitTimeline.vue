@@ -64,7 +64,8 @@ const previousVisitsLength = ref(0)
 const getVisits = async () => {
   try {
     loading.value = true
-    const res = await visitApi.getVisits(page.value, props.pageSize)
+    const res = await visitApi.getVisits(page.value, props.pageSize).send()
+    console.log('res', res)
 
     // 处理 null 或空数组的情况
     if (!res || res === null) {

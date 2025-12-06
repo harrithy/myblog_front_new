@@ -26,9 +26,18 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/blog',
     name: 'blog',
-    component: () => import('../views/blog/BlogIndex.vue'),
+    // component: () => import('../views/blog/BlogIndex.vue'),
+    component: () => import('../views/blog/index.vue'),
     meta: {
       title: '博客',
+    },
+  },
+  {
+    path: '/bloglist',
+    name: 'bloglist',
+    component: () => import('../views/blog/BlogIndex.vue'),
+    meta: {
+      title: '博客列表',
     },
   },
   {
@@ -77,7 +86,7 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const title = to.meta.title as string
   if (title) {
-    document.title = title
+    document.title = title + '-harrio'
   }
   next()
 })
