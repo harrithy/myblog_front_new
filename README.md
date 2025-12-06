@@ -14,3 +14,4 @@
 6. tailwindcss
 7. typed.js // 打字效果
 8. markdown-it // Markdown 解析器
+9. svg-icons-register // svg 图标注册

@@ -36,6 +36,8 @@ export default defineConfig(({ mode }) => {
     },
     // server:服务器
     server: {
+      // 自动打开浏览器
+      open: true,
       // proxy:代理
       proxy: {
         // 代理路径

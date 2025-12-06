@@ -4,12 +4,17 @@
       <!-- 已登录状态 -->
       <template v-if="userStore.isLoggedIn">
         <div class="user-card-header">
-          <img
-            :src="userStore.userInfo?.avatar_url"
-            alt=""
-            class="user-card-avatar"
-            @error="(e: Event) => ((e.target as HTMLImageElement).src = defaultAvatar)"
-          />
+          <div class="avatar-wrapper">
+            <div v-if="isAvatarLoading" class="avatar-loading"></div>
+            <img
+              v-show="!isAvatarLoading"
+              :src="userStore.userInfo?.avatar_url"
+              alt=""
+              class="user-card-avatar"
+              @load="handleImageLoad"
+              @error="handleImageError"
+            />
+          </div>
           <div class="user-card-info">
             <div class="user-card-name">
               {{ userStore.userInfo?.nickname || userStore.userInfo?.name }}
@@ -46,6 +51,7 @@ defineOptions({
 
 import { useUserStore } from '@/stores/user'
 import defaultAvatar from '@/assets/source/avatar.gif'
+import { ref, watch } from 'vue'
 
 // Props
 defineProps<{
@@ -59,6 +65,27 @@ const emit = defineEmits<{
 
 // 用户状态
 const userStore = useUserStore()
+
+// 图片加载状态
+const isAvatarLoading = ref(true)
+
+// 监听用户信息变化，重置 loading 状态
+watch(
+  () => userStore.userInfo?.avatar_url,
+  () => {
+    isAvatarLoading.value = true
+  },
+)
+
+const handleImageLoad = () => {
+  isAvatarLoading.value = false
+}
+
+const handleImageError = (e: Event) => {
+  isAvatarLoading.value = false
+  const target = e.target as HTMLImageElement
+  target.src = defaultAvatar
+}
 
 // GitHub 登录配置
 const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID || 'Ov23liSXz8pI9Z4PcnnO'
@@ -108,6 +135,26 @@ const handleLogout = () => {
       object-fit: cover;
       border: 2px solid white;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .avatar-loading {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border: 2px solid white;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes skeleton-loading {
+      0% {
+        background-position: 200% 0;
+      }
+      100% {
+        background-position: -200% 0;
+      }
     }
 
     .user-card-info {

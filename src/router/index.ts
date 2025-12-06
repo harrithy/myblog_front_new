@@ -9,6 +9,7 @@
  * Copyright (c) 2025 by ${git_name_email}, All Rights Reserved.
  */
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { useLoading } from '@/composables/useLoading'
 // 为什么使用RouteRecordRaw
 // 主要是为了TypeScript的类型安全和开发体验
 // +
@@ -84,6 +85,10 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  // 路由跳转时启动 loading
+  const { startLoading } = useLoading()
+  startLoading()
+
   const title = to.meta.title as string
   if (title) {
     document.title = title + '-harrio'

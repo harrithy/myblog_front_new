@@ -54,10 +54,10 @@ const menuList = [
     desc: '回到开始的地方',
   },
   {
-    path: '/blog',
+    path: '/bloglist',
     icon: 'book',
     iconClass: 'blog-icon',
-    title: '阅览室',
+    title: '博客列表',
     desc: '探索所有文章',
   },
   {
@@ -87,9 +87,9 @@ const navigateTo = (path: string) => {
     width: 42px;
     height: 42px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.1);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;

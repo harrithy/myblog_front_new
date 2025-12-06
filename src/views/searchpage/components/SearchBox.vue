@@ -111,7 +111,7 @@ const handleSearch = () => {
 const handleItemClick = (item: SearchResult) => {
   if (item.type === 'article' && item.url) {
     // 跳转到文章详情页
-    router.push({ path: '/blog', query: { id: item.id, url: item.url } })
+    router.push({ path: '/blog', query: { id: item.id } })
   } else if (item.type === 'folder') {
     // 跳转到博客列表并展开该文件夹
     router.push({ path: '/bloglist', query: { folderId: item.id } })

@@ -3,20 +3,36 @@
     <!-- 顶部导航栏 -->
     <div class="top-nav">
       <!-- 灵动导航菜单 -->
-      <NavMenu />
-      <div class="avatar-wrapper" @mouseenter="showCard = true" @mouseleave="showCard = false">
+      <NavMenu ref="navMenuRef" />
+      <div
+        ref="avatarRef"
+        class="avatar-wrapper"
+        @mouseenter="showCard = true"
+        @mouseleave="showCard = false"
+      >
         <div class="avatar">
+          <div v-if="isAvatarLoading" class="avatar-loading"></div>
           <img
+            v-show="!isAvatarLoading"
             :src="userStore.isLoggedIn ? userStore.userInfo?.avatar_url : avatarImage"
             alt=""
-            @error="(e: Event) => ((e.target as HTMLImageElement).src = avatarImage)"
+            @load="handleImageLoad"
+            @error="handleImageError"
           />
         </div>
         <!-- 用户信息卡片 -->
         <UserCard :visible="showCard" />
       </div>
     </div>
-    <SearchBox @search="handleSearch" />
+    <SearchBox ref="searchBoxRef" @search="handleSearch" />
+
+    <!-- 自定义新手引导 -->
+    <TourGuide
+      v-model:visible="showTour"
+      :steps="tourSteps"
+      @finish="handleTourFinish"
+      @skip="handleTourSkip"
+    />
   </div>
 </template>
 
@@ -25,18 +41,94 @@
 defineOptions({
   name: 'SearchPage',
 })
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import avatarImage from '@/assets/source/avatar.gif'
 import { useUserStore } from '@/stores/user'
 import UserCard from '@/components/UserCard.vue'
 import SearchBox from '@/views/searchpage/components/SearchBox.vue'
 import NavMenu from '@/views/searchpage/components/NavMenu.vue'
+import TourGuide, { type TourStep } from '@/components/TourGuide/index.vue'
 
 // 用户状态
 const userStore = useUserStore()
 
+// 图片加载状态
+const isAvatarLoading = ref(true)
+
+// 监听用户信息变化，重置 loading 状态
+watch(
+  () => userStore.userInfo?.avatar_url,
+  () => {
+    isAvatarLoading.value = true
+  },
+)
+
+const handleImageLoad = () => {
+  isAvatarLoading.value = false
+}
+
+const handleImageError = (e: Event) => {
+  isAvatarLoading.value = false
+  const target = e.target as HTMLImageElement
+  target.src = avatarImage
+}
+
 // 控制卡片显示
 const showCard = ref(false)
+
+// 引导相关
+const showTour = ref(false)
+const searchBoxRef = ref<InstanceType<typeof SearchBox> | null>(null)
+const navMenuRef = ref<InstanceType<typeof NavMenu> | null>(null)
+const avatarRef = ref<HTMLElement | null>(null)
+
+// 引导步骤配置
+const tourSteps = ref<TourStep[]>([])
+
+// localStorage key
+const TOUR_SHOWN_KEY = 'search_page_tour_shown_custom'
+
+// 检查是否需要显示引导
+const checkShowTour = () => {
+  const hasShown = localStorage.getItem(TOUR_SHOWN_KEY)
+  if (!hasShown) {
+    // 延迟显示，确保 DOM 渲染完成
+    setTimeout(() => {
+      // 配置引导步骤
+      tourSteps.value = [
+        {
+          target: '.search-box', // 使用类名选择器更稳定
+          title: '🔍 灵动搜索',
+          description: '在这里输入关键词，即可快速检索博客文章和分类，支持模糊搜索~',
+          placement: 'bottom',
+        },
+        {
+          target: '.nav-trigger',
+          title: '📍 传送门',
+          description: '点击这里展开导航菜单，可以快速跳转到首页、博客列表等页面，探索更多精彩~',
+          placement: 'bottom',
+        },
+        {
+          target: '.avatar',
+          title: '👤 个人中心',
+          description: '鼠标悬停在这里可以查看个人信息，登录后还可以发表评论~',
+          placement: 'bottom',
+        },
+      ]
+      showTour.value = true
+    }, 800)
+  }
+}
+
+const handleTourFinish = () => {
+  localStorage.setItem(TOUR_SHOWN_KEY, 'true')
+  console.log('引导完成 ✨')
+}
+
+const handleTourSkip = () => {
+  localStorage.setItem(TOUR_SHOWN_KEY, 'true')
+  console.log('跳过引导')
+}
 
 const handleSearch = (value: string) => {
   console.log('搜索内容:', value)
@@ -45,6 +137,7 @@ const handleSearch = (value: string) => {
 // 初始化时恢复用户信息
 onMounted(() => {
   userStore.restoreUserInfo()
+  checkShowTour()
 })
 </script>
 
@@ -88,6 +181,17 @@ onMounted(() => {
         transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
+        .avatar-loading {
+          width: 100%;
+          height: 100%;
+          position: absolute;
+          top: 0;
+          left: 0;
+          background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+          background-size: 200% 100%;
+          animation: skeleton-loading 1.5s infinite;
+        }
+
         img {
           width: 100%;
           height: 100%;
@@ -106,6 +210,15 @@ onMounted(() => {
         }
       }
     }
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
   }
 }
 </style>

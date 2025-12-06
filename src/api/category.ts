@@ -30,7 +30,7 @@ export const categoryApi = {
 
   // 获取单个分类详情
   getCategoryById: (id: string | number) => {
-    return http.get(`/categories/${id}`)
+    return http.get(`/categories/${id}`, { meta: { skipAuth: true } })
   },
 
   // 更新分类
