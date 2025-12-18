@@ -54,9 +54,9 @@ import WalkingCharacter from './components/WalkingCharacter.vue'
 import AvatarGlow from './components/AvatarGlow.vue'
 import SocialLinks from './components/SocialLinks.vue'
 import VisitTimeline from '@/views/home/components/VisitTimeline.vue'
-import avatarImage from '@/assets/source/avatar.gif'
-import posterImage from '@/assets/source/k-on.png'
-import videoSource from '@/assets/source/kkl.mp4'
+import avatarImg from '@/assets/source/avatar.gif'
+import posterImg from '@/assets/source/k-on.png'
+import videoSrc from '@/assets/source/kkl.mp4'
 import { onMounted, ref, nextTick } from 'vue'
 import { visitApi } from '@/api/index'
 import gsap from 'gsap'
@@ -64,6 +64,10 @@ import { MotionPathPlugin } from 'gsap/MotionPathPlugin'
 import welcomeObj from '@/constants/welcome'
 
 gsap.registerPlugin(MotionPathPlugin)
+
+const avatarImage = avatarImg
+const posterImage = posterImg
+const videoSource = videoSrc
 
 // 获取myblog-box的引用
 const myblogBox = ref<HTMLElement | null>(null)
