@@ -1,30 +1,38 @@
 <template>
   <div class="comment-section">
     <div class="comment-card">
-      <h3 class="comment-title">💬 评论</h3>
+      <h3 class="comment-title">💬 评论区</h3>
 
       <!-- 评论输入框 -->
       <div class="comment-input-wrapper">
         <textarea
           v-model="newComment"
           class="comment-input"
-          placeholder="写下你的评论..."
+          placeholder="写下你的想法..."
           rows="3"
         ></textarea>
-        <button class="comment-submit" @click="submitComment" :disabled="!newComment.trim()">
-          发表评论
-        </button>
+        <div class="input-actions">
+          <button class="comment-submit" @click="submitComment" :disabled="!newComment.trim()">
+            发表评论
+          </button>
+        </div>
       </div>
 
       <!-- 评论列表 -->
       <div class="comment-list">
-        <div v-if="comments.length === 0" class="no-comments">暂无评论，快来抢沙发吧~</div>
+        <div v-if="comments.length === 0" class="no-comments">
+          <span class="empty-icon">🍃</span>
+          <p>暂无评论，来做第一个发言的人吧~</p>
+        </div>
         <div v-else v-for="comment in comments" :key="comment.id" class="comment-item">
-          <div class="comment-header">
-            <span class="comment-author">{{ comment.author }}</span>
-            <span class="comment-time">{{ comment.time }}</span>
+          <div class="comment-avatar">{{ comment.author.charAt(0) }}</div>
+          <div class="comment-body">
+            <div class="comment-header">
+              <span class="comment-author">{{ comment.author }}</span>
+              <span class="comment-time">{{ comment.time }}</span>
+            </div>
+            <p class="comment-content">{{ comment.content }}</p>
           </div>
-          <p class="comment-content">{{ comment.content }}</p>
         </div>
       </div>
     </div>
@@ -56,7 +64,7 @@ const submitComment = () => {
 
   const comment: Comment = {
     id: Date.now(),
-    author: '访客',
+    author: '访客', // 这里后续可以对接用户系统
     content: newComment.value.trim(),
     time: formatTime(),
   }
@@ -69,115 +77,162 @@ const submitComment = () => {
 <style lang="scss" scoped>
 $primary: #e8a0bf;
 $primary-light: #f4c7d5;
-$text-primary: #5d4e60;
-$text-secondary: #9b8a9e;
-$border-color: rgba(232, 160, 191, 0.2);
-$shadow-soft: rgba(232, 160, 191, 0.15);
+$primary-dark: #d48aa7;
+$text-primary: #4a4a4a;
+$text-secondary: #8c8c8c;
+$glass-bg: rgba(255, 255, 255, 0.6);
+$border-color: rgba(255, 255, 255, 0.5);
+$shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
 
 .comment-section {
-  // width: 280px;
-  flex: 1;
-  flex-shrink: 0;
-  padding: 20px 20px 20px 10px;
-  position: sticky;
-  top: 0px;
-  height: fit-content;
-  max-height: calc(100vh - 40px);
-  overflow-y: auto;
+  width: 100%;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .comment-card {
-  background: rgba(255, 255, 255, 0.9);
+  background: $glass-bg;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid $border-color;
-  border-radius: 16px;
-  padding: 20px;
-  box-shadow: 0 4px 20px $shadow-soft;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: $shadow-soft;
 }
 
 .comment-title {
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: $text-primary;
-  margin: 0 0 16px 0;
-  padding-bottom: 12px;
-  border-bottom: 1px dashed $border-color;
+  margin: 0 0 24px 0;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed rgba($primary, 0.3);
 }
 
 .comment-input-wrapper {
-  margin-bottom: 20px;
+  margin-bottom: 32px;
+  background: rgba(255, 255, 255, 0.5);
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid rgba($primary, 0.1);
+  transition: all 0.3s ease;
+
+  &:focus-within {
+    border-color: $primary;
+    box-shadow: 0 0 0 4px rgba($primary, 0.1);
+    background: rgba(255, 255, 255, 0.8);
+  }
 }
 
 .comment-input {
   width: 100%;
   padding: 12px;
-  border: 1px solid $border-color;
-  border-radius: 8px;
-  font-size: 13px;
+  border: none;
+  background: transparent;
+  font-size: 14px;
   resize: none;
   outline: none;
   font-family: inherit;
-  box-sizing: border-box;
-  transition: border-color 0.2s;
-
-  &:focus {
-    border-color: $primary;
-  }
+  color: $text-primary;
+  min-height: 80px;
 
   &::placeholder {
     color: $text-secondary;
   }
 }
 
+.input-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba($primary, 0.1);
+}
+
 .comment-submit {
-  margin-top: 10px;
-  width: 100%;
-  padding: 10px 16px;
+  padding: 8px 24px;
   background: $primary;
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 13px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba($primary, 0.3);
 
   &:hover:not(:disabled) {
-    background: darken($primary, 10%);
+    background: $primary-dark;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba($primary, 0.4);
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(0);
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.6;
     cursor: not-allowed;
+    box-shadow: none;
   }
 }
 
 .comment-list {
-  max-height: 300px;
-  overflow-y: auto;
-
-  &::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: $primary-light;
-    border-radius: 2px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .no-comments {
   text-align: center;
   color: $text-secondary;
-  font-size: 13px;
-  padding: 20px 0;
+  padding: 40px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+
+  .empty-icon {
+    font-size: 32px;
+    opacity: 0.5;
+  }
+
+  p {
+    font-size: 14px;
+  }
 }
 
 .comment-item {
-  padding: 12px 0;
-  border-bottom: 1px dashed $border-color;
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.4);
+  border-radius: 16px;
+  transition: all 0.2s ease;
 
-  &:last-child {
-    border-bottom: none;
+  &:hover {
+    background: rgba(255, 255, 255, 0.7);
+    transform: translateX(4px);
   }
+}
+
+.comment-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $primary-light, $primary);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba($primary, 0.2);
+}
+
+.comment-body {
+  flex: 1;
 }
 
 .comment-header {
@@ -188,27 +243,38 @@ $shadow-soft: rgba(232, 160, 191, 0.15);
 }
 
 .comment-author {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   color: $text-primary;
 }
 
 .comment-time {
-  font-size: 11px;
+  font-size: 12px;
   color: $text-secondary;
 }
 
 .comment-content {
-  font-size: 13px;
+  font-size: 14px;
   color: $text-primary;
-  line-height: 1.5;
+  line-height: 1.6;
   margin: 0;
   word-break: break-word;
 }
 
-@media (max-width: 1400px) {
-  .comment-section {
-    display: none;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .comment-card {
+    padding: 20px;
   }
 }
 </style>

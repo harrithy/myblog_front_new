@@ -67,7 +67,6 @@ const scrollToHeading = (id: string) => {
   activeId.value = id // 立即设置激活状态
   const element = document.getElementById(id)
   if (element) {
-    // 考虑顶部导航栏的高度，如果有的话
     const offset = 20
     const top = element.getBoundingClientRect().top + window.pageYOffset - offset
     window.scrollTo({
@@ -101,7 +100,6 @@ const setupIntersectionObserver = () => {
 }
 
 onMounted(() => {
-  // 稍微延迟以确保 DOM 已渲染
   setTimeout(setupIntersectionObserver, 500)
 })
 
@@ -112,35 +110,39 @@ onUnmounted(() => {
 
 <style lang="scss" scoped>
 $primary: #e8a0bf;
-$primary-light: #f4c7d5;
-$text-primary: #5d4e60;
-$text-secondary: #9b8a9e;
-$border-color: rgba(232, 160, 191, 0.2);
-$shadow-soft: rgba(232, 160, 191, 0.15);
-$bg-hover: rgba(232, 160, 191, 0.05);
+$text-primary: #4a4a4a;
+$text-secondary: #8c8c8c;
+$glass-bg: rgba(255, 255, 255, 0.6);
+$border-color: rgba(255, 255, 255, 0.5);
+$shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+$bg-hover: rgba(232, 160, 191, 0.1);
 
 .toc-sidebar {
-  min-width: 280px;
-  max-width: 300px;
+  min-width: 260px;
+  max-width: 280px;
   flex-shrink: 0;
   position: sticky;
-  top: 20px;
+  top: 24px;
   height: fit-content;
-  max-height: calc(100vh - 40px);
+  max-height: calc(100vh - 48px);
+  margin-right: 24px;
+  margin-top: 24px; // Align with main content padding
+  z-index: 5;
 }
 
 .toc-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
+  background: $glass-bg;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid $border-color;
   border-radius: 20px;
   padding: 24px;
-  box-shadow: 0 8px 30px $shadow-soft;
+  box-shadow: $shadow-soft;
   transition: all 0.3s ease;
 
   &:hover {
-    box-shadow: 0 12px 40px rgba(232, 160, 191, 0.25);
-    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 12px 40px rgba(232, 160, 191, 0.15);
+    background: rgba(255, 255, 255, 0.8);
   }
 }
 
@@ -150,20 +152,20 @@ $bg-hover: rgba(232, 160, 191, 0.05);
   color: $text-primary;
   margin: 0 0 20px 0;
   padding-bottom: 16px;
-  border-bottom: 2px solid rgba($primary, 0.1);
+  border-bottom: 1px dashed rgba($primary, 0.3);
   display: flex;
   align-items: center;
   gap: 8px;
 
   .icon {
-    font-size: 20px;
+    font-size: 18px;
   }
 }
 
 .toc-nav {
-  max-height: 65vh;
+  max-height: 60vh;
   overflow-y: auto;
-  padding-right: 4px; // 防止滚动条遮挡内容
+  padding-right: 4px;
 
   &::-webkit-scrollbar {
     width: 4px;
@@ -174,11 +176,11 @@ $bg-hover: rgba(232, 160, 191, 0.05);
   }
 
   &::-webkit-scrollbar-thumb {
-    background: rgba($primary, 0.3);
+    background: rgba($primary, 0.2);
     border-radius: 4px;
 
     &:hover {
-      background: rgba($primary, 0.5);
+      background: rgba($primary, 0.4);
     }
   }
 }
@@ -187,12 +189,10 @@ $bg-hover: rgba(232, 160, 191, 0.05);
   list-style: none;
   margin: 0;
   padding: 0;
-  position: relative;
 }
 
 .toc-item {
-  margin: 2px 0;
-  position: relative;
+  margin: 4px 0;
 
   &.active {
     .toc-link {
@@ -201,8 +201,8 @@ $bg-hover: rgba(232, 160, 191, 0.05);
       font-weight: 600;
 
       &::before {
+        height: 20px;
         opacity: 1;
-        transform: translateY(-50%) scaleY(1);
       }
     }
   }
@@ -210,13 +210,13 @@ $bg-hover: rgba(232, 160, 191, 0.05);
 
 .toc-link {
   display: block;
-  padding: 8px 16px 8px 24px;
+  padding: 8px 12px 8px 20px;
   color: $text-secondary;
   text-decoration: none;
   font-size: 14px;
   line-height: 1.5;
   border-radius: 8px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 
   // 左侧指示条
@@ -225,9 +225,9 @@ $bg-hover: rgba(232, 160, 191, 0.05);
     position: absolute;
     left: 6px;
     top: 50%;
-    transform: translateY(-50%) scaleY(0);
-    width: 4px;
-    height: 18px;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 0;
     background: $primary;
     border-radius: 2px;
     opacity: 0;
@@ -240,36 +240,23 @@ $bg-hover: rgba(232, 160, 191, 0.05);
   }
 }
 
-// 缩进层级处理 - 改为 margin-left 缩进，让色块也跟着缩进
+// 缩进层级处理
 .level-1 {
   .toc-link {
-    font-size: 15px;
     font-weight: 600;
     color: $text-primary;
   }
 }
-
 .level-2 {
   margin-left: 12px;
-  .toc-link {
-    font-size: 14px;
-  }
 }
-
 .level-3 {
   margin-left: 24px;
-  .toc-link {
-    font-size: 13px;
-  }
 }
-
 .level-4,
 .level-5,
 .level-6 {
   margin-left: 36px;
-  .toc-link {
-    font-size: 13px;
-  }
 }
 
 // 响应式隐藏

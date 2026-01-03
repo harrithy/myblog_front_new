@@ -2,18 +2,22 @@
   <div class="blog-layout">
     <!-- 左侧分类导航 -->
     <CategorySidebar @select="handleCategorySelect" />
+
     <!-- 中间内容区 -->
     <main class="main-content">
       <div class="content-wrapper">
         <!-- 未选择文章时显示欢迎卡片 -->
         <div v-if="!currentCategory" class="welcome-card">
-          <div class="welcome-emoji">📚</div>
-          <h1>欢迎来到我的博客</h1>
-          <p>从左侧选择一篇文章开始阅读吧</p>
+          <div class="welcome-content">
+            <div class="welcome-emoji">📚</div>
+            <h1>欢迎来到我的博客</h1>
+            <p>这里记录着技术、生活与思考</p>
+            <p class="sub-text">👈 请从左侧选择一篇文章开始阅读</p>
+          </div>
           <div class="welcome-decoration">
-            <span>🌸</span>
-            <span>🌿</span>
-            <span>✨</span>
+            <div class="floating-shape shape-1"></div>
+            <div class="floating-shape shape-2"></div>
+            <div class="floating-shape shape-3"></div>
           </div>
         </div>
 
@@ -23,16 +27,20 @@
           <p>正在加载文章...</p>
         </div>
 
-        <!-- 文章内容 -->
-        <article v-else class="article-card">
-          <MarkdownRenderer :content="articleContent" />
-        </article>
+        <!-- 文章内容 & 评论 -->
+        <div v-else class="article-container">
+          <article class="article-card">
+            <MarkdownRenderer :content="articleContent" />
+          </article>
+
+          <!-- 评论区 (移动到文章下方) -->
+          <CommentSection />
+        </div>
       </div>
     </main>
-    <!-- 右侧目录 -->
+
+    <!-- 右侧目录 (仅在有文章且不加载时显示) -->
     <TableOfContents v-if="currentCategory && !loading" :content="articleContent" />
-    <!-- 右侧评论 -->
-    <CommentSection v-if="currentCategory && !loading" />
   </div>
 </template>
 
@@ -75,7 +83,6 @@ const handleCategorySelect = async (category: Category) => {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
       articleContent.value = await response.text()
-      // console.log('文章内容:', articleContent.value)
     } catch (error) {
       console.error('获取文章内容失败:', error)
       articleContent.value = '# 加载失败\n\n文章内容加载失败，请稍后重试。'
@@ -89,87 +96,194 @@ const handleCategorySelect = async (category: Category) => {
 </script>
 
 <style lang="scss" scoped>
-// 温馨配色
+// 配色系统 - 莫兰迪色系 & 柔和渐变
 $primary: #e8a0bf;
 $primary-light: #f4c7d5;
-$bg-cream: #fef9f3;
-$bg-pink: #fff5f8;
-$text-primary: #5d4e60;
-$text-secondary: #9b8a9e;
-$border-color: rgba(232, 160, 191, 0.2);
-$shadow-soft: rgba(232, 160, 191, 0.15);
+$secondary: #b4e4d3;
+$bg-cream: #fdfbf7;
+$bg-pink: #fff0f5;
+$text-primary: #4a4a4a;
+$text-secondary: #8c8c8c;
+$glass-bg: rgba(255, 255, 255, 0.7);
+$glass-border: rgba(255, 255, 255, 0.5);
+$shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 
 .blog-layout {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, $bg-cream 0%, $bg-pink 50%, #f0f7f4 100%);
+  // 更加柔和丰富的动态背景
+  background:
+    radial-gradient(circle at 0% 0%, rgba($primary-light, 0.4) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba($secondary, 0.4) 0%, transparent 50%),
+    linear-gradient(135deg, $bg-cream 0%, #fff 100%);
+  background-attachment: fixed;
 }
 
 // 主内容区
 .main-content {
-  // flex: 1;
-  padding: 10px;
+  flex: 1;
+  padding: 24px;
   overflow-y: auto;
+  // 隐藏主滚动条，让内部滚动更自然
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .content-wrapper {
-  max-width: 900px;
+  max-width: 960px;
   margin: 0 auto;
+  width: 100%;
 }
 
+// 通用卡片样式 - Glassmorphism
+@mixin glass-card {
+  background: $glass-bg;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid $glass-border;
+  border-radius: 24px;
+  box-shadow: $shadow-soft;
+}
+
+// 欢迎卡片
 .welcome-card {
+  @include glass-card;
+  min-height: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-height: 420px;
-  padding: 48px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid $border-color;
-  border-radius: 32px;
-  box-shadow: 0 8px 40px $shadow-soft;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+  padding: 40px;
+  margin-top: 40px;
+
+  .welcome-content {
+    position: relative;
+    z-index: 2;
+  }
 
   .welcome-emoji {
-    font-size: 64px;
+    font-size: 80px;
     margin-bottom: 24px;
-    animation: bounce 2s ease-in-out infinite;
+    animation: float 3s ease-in-out infinite;
   }
 
   h1 {
-    font-size: 32px;
-    font-weight: 600;
+    font-size: 36px;
+    font-weight: 700;
     color: $text-primary;
-    margin-bottom: 12px;
-    letter-spacing: 2px;
+    margin-bottom: 16px;
+    background: linear-gradient(45deg, $primary, #dfaec3);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   p {
     color: $text-secondary;
-    font-size: 16px;
-    margin-bottom: 32px;
+    font-size: 18px;
+    margin-bottom: 8px;
+
+    &.sub-text {
+      font-size: 14px;
+      margin-top: 24px;
+      opacity: 0.8;
+    }
   }
 
+  // 背景装饰
   .welcome-decoration {
-    display: flex;
-    gap: 16px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
 
-    span {
-      font-size: 28px;
-      animation: sway 2s ease-in-out infinite;
+    .floating-shape {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(40px);
+      opacity: 0.6;
+      animation: drift 10s infinite alternate;
 
-      &:nth-child(2) {
-        animation-delay: 0.3s;
+      &.shape-1 {
+        width: 200px;
+        height: 200px;
+        background: $primary-light;
+        top: -50px;
+        left: -50px;
       }
-      &:nth-child(3) {
-        animation-delay: 0.6s;
+
+      &.shape-2 {
+        width: 300px;
+        height: 300px;
+        background: rgba($secondary, 0.3);
+        bottom: -50px;
+        right: -50px;
+        animation-delay: -5s;
+      }
+
+      &.shape-3 {
+        width: 150px;
+        height: 150px;
+        background: rgba(255, 214, 165, 0.3);
+        top: 40%;
+        left: 60%;
+        animation-duration: 15s;
       }
     }
   }
 }
 
-// 动画
-@keyframes bounce {
+// 加载卡片
+.loading-card {
+  @include glass-card;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba($primary, 0.2);
+    border-top-color: $primary;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 24px;
+  }
+
+  p {
+    color: $text-secondary;
+    letter-spacing: 1px;
+  }
+}
+
+// 文章容器
+.article-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-bottom: 40px;
+}
+
+// 文章卡片
+.article-card {
+  @include glass-card;
+  background: rgba(255, 255, 255, 0.9); // 文章背景稍微不透明一点，提高阅读体验
+  padding: 48px 64px;
+  animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+// 动画定义
+@keyframes float {
   0%,
   100% {
     transform: translateY(0);
@@ -179,82 +293,25 @@ $shadow-soft: rgba(232, 160, 191, 0.15);
   }
 }
 
-@keyframes sway {
-  0%,
-  100% {
-    transform: rotate(-5deg);
+@keyframes drift {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
   }
-  50% {
-    transform: rotate(5deg);
+  100% {
+    transform: translate(30px, 30px) rotate(10deg);
   }
 }
 
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
   to {
     transform: rotate(360deg);
   }
 }
 
-// 加载状态卡片
-.loading-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  padding: 48px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid $border-color;
-  border-radius: 32px;
-  box-shadow: 0 8px 40px $shadow-soft;
-
-  .loading-spinner {
-    width: 48px;
-    height: 48px;
-    border: 3px solid $primary-light;
-    border-top-color: $primary;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 20px;
-  }
-
-  p {
-    color: $text-secondary;
-    font-size: 16px;
-  }
-}
-
-// 文章卡片
-.article-card {
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid $border-color;
-  border-radius: 24px;
-  box-shadow: 0 8px 40px $shadow-soft;
-  padding: 48px;
-  animation: fadeIn 0.3s ease-out;
-
-  .article-header {
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px dashed $border-color;
-  }
-
-  .article-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: $text-primary;
-    margin: 0;
-    letter-spacing: 1px;
-  }
-}
-
-@keyframes fadeIn {
+@keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -265,20 +322,25 @@ $shadow-soft: rgba(232, 160, 191, 0.15);
 // 响应式
 @media (max-width: 768px) {
   .main-content {
-    padding: 20px;
+    padding: 16px;
   }
+
   .welcome-card {
-    padding: 32px 20px;
+    padding: 24px;
+    min-height: 300px;
+
+    .welcome-emoji {
+      font-size: 60px;
+    }
+
     h1 {
       font-size: 24px;
     }
   }
+
   .article-card {
     padding: 24px;
-
-    .article-title {
-      font-size: 22px;
-    }
+    border-radius: 16px;
   }
 }
 </style>
