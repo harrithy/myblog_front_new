@@ -1,7 +1,7 @@
 <template>
   <div class="comment-section">
     <div class="comment-card">
-      <h3 class="comment-title">💬 评论区</h3>
+      <h3 class="comment-title">💬 评论区 ({{ comments.length }})</h3>
 
       <!-- 评论输入框 -->
       <div class="comment-input-wrapper">
@@ -24,17 +24,14 @@
           <span class="empty-icon">🍃</span>
           <p>暂无评论，来做第一个发言的人吧~</p>
         </div>
-        <div v-else v-for="comment in comments" :key="comment.id" class="comment-item">
-          <div class="comment-avatar">
-            <img :src="comment.avatar_url" alt="" />
-          </div>
-          <div class="comment-body">
-            <div class="comment-header">
-              <span class="comment-author">{{ comment.nickname }}</span>
-              <span class="comment-time">{{ comment.time }}</span>
-            </div>
-            <p class="comment-content">{{ comment.content }}</p>
-          </div>
+
+        <div v-else class="comments-container">
+          <CommentItem
+            v-for="comment in comments"
+            :key="comment.id"
+            :comment="comment"
+            @reply-success="fetchComments"
+          />
         </div>
       </div>
     </div>
@@ -42,10 +39,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-// 评论接口
+import { ref, onMounted, watch } from 'vue'
 import commentApi from '@/api/comment'
+import { useUserStore } from '@/stores/user'
+import CommentItem from './CommentItem.vue'
 
+// Define the interface to match CommentItem's expectation
 interface Comment {
   id: number
   article_id: number
@@ -54,23 +53,22 @@ interface Comment {
   email?: string
   avatar_url?: string
   content: string
-  time: string
+  created_at: string
+  children?: Comment[]
 }
 
-// 文章ID
 const props = defineProps({
   articleId: {
     type: Number,
     required: true,
   },
 })
-// 新评论内容
+
 const newComment = ref('')
-// 评论列表
 const comments = ref<Comment[]>([])
-// 分页加载评论列表
 const page = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(100)
+
 const fetchComments = () => {
   if (!props.articleId) return
   const params = {
@@ -79,33 +77,16 @@ const fetchComments = () => {
     page_size: pageSize.value,
   }
   commentApi.getComments(params).then((res) => {
-    comments.value = res as Comment[]
+    comments.value = res as unknown as Comment[]
   })
 }
 
-onMounted(() => {
-  fetchComments()
-})
-
-// 监听文章ID变化
-import { watch } from 'vue'
-watch(
-  () => props.articleId,
-  (newVal) => {
-    if (newVal) {
-      fetchComments()
-    }
-  },
-)
-// 从stores里获取userinfo
-import { useUserStore } from '@/stores/user'
 const userStore = useUserStore()
-// 提交评论
+
 const submitComment = () => {
-  // console.log('123', userStore.userInfo)
   const data = {
     article_id: props.articleId,
-    // parent_id: 0,
+    // No parent_id for root comments
     nickname: userStore.userInfo?.nickname || '匿名用户',
     email: userStore.userInfo?.email || '',
     avatar_url: userStore.userInfo?.avatar_url || '',
@@ -116,68 +97,90 @@ const submitComment = () => {
     fetchComments()
   })
 }
+
+onMounted(() => {
+  fetchComments()
+})
+
+watch(
+  () => props.articleId,
+  (newVal) => {
+    if (newVal) {
+      fetchComments()
+    }
+  },
+)
 </script>
 
 <style lang="scss" scoped>
 $primary: #e8a0bf;
 $primary-light: #f4c7d5;
 $primary-dark: #d48aa7;
-$text-primary: #4a4a4a;
-$text-secondary: #8c8c8c;
-$glass-bg: rgba(255, 255, 255, 0.6);
-$border-color: rgba(255, 255, 255, 0.5);
-$shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+$text-primary: #2c3e50;
+$text-secondary: #95a5a6;
+$bg-color: #ffffff;
+$border-color: #f0f2f5;
+$shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
 
 .comment-section {
   width: 100%;
-  animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.6s ease-out;
+  margin-top: 40px;
 }
 
 .comment-card {
-  background: $glass-bg;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid $border-color;
-  border-radius: 24px;
-  padding: 32px;
+  background: $bg-color;
+  border-radius: 16px;
+  padding: 40px;
   box-shadow: $shadow-soft;
 }
 
 .comment-title {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
   color: $text-primary;
-  margin: 0 0 24px 0;
-  padding-bottom: 16px;
-  border-bottom: 1px dashed rgba($primary, 0.3);
+  margin: 0 0 30px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &::before {
+    content: '';
+    display: block;
+    width: 4px;
+    height: 24px;
+    background: $primary;
+    border-radius: 2px;
+  }
 }
 
 .comment-input-wrapper {
-  margin-bottom: 32px;
-  background: rgba(255, 255, 255, 0.5);
-  padding: 20px;
-  border-radius: 16px;
-  border: 1px solid rgba($primary, 0.1);
+  margin-bottom: 40px;
+  background: #f8f9fa;
+  padding: 24px;
+  border-radius: 12px;
   transition: all 0.3s ease;
+  border: 1px solid transparent;
 
   &:focus-within {
-    border-color: $primary;
-    box-shadow: 0 0 0 4px rgba($primary, 0.1);
-    background: rgba(255, 255, 255, 0.8);
+    background: #fff;
+    border-color: rgba($primary, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   }
 }
 
 .comment-input {
   width: 100%;
-  padding: 12px;
+  padding: 0;
   border: none;
   background: transparent;
-  font-size: 14px;
+  font-size: 15px;
   resize: none;
   outline: none;
   font-family: inherit;
   color: $text-primary;
   min-height: 80px;
+  line-height: 1.6;
 
   &::placeholder {
     color: $text-secondary;
@@ -187,27 +190,26 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
 .input-actions {
   display: flex;
   justify-content: flex-end;
-  margin-top: 12px;
-  padding-top: 12px;
-  border-top: 1px solid rgba($primary, 0.1);
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .comment-submit {
-  padding: 8px 24px;
+  padding: 10px 28px;
   background: $primary;
   color: white;
   border: none;
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba($primary, 0.3);
+  transition: all 0.2s ease;
 
   &:hover:not(:disabled) {
     background: $primary-dark;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba($primary, 0.4);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba($primary, 0.2);
   }
 
   &:active:not(:disabled) {
@@ -217,98 +219,42 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
-    box-shadow: none;
+    background: #ccc;
   }
 }
 
 .comment-list {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+}
+
+.comments-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
 }
 
 .no-comments {
   text-align: center;
   color: $text-secondary;
-  padding: 40px 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
+  padding: 60px 0;
 
   .empty-icon {
-    font-size: 32px;
+    font-size: 48px;
     opacity: 0.5;
+    margin-bottom: 16px;
+    display: block;
   }
 
   p {
-    font-size: 14px;
+    font-size: 15px;
   }
-}
-
-.comment-item {
-  display: flex;
-  gap: 16px;
-  padding: 20px;
-  background: rgba(255, 255, 255, 0.4);
-  border-radius: 16px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: rgba(255, 255, 255, 0.7);
-    transform: translateX(4px);
-  }
-}
-
-.comment-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, $primary-light, $primary);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 18px;
-  flex-shrink: 0;
-  box-shadow: 0 4px 12px rgba($primary, 0.2);
-}
-
-.comment-body {
-  flex: 1;
-}
-
-.comment-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-
-.comment-author {
-  font-size: 14px;
-  font-weight: 700;
-  color: $text-primary;
-}
-
-.comment-time {
-  font-size: 12px;
-  color: $text-secondary;
-}
-
-.comment-content {
-  font-size: 14px;
-  color: $text-primary;
-  line-height: 1.6;
-  margin: 0;
-  word-break: break-word;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   to {
     opacity: 1;
@@ -318,7 +264,11 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
 
 @media (max-width: 768px) {
   .comment-card {
-    padding: 20px;
+    padding: 24px;
+  }
+
+  .comment-input-wrapper {
+    padding: 16px;
   }
 }
 </style>
