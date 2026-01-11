@@ -8,16 +8,14 @@
         <div class="comment-header">
           <div class="user-info">
             <span class="comment-author">{{ comment.nickname }}</span>
-            <span v-if="comment.parent_id" class="reply-tag"> <span>↪</span> 回复 </span>
+            <span v-if="comment.parent_id" class="reply-tag">回复</span>
           </div>
           <span class="comment-time">{{ formatDate(comment.created_at) }}</span>
         </div>
         <p class="comment-content">{{ comment.content }}</p>
 
         <div class="comment-actions">
-          <button class="action-btn reply-btn" @click="toggleReply">
-            <span class="icon">↩</span> 回复
-          </button>
+          <button class="action-btn reply-btn" @click="toggleReply">回复</button>
         </div>
 
         <!-- Reply Input -->
