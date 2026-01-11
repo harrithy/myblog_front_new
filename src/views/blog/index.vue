@@ -64,7 +64,7 @@
 
           <!-- 评论区 -->
           <div class="comment-wrapper">
-            <CommentSection />
+            <CommentSection v-if="article" :article-id="article.id" />
           </div>
         </div>
 

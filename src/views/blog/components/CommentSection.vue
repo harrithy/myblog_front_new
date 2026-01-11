@@ -25,10 +25,12 @@
           <p>暂无评论，来做第一个发言的人吧~</p>
         </div>
         <div v-else v-for="comment in comments" :key="comment.id" class="comment-item">
-          <div class="comment-avatar">{{ comment.author.charAt(0) }}</div>
+          <div class="comment-avatar">
+            <img :src="comment.avatar_url" alt="" />
+          </div>
           <div class="comment-body">
             <div class="comment-header">
-              <span class="comment-author">{{ comment.author }}</span>
+              <span class="comment-author">{{ comment.nickname }}</span>
               <span class="comment-time">{{ comment.time }}</span>
             </div>
             <p class="comment-content">{{ comment.content }}</p>
@@ -40,37 +42,79 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+// 评论接口
+import commentApi from '@/api/comment'
 
 interface Comment {
   id: number
-  author: string
+  article_id: number
+  parent_id?: number
+  nickname: string
+  email?: string
+  avatar_url?: string
   content: string
   time: string
 }
 
+// 文章ID
+const props = defineProps({
+  articleId: {
+    type: Number,
+    required: true,
+  },
+})
+// 新评论内容
 const newComment = ref('')
+// 评论列表
 const comments = ref<Comment[]>([])
-
-// 格式化时间
-const formatTime = (): string => {
-  const now = new Date()
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+// 分页加载评论列表
+const page = ref(1)
+const pageSize = ref(10)
+const fetchComments = () => {
+  if (!props.articleId) return
+  const params = {
+    article_id: props.articleId,
+    page: page.value,
+    page_size: pageSize.value,
+  }
+  commentApi.getComments(params).then((res) => {
+    comments.value = res as Comment[]
+  })
 }
 
+onMounted(() => {
+  fetchComments()
+})
+
+// 监听文章ID变化
+import { watch } from 'vue'
+watch(
+  () => props.articleId,
+  (newVal) => {
+    if (newVal) {
+      fetchComments()
+    }
+  },
+)
+// 从stores里获取userinfo
+import { useUserStore } from '@/stores/user'
+const userStore = useUserStore()
 // 提交评论
 const submitComment = () => {
-  if (!newComment.value.trim()) return
-
-  const comment: Comment = {
-    id: Date.now(),
-    author: '访客', // 这里后续可以对接用户系统
-    content: newComment.value.trim(),
-    time: formatTime(),
+  // console.log('123', userStore.userInfo)
+  const data = {
+    article_id: props.articleId,
+    // parent_id: 0,
+    nickname: userStore.userInfo?.nickname || '匿名用户',
+    email: userStore.userInfo?.email || '',
+    avatar_url: userStore.userInfo?.avatar_url || '',
+    content: newComment.value,
   }
-
-  comments.value.unshift(comment)
-  newComment.value = ''
+  commentApi.addComment(data).then(() => {
+    newComment.value = ''
+    fetchComments()
+  })
 }
 </script>
 

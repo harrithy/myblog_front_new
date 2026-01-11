@@ -12,8 +12,16 @@
 <script setup lang="ts">
 import LoadingAnimation from '@/components/LoadingAnimation.vue'
 import { useLoading } from '@/composables/useLoading'
+import { useUserStore } from '@/stores/user'
+import { onMounted } from 'vue'
 
 const { isLoading, stopLoading } = useLoading()
+const userStore = useUserStore()
+
+// 初始化时尝试恢复用户信息
+onMounted(() => {
+  userStore.restoreUserInfo()
+})
 
 // 页面组件挂载完成后停止 loading
 const onPageMounted = () => {

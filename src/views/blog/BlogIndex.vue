@@ -34,7 +34,7 @@
           </article>
 
           <!-- 评论区 (移动到文章下方) -->
-          <CommentSection />
+          <CommentSection :article-id="currentCategory?.id" />
         </div>
       </div>
     </main>

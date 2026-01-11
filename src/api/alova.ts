@@ -5,7 +5,7 @@ import adapterFetch from 'alova/fetch'
 // 使用 VueHook
 import VueHook from 'alova/vue'
 // 引入element-plus的message
-import { ElMessage } from 'element-plus'  // 或其他UI库
+import { ElMessage } from 'element-plus' // 或其他UI库
 // GET、POST、PUT、DELETE、HEAD、OPTIONS、PATCH 7 种请求类型
 
 // 类型定义
@@ -13,7 +13,7 @@ export interface RequestConfig {
   // 请求头
   headers?: Record<string, string>
   // 请求参数
-  params?: Record<string, string | number>
+  params?: Record<string, string | number | undefined>
   // 请求超时时间
   timeout?: number
   // 其他配置
@@ -55,7 +55,8 @@ const alova = createAlova({
     // 检查meta数据，如果skipAuth为true，则跳过添加token
     if (!request.meta?.skipAuth) {
       // 在请求头中添加token
-      request.config.headers.set('Authorization', `Bearer ${localStorage.getItem('token')}`)
+      // request.config.headers.set('Authorization', `Bearer ${localStorage.getItem('token')}`)
+      request.config.headers['Authorization'] = `Bearer ${localStorage.getItem('token')}`
     }
   },
   // 全局的响应拦截器

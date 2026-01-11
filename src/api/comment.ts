@@ -9,63 +9,26 @@ export interface CommentListParams {
   [key: string]: string | number | undefined
 }
 
-// 评论数据结构
-export interface Comment {
-  id: number
-  content: string
-  author: string
-  author_id?: number
-  avatar?: string
-  created_at: string
-  updated_at?: string
-  parent_id?: number
-  article_id: number
-  replies?: Comment[]
-  reply_count?: number
-}
-
-// 评论列表响应
-export interface CommentListResponse {
-  data: Comment[]
-  total: number
-  page: number
-  page_size: number
-}
-
-// 添加评论请求数据
+// 创建评论请求数据
 export interface AddCommentData {
-  article_id: number
-  content: string
-  parent_id?: number
-  [key: string]: unknown
-}
-
-// 更新评论请求数据
-export interface UpdateCommentData {
-  id: number
-  content: string
-  [key: string]: unknown
+  article_id: number // 必填：文章ID
+  parent_id?: number // 可选：父评论ID（回复时填写）
+  nickname: string // 必填：昵称
+  email?: string // 可选：邮箱
+  avatar_url?: string // 可选：头像URL
+  content: string // 必填：评论内容
+  [key: string]: string | number | undefined
 }
 
 export const commentApi = {
   // 获取博客评论
   getComments: (params: CommentListParams) => {
-    return http.get(`/comments`, params)
+    return http.get(`/comments`, { params, cacheFor: 0 })
   },
 
   // 添加评论
-  addComment: (commentData: AddCommentData) => {
-    return http.post(`/comments`, commentData)
-  },
-
-  // 更新评论
-  updateComment: (commentData: UpdateCommentData) => {
-    return http.put(`/comments/${commentData.id}`, commentData)
-  },
-
-  // 删除评论
-  deleteComment: (commentId: number) => {
-    return http.delete(`/comments/${commentId}`)
+  addComment: (data: AddCommentData) => {
+    return http.post(`/comments`, data)
   },
 }
 
