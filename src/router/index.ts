@@ -69,6 +69,14 @@ const routes: RouteRecordRaw[] = [
       title: 'GitHub 登录中...',
     },
   },
+  {
+    path: '/me',
+    name: 'me',
+    component: () => import('../views/me/me.vue'),
+    meta: {
+      title: 'Me',
+    },
+  },
 ]
 
 const router = createRouter({

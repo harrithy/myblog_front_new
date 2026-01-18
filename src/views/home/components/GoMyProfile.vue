@@ -93,6 +93,6 @@ button:hover .button-text {
     <span class="circle" aria-hidden="true">
       <span class="icon arrow"></span>
     </span>
-    <span class="button-text">Go My Profile</span>
+    <span class="button-text" @click="$router.push({ path: '/me' })">Go My Profile</span>
   </button>
 </template>
