@@ -111,11 +111,8 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 .blog-layout {
   display: flex;
   min-height: 100vh;
-  // 更加柔和丰富的动态背景
-  background:
-    radial-gradient(circle at 0% 0%, rgba($primary-light, 0.4) 0%, transparent 50%),
-    radial-gradient(circle at 100% 100%, rgba($secondary, 0.4) 0%, transparent 50%),
-    linear-gradient(135deg, $bg-cream 0%, #fff 100%);
+  // 柔和渐变背景
+  background: linear-gradient(90deg, rgb(255, 225, 225), rgb(227, 244, 255));
   background-attachment: fixed;
 }
 

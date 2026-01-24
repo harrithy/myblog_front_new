@@ -3,7 +3,7 @@
     <!-- 头部 -->
     <div class="sidebar-header">
       <div class="logo-wrapper">
-        <span class="logo-text">harrioの空间</span>
+        <!-- <span class="logo-text">harrioの空间</span> -->
       </div>
     </div>
 
