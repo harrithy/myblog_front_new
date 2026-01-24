@@ -1,7 +1,7 @@
 <template>
   <aside class="toc-sidebar" v-if="headings.length > 0">
     <div class="toc-card">
-      <h3 class="toc-title"><span class="icon">📑</span> 目录</h3>
+      <h3 class="toc-title">目录</h3>
       <nav class="toc-nav">
         <ul class="toc-list">
           <li

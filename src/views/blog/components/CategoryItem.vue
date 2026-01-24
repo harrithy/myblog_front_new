@@ -5,17 +5,18 @@
       :class="{
         active: activeId === category.id,
         expanded: isExpanded,
-        'is-folder': category.type === 'folder',
       }"
       :style="{ paddingLeft: `${16 + depth * 16}px` }"
       @click="handleClick"
     >
-      <span class="nav-icon">{{
-        category.type === 'folder' ? (isExpanded ? '📂' : '📁') : '📄'
-      }}</span>
       <span class="nav-text">{{ category.name }}</span>
       <span v-if="category.type !== 'folder'" class="nav-dot"></span>
-      <span v-else class="folder-arrow" :class="{ rotated: isExpanded }">›</span>
+      <el-icon
+        v-if="category.type === 'folder'"
+        class="folder-arrow"
+        :class="{ expanded: isExpanded }"
+        ><ArrowRight
+      /></el-icon>
     </div>
 
     <!-- 递归渲染子分类 -->
@@ -37,6 +38,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { ArrowRight } from '@element-plus/icons-vue'
 
 // 类型定义
 export interface Category {
@@ -98,6 +100,8 @@ $shadow-soft: rgba(232, 160, 191, 0.15);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   color: $text-secondary;
   user-select: none;
+  font-size: 16px;
+  font-weight: 500;
 
   &:hover {
     background: $bg-hover;
@@ -138,7 +142,6 @@ $shadow-soft: rgba(232, 160, 191, 0.15);
 
 .nav-text {
   flex: 1;
-  font-size: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -161,7 +164,7 @@ $shadow-soft: rgba(232, 160, 191, 0.15);
   transition: transform 0.3s ease;
   opacity: 0.6;
 
-  &.rotated {
+  &.expanded {
     transform: rotate(90deg);
   }
 }

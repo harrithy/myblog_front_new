@@ -110,10 +110,9 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
 
 .blog-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
   // 柔和渐变背景
-  background: linear-gradient(90deg, rgb(255, 225, 225), rgb(227, 244, 255));
-  background-attachment: fixed;
+  // background: linear-gradient(90deg, rgb(255, 225, 225), rgb(227, 244, 255));
 }
 
 // 主内容区
@@ -122,9 +121,14 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   padding: 24px;
   overflow-y: auto;
   // 隐藏主滚动条，让内部滚动更自然
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
+  // scrollbar-width: none;
+  // &::-webkit-scrollbar {
+  //   display: none;
+  // }
+  /* 隐藏滚动条上下箭头 */
+  ::-moz-scrollbar-button,
+  ::-webkit-scrollbar-button {
+    width: 0px;
   }
 }
 
@@ -269,6 +273,7 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   flex-direction: column;
   gap: 24px;
   padding-bottom: 40px;
+  overflow-y: auto;
 }
 
 // 文章卡片

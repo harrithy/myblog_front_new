@@ -11,14 +11,17 @@
         @mouseleave="showCard = false"
       >
         <div class="avatar">
-          <div v-if="isAvatarLoading" class="avatar-loading"></div>
-          <img
-            v-show="!isAvatarLoading"
+          <el-image
             :src="userStore.isLoggedIn ? userStore.userInfo?.avatar_url : avatarImage"
-            alt=""
-            @load="handleImageLoad"
-            @error="handleImageError"
-          />
+            fit="cover"
+          >
+            <template #placeholder>
+              <div class="avatar-loading"></div>
+            </template>
+            <template #error>
+              <img :src="avatarImage" alt="default" class="error-image" />
+            </template>
+          </el-image>
         </div>
         <!-- 用户信息卡片 -->
         <UserCard :visible="showCard" />
@@ -41,7 +44,7 @@
 defineOptions({
   name: 'SearchPage',
 })
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import avatarImage from '@/assets/source/avatar.gif'
 import { useUserStore } from '@/stores/user'
 import UserCard from '@/components/UserCard.vue'
@@ -51,27 +54,6 @@ import TourGuide, { type TourStep } from '@/components/TourGuide/index.vue'
 
 // 用户状态
 const userStore = useUserStore()
-
-// 图片加载状态
-const isAvatarLoading = ref(true)
-
-// 监听用户信息变化，重置 loading 状态
-watch(
-  () => userStore.userInfo?.avatar_url,
-  () => {
-    isAvatarLoading.value = true
-  },
-)
-
-const handleImageLoad = () => {
-  isAvatarLoading.value = false
-}
-
-const handleImageError = (e: Event) => {
-  isAvatarLoading.value = false
-  const target = e.target as HTMLImageElement
-  target.src = avatarImage
-}
 
 // 控制卡片显示
 const showCard = ref(false)
@@ -184,19 +166,27 @@ onMounted(() => {
         .avatar-loading {
           width: 100%;
           height: 100%;
-          position: absolute;
-          top: 0;
-          left: 0;
           background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
           background-size: 200% 100%;
           animation: skeleton-loading 1.5s infinite;
         }
 
-        img {
+        :deep(.el-image) {
+          width: 100%;
+          height: 100%;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+          }
+        }
+
+        .error-image {
           width: 100%;
           height: 100%;
           object-fit: cover;
-          transition: transform 0.5s ease;
         }
 
         &:hover {
@@ -204,7 +194,7 @@ onMounted(() => {
           border-color: #ffb6c1; // 浅粉色
           box-shadow: 0 0 20px rgba(255, 182, 193, 0.6); // 粉色梦幻光晕
 
-          img {
+          :deep(.el-image) img {
             transform: scale(1.1);
           }
         }

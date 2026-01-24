@@ -8,10 +8,6 @@
     <!-- 下拉面板 -->
     <Transition name="menu-slide">
       <div v-show="showMenu" class="glass-panel">
-        <!-- <div class="panel-header">
-          <span class="header-icon">✨</span>
-          <span class="header-text">传送门</span>
-        </div> -->
         <div class="menu-list">
           <div
             v-for="item in menuList"

@@ -13,7 +13,16 @@
         >
           <!-- 左侧封面图 -->
           <div class="item-cover">
-            <img v-if="item.img_url" :src="item.img_url" :alt="item.name" />
+            <el-image v-if="item.img_url" :src="item.img_url" :alt="item.name" fit="cover">
+              <template #placeholder>
+                <div class="image-loading">
+                  <div class="loading-spinner"></div>
+                </div>
+              </template>
+              <template #error>
+                <img :src="defaultImage" alt="default" class="error-image" />
+              </template>
+            </el-image>
             <div v-else class="placeholder-icon">
               <svg-icon :name="item.type === 'folder' ? 'folder' : 'article'" />
             </div>
@@ -62,6 +71,8 @@
 </template>
 
 <script setup lang="ts">
+import defaultImage from '@/assets/source/avatar.jpg'
+
 export interface SearchResult {
   id: number
   name: string
@@ -176,11 +187,40 @@ defineEmits<{
       position: relative;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 
-      img {
+      :deep(.el-image) {
+        width: 100%;
+        height: 100%;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+      }
+
+      .image-loading {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+
+        .loading-spinner {
+          width: 36px;
+          height: 36px;
+          border: 3px solid rgba(255, 182, 193, 0.2);
+          border-top-color: #ffb6c1;
+          border-radius: 50%;
+          animation: spin 0.8s linear infinite;
+        }
+      }
+
+      .error-image {
         width: 100%;
         height: 100%;
         object-fit: cover;
-        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
       }
 
       .placeholder-icon {
@@ -306,5 +346,11 @@ defineEmits<{
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
