@@ -1,20 +1,20 @@
 <template>
-  <aside class="sidebar" v-loading="loading">
+  <aside class="sidebar" :class="{ collapsed }" v-loading="loading">
     <!-- 头部 -->
     <div class="sidebar-header">
-      <div class="logo-wrapper">
+      <div class="logo-wrapper" @click="toggleCollapse">
         <div class="avatar-container">
           <img src="../../../assets/source/avatar.gif" alt="avatar" />
           <div class="avatar-ring"></div>
         </div>
-        <div class="user-info">
+        <div v-show="!collapsed" class="user-info">
           <span class="logo-text">harrio</span>
         </div>
       </div>
     </div>
 
     <!-- 分类列表 - 使用递归组件支持无限层级 -->
-    <nav class="nav-list">
+    <nav v-show="!collapsed" class="nav-list">
       <CategoryItem
         v-for="category in categories"
         :key="category.id"
@@ -50,6 +50,13 @@ export interface Category {
 const emit = defineEmits<{
   select: [category: Category]
 }>()
+
+// 折叠状态
+const collapsed = ref(false)
+
+const toggleCollapse = () => {
+  collapsed.value = !collapsed.value
+}
 
 // 状态
 const categories = ref<Category[]>([])
@@ -123,6 +130,20 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
   display: flex;
   flex-direction: column;
   z-index: 10;
+  width: 280px;
+  transition: width 0.3s ease;
+
+  &.collapsed {
+    width: 90px;
+
+    .sidebar-header {
+      padding: 20px 10px 0px 10px;
+    }
+
+    .logo-wrapper {
+      justify-content: center;
+    }
+  }
 }
 
 // 头部
