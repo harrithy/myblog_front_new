@@ -49,7 +49,24 @@
         >
           <!-- 左侧封面图 -->
           <div class="card-cover">
-            <img v-if="item.img_url" :src="item.img_url" :alt="item.name" class="cover-img" />
+            <el-image
+              v-if="item.img_url"
+              :src="item.img_url"
+              :alt="item.name"
+              class="cover-img"
+              fit="cover"
+            >
+              <template #placeholder>
+                <div class="image-loading">
+                  <div class="loading-spinner"></div>
+                </div>
+              </template>
+              <template #error>
+                <div class="cover-placeholder">
+                  <SvgIcon name="document" />
+                </div>
+              </template>
+            </el-image>
             <div v-else class="cover-placeholder">
               <SvgIcon name="document" />
             </div>
@@ -422,9 +439,29 @@ onMounted(() => {
       object-fit: cover;
     }
 
+    .image-loading {
+      width: 100%;
+      height: 100%;
+      min-height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+
+      .loading-spinner {
+        width: 32px;
+        height: 32px;
+        border: 3px solid #e2e8f0;
+        border-top-color: #1a73e8;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+    }
+
     .cover-placeholder {
       width: 100%;
       height: 100%;
+      min-height: 120px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -435,6 +472,12 @@ onMounted(() => {
         height: 48px;
         color: #94a3b8;
       }
+    }
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 
@@ -527,6 +570,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  max-width: 400px;
 
   // 订阅卡片
   .subscribe-card {
@@ -536,6 +580,13 @@ onMounted(() => {
     border-radius: 16px;
     margin-top: 20px;
     box-sizing: border-box;
+    transition: all 0.3s ease;
+    cursor: default;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(127, 92, 255, 0.35);
+    }
 
     .subscribe-header {
       display: flex;
@@ -617,51 +668,87 @@ onMounted(() => {
   .hot-tags {
     padding: 24px;
     border-radius: 16px;
-    min-width: 280px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.1);
+    }
+
     .hot-tags-title {
-      font-size: 16px;
+      font-size: 13px;
       font-weight: 700;
-      color: #1e293b;
-      margin: 0 0 20px 0;
-      letter-spacing: 0.5px;
+      color: #64748b;
+      margin: 0 0 16px 0;
+      letter-spacing: 1px;
       text-transform: uppercase;
     }
 
     .tags-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
 
     .tag-item {
       display: flex;
       align-items: center;
-      gap: 4px;
-      padding: 10px 16px;
-      background: #fff;
-      border-radius: 8px;
-      font-size: 14px;
+      gap: 2px;
+      padding: 8px 14px;
+      background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+      border: 1px solid #e2e8f0;
+      border-radius: 20px;
+      font-size: 13px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: all 0.25s ease;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        transition: left 0.5s ease;
+      }
 
       .tag-hash {
-        color: #94a3b8;
-        font-weight: 500;
+        color: #1a73e8;
+        font-weight: 600;
+        font-size: 14px;
       }
 
       .tag-name {
-        color: #64748b;
+        color: #475569;
         font-weight: 500;
       }
 
       &:hover {
-        background: #f8fafc;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+        background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+        border-color: #7dd3fc;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+
+        &::before {
+          left: 100%;
+        }
+
+        .tag-hash {
+          color: #0284c7;
+        }
 
         .tag-name {
-          color: #334155;
+          color: #0369a1;
         }
+      }
+
+      &:active {
+        transform: translateY(0);
       }
     }
   }
