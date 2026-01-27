@@ -1,7 +1,25 @@
 <template>
   <div class="blog-layout">
     <!-- 顶部导航栏 -->
-    <div class="top-nav"></div>
+    <div class="top-nav">
+      <div class="nav-box">
+        <div class="nav-left">
+          <router-link to="/" class="nav-item">Home</router-link>
+          <router-link to="/blog" class="nav-item active">Articles</router-link>
+          <router-link to="/me" class="nav-item">About</router-link>
+          <a href="mailto:2656450899@qq.com" class="nav-item">Contact</a>
+        </div>
+        <div class="nav-right">
+          <div class="search-box">
+            <SvgIcon name="search" class="search-icon" />
+            <input type="text" class="search-input" placeholder="Search articles..." />
+          </div>
+          <div class="user-avatar">
+            <img src="../../assets/source/avatar.gif" alt="avatar" />
+          </div>
+        </div>
+      </div>
+    </div>
     <!-- 左侧分类导航 -->
     <CategorySidebar @select="handleCategorySelect" />
 
@@ -75,11 +93,32 @@
     </main>
     <!-- 右边内容区 -->
     <div class="right-content">
+      <!-- 订阅卡片 -->
+      <div class="subscribe-card">
+        <div class="subscribe-header">
+          <SvgIcon name="email" class="subscribe-icon" />
+          <h3 class="subscribe-title">如果你想催更</h3>
+        </div>
+        <p class="subscribe-desc">
+          给可爱的作者发送你想说的,可以是动漫、游戏、电影、你的爱好、你的烦恼、甚至是问题和建议，作者会尽力回复你的。
+        </p>
+        <input
+          type="text"
+          class="subscribe-input"
+          v-model="subscribeInput"
+          placeholder="请留下你想说的..."
+        />
+        <!-- 点击打开邮箱发送 -->
+        <button class="subscribe-btn" @click="sendEmail">Send to Author</button>
+      </div>
       <!-- 热门标签 -->
       <div class="hot-tags">
         <h3 class="hot-tags-title">Popular Tags</h3>
         <div class="tags-list">
-          <span v-for="tag in hotTags" :key="tag.id" class="tag-item">#{{ tag.name }}</span>
+          <span v-for="tag in hotTags" :key="tag.id" class="tag-item">
+            <span class="tag-hash">#</span>
+            <span class="tag-name">{{ tag.name }}</span>
+          </span>
         </div>
       </div>
       <!-- 右侧目录 (仅在有文章且不加载时显示) -->
@@ -109,7 +148,16 @@ const hotTags = ref<Category[]>([])
 // const articleContent = ref('')
 // 加载状态
 // const loading = ref(false)
-
+// 订阅输入框内容
+const subscribeInput = ref('')
+// 发送邮件
+const sendEmail = () => {
+  const email = '2656450899@qq.com'
+  const subject = '来自博客的留言'
+  const body = subscribeInput.value
+  window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+  subscribeInput.value = ''
+}
 // 格式化日期
 const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr)
@@ -194,8 +242,89 @@ onMounted(() => {
     height: 64px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    justify-content: space-between;
+    padding: 0 40px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    .nav-box {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 600px;
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 32px;
+
+        .nav-item {
+          font-size: 15px;
+          font-weight: 500;
+          color: #4b5563;
+          text-decoration: none;
+          transition: color 0.2s ease;
+
+          &:hover {
+            color: #1a73e8;
+          }
+
+          &.active {
+            color: #1a73e8;
+            font-weight: 700;
+          }
+        }
+      }
+
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+
+        .search-box {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 10px 16px;
+          background: #f1f5f9;
+          border-radius: 10px;
+          min-width: 220px;
+
+          .search-icon {
+            width: 18px;
+            height: 18px;
+            color: #94a3b8;
+          }
+
+          .search-input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 14px;
+            color: #334155;
+            width: 100%;
+
+            &::placeholder {
+              color: #94a3b8;
+            }
+          }
+        }
+
+        .user-avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          overflow: hidden;
+          background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%);
+          cursor: pointer;
+
+          img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+          }
+        }
+      }
+    }
   }
   .main-content {
     // flex: 1;
@@ -260,7 +389,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  width: 560px;
+  width: 600px;
 }
 
 // 文章卡片
@@ -281,8 +410,9 @@ onMounted(() => {
 
   .card-cover {
     flex-shrink: 0;
-    width: 180px;
-    height: 180px;
+    // width: 150px;
+    // height: 150px;
+    flex: 1;
     border-radius: 12px;
     overflow: hidden;
 
@@ -309,7 +439,7 @@ onMounted(() => {
   }
 
   .card-content {
-    flex: 1;
+    flex: 2;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -374,7 +504,7 @@ onMounted(() => {
     display: flex;
     align-items: center;
     gap: 20px;
-    margin-top: 16px;
+    // margin-top: 16px;
     padding-top: 12px;
 
     .meta-time {
@@ -392,40 +522,149 @@ onMounted(() => {
     }
   }
 }
-
-// 热门标签
-.hot-tags {
-  padding: 20px;
-  background: #f6f6f8;
-  border-radius: 12px;
+.right-content {
   margin-top: 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 
-  .hot-tags-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    margin: 0 0 16px 0;
+  // 订阅卡片
+  .subscribe-card {
+    width: 400px;
+    padding: 24px;
+    background: linear-gradient(135deg, #4f8cff 0%, #7c5cff 50%, #a855f7 100%);
+    border-radius: 16px;
+    margin-top: 20px;
+    box-sizing: border-box;
+
+    .subscribe-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+
+      .subscribe-icon {
+        width: 28px;
+        height: 28px;
+        color: #fff;
+        flex-shrink: 0;
+      }
+
+      .subscribe-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    .subscribe-desc {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.85);
+      line-height: 1.6;
+      margin: 0 0 20px 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .subscribe-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      color: #fff;
+      margin-bottom: 12px;
+      outline: none;
+      transition: all 0.2s ease;
+      box-sizing: border-box;
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+      }
+
+      &:focus {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    }
+
+    .subscribe-btn {
+      width: 100%;
+      padding: 14px 18px;
+      background: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #6366f1;
+      cursor: pointer;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #f8fafc;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      }
+    }
   }
 
-  .tags-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
+  .hot-tags {
+    padding: 24px;
+    border-radius: 16px;
+    min-width: 280px;
+    .hot-tags-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0 0 20px 0;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
 
-  .tag-item {
-    padding: 6px 12px;
-    background: #fff;
-    color: #4b5563;
-    border-radius: 6px;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
+    .tags-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
 
-    &:hover {
-      background: #e5e7eb;
-      color: #1f2937;
+    .tag-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 10px 16px;
+      background: #fff;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+      .tag-hash {
+        color: #94a3b8;
+        font-weight: 500;
+      }
+
+      .tag-name {
+        color: #64748b;
+        font-weight: 500;
+      }
+
+      &:hover {
+        background: #f8fafc;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+
+        .tag-name {
+          color: #334155;
+        }
+      }
     }
   }
 }
+// 热门标签
 </style>
