@@ -39,7 +39,7 @@
         </div>
       </div>
       <!-- 有两种可能, 1. 当前分类下有文章, 2. 当前分类下有子分类 -->
-      <div v-if="currentCategory?.children?.length" class="category-list">
+      <div v-if="!showArticle && currentCategory?.children?.length" class="category-list">
         <!-- 子分类/文章卡片列表 -->
         <div
           v-for="item in currentCategory.children"
@@ -97,14 +97,20 @@
         </div>
       </div>
       <div class="content-wrapper">
-        <!-- 文章内容 & 评论 -->
-        <div class="article-container">
-          <!-- <article class="article-card">
-            <MarkdownRenderer :content="articleContent" />
-          </article> -->
-
-          <!-- 评论区 (移动到文章下方) -->
-          <!-- <CommentSection :article-id="currentCategory?.id" /> -->
+        <!-- 文章内容 -->
+        <div v-if="showArticle" class="article-container">
+          <div v-if="loading" class="article-loading">
+            <div class="loading-spinner"></div>
+            <span>加载中...</span>
+          </div>
+          <div v-else-if="showArticle && !loading" class="article-box">
+            <div class="article-content">
+              <MarkdownRenderer :content="articleContent" />
+            </div>
+            <div>
+              <!-- <TableOfContents v-if="showArticle && !loading" :content="articleContent" /> -->
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -138,12 +144,10 @@
           </span>
         </div>
       </div>
-      <!-- 右侧目录 (仅在有文章且不加载时显示) -->
-      <!-- <TableOfContents v-if="currentCategory && !loading" :content="articleContent" /> -->
+      <div>
+        <TableOfContents v-if="showArticle && !loading" :content="articleContent" />
+      </div>
     </div>
-
-    <!-- 右侧目录 (仅在有文章且不加载时显示) -->
-    <!-- <TableOfContents v-if="currentCategory && !loading" :content="articleContent" /> -->
   </div>
 </template>
 
@@ -152,8 +156,8 @@ import { ref, onMounted } from 'vue'
 import CategorySidebar from './components/CategorySidebar.vue'
 import type { Category } from '@/types/Category'
 import { categoryApi } from '@/api'
-// import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
-// import TableOfContents from './components/TableOfContents.vue'
+import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
+import TableOfContents from './components/TableOfContents.vue'
 import SvgIcon from '@/components/SvgIcon.vue'
 // import CommentSection from './components/CommentSection.vue'
 
@@ -162,9 +166,11 @@ const currentCategory = ref<Category | null>(null)
 // 热门标签
 const hotTags = ref<Category[]>([])
 // 文章内容
-// const articleContent = ref('')
+const articleContent = ref('')
 // 加载状态
-// const loading = ref(false)
+const loading = ref(false)
+// 是否显示文章内容
+const showArticle = ref(false)
 // 订阅输入框内容
 const subscribeInput = ref('')
 // 发送邮件
@@ -194,38 +200,48 @@ const estimateReadTime = (description?: string): number => {
 }
 
 // 将外部URL转换为代理URL
-// const getProxiedUrl = (url: string): string => {
-//   const imageHost = 'https://image.harrio.xyz'
-//   if (url.startsWith(imageHost)) {
-//     return url.replace(imageHost, '/image-proxy')
-//   }
-//   return url
-// }
+const getProxiedUrl = (url: string): string => {
+  const imageHost = 'https://image.harrio.xyz'
+  if (url.startsWith(imageHost)) {
+    return url.replace(imageHost, '/image-proxy')
+  }
+  return url
+}
 
 // 处理分类选择
 const handleCategorySelect = async (category: Category) => {
-  currentCategory.value = category
-  console.log('选中分类:', currentCategory.value)
+  console.log('选中分类:', category)
 
-  // 如果有url，直接fetch获取Markdown内容
-  // if (category.url) {
-  //   loading.value = true
-  //   try {
-  //     const fetchUrl = getProxiedUrl(category.url)
-  //     const response = await fetch(fetchUrl)
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`)
-  //     }
-  //     articleContent.value = await response.text()
-  //   } catch (error) {
-  //     console.error('获取文章内容失败:', error)
-  //     articleContent.value = '# 加载失败\n\n文章内容加载失败，请稍后重试。'
-  //   } finally {
-  //     loading.value = false
-  //   }
-  // } else {
-  //   articleContent.value = '# 暂无内容\n\n该分类暂无文章内容。'
-  // }
+  // 判断是文件夹还是文章
+  if (category.type === 'article') {
+    // 是文章，获取 Markdown 内容
+    showArticle.value = true
+    currentCategory.value = category
+
+    if (category.url) {
+      loading.value = true
+      try {
+        const fetchUrl = getProxiedUrl(category.url)
+        const response = await fetch(fetchUrl)
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        articleContent.value = await response.text()
+      } catch (error) {
+        console.error('获取文章内容失败:', error)
+        articleContent.value = '# 加载失败\n\n文章内容加载失败，请稍后重试。'
+      } finally {
+        loading.value = false
+      }
+    } else {
+      articleContent.value = '# 暂无内容\n\n该文章暂无内容。'
+    }
+  } else {
+    // 是文件夹，更新当前分类并显示子分类列表
+    showArticle.value = false
+    articleContent.value = ''
+    currentCategory.value = category
+  }
 }
 
 // 获取热门标签
@@ -247,8 +263,10 @@ onMounted(() => {
 .blog-layout {
   display: flex;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
   background-color: rgb(246 246 248 / var(--tw-bg-opacity, 1));
+  padding-top: 64px;
+
   .top-nav {
     position: fixed;
     top: 0;
@@ -345,11 +363,17 @@ onMounted(() => {
   }
   .main-content {
     // flex: 1;
-    margin-top: 64px;
     padding: 24px;
-    overflow-y: auto;
     // width: 560px;
   }
+}
+
+// 左侧侧边栏 sticky
+:deep(.sidebar) {
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+  overflow-y: auto;
 }
 
 // 分类头部
@@ -407,6 +431,43 @@ onMounted(() => {
   flex-direction: column;
   gap: 16px;
   width: 600px;
+}
+
+// 文章内容区域
+.article-container {
+  width: 1000px;
+
+  .article-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 60px 0;
+    color: #64748b;
+    font-size: 14px;
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid #e2e8f0;
+      border-top-color: #1a73e8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+  }
+  .article-box {
+    display: flex;
+    gap: 24px;
+  }
+
+  .article-content {
+    flex: 1;
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
 }
 
 // 文章卡片
@@ -566,7 +627,10 @@ onMounted(() => {
   }
 }
 .right-content {
-  margin-top: 64px;
+  position: sticky;
+  top: 88px;
+  height: fit-content;
+  align-self: flex-start;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -578,7 +642,6 @@ onMounted(() => {
     padding: 24px;
     background: linear-gradient(135deg, #4f8cff 0%, #7c5cff 50%, #a855f7 100%);
     border-radius: 16px;
-    margin-top: 20px;
     box-sizing: border-box;
     transition: all 0.3s ease;
     cursor: default;

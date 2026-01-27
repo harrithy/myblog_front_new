@@ -78,7 +78,6 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
 .sidebar {
   display: flex;
   flex-direction: column;
-  margin-top: 64px;
   min-width: 256px;
 }
 
