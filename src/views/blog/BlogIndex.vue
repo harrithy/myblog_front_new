@@ -96,6 +96,31 @@
           </div>
         </div>
       </div>
+      <!-- 空状态占位 -->
+      <div
+        v-if="!showArticle && currentCategory && !currentCategory?.children?.length"
+        class="empty-state"
+      >
+        <div class="empty-decoration top-left">🌸</div>
+        <div class="empty-decoration top-right">🌼</div>
+        <div class="empty-illustration">
+          <div class="avatar-glow"></div>
+          <img src="@/assets/source/avatar.gif" alt="empty" class="empty-avatar" />
+          <div class="floating-icons">
+            <span class="float-icon">✨</span>
+            <span class="float-icon">💖</span>
+            <span class="float-icon">⭐</span>
+            <span class="float-icon">🌙</span>
+          </div>
+        </div>
+        <h3 class="empty-title">😺 这里空空如也~ 😺</h3>
+        <p class="empty-desc">小猫咪正在等待新内容的到来...</p>
+        <div class="empty-wave">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <div class="empty-decoration bottom-left">🌿</div>
+        <div class="empty-decoration bottom-right">🌷</div>
+      </div>
       <div class="content-wrapper">
         <!-- 文章内容 -->
         <div v-if="showArticle" class="article-container">
@@ -431,6 +456,230 @@ onMounted(() => {
   flex-direction: column;
   gap: 16px;
   width: 600px;
+}
+
+// 空状态占位
+.empty-state {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 750px;
+  padding: 60px 40px;
+  text-align: center;
+  background: linear-gradient(135deg, #fff9f9 0%, #f0f7ff 50%, #fff5f8 100%);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+
+  // 角落装饰
+  .empty-decoration {
+    position: absolute;
+    font-size: 28px;
+    opacity: 0.7;
+    animation: floatDecor 3s ease-in-out infinite;
+
+    &.top-left {
+      top: 20px;
+      left: 30px;
+      animation-delay: 0s;
+    }
+    &.top-right {
+      top: 25px;
+      right: 30px;
+      animation-delay: 0.5s;
+    }
+    &.bottom-left {
+      bottom: 20px;
+      left: 35px;
+      animation-delay: 1s;
+    }
+    &.bottom-right {
+      bottom: 25px;
+      right: 35px;
+      animation-delay: 1.5s;
+    }
+  }
+
+  .empty-illustration {
+    position: relative;
+    margin-bottom: 24px;
+  }
+
+  // 头像光晕
+  .avatar-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(255, 182, 193, 0.4) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+
+  .empty-avatar {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
+    border-radius: 50%;
+    border: 4px solid #fff;
+    box-shadow: 0 8px 25px rgba(255, 105, 135, 0.2);
+    animation: avatarBounce 2s ease-in-out infinite;
+    z-index: 1;
+  }
+
+  // 浮动图标
+  .floating-icons {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+
+    .float-icon {
+      position: absolute;
+      font-size: 20px;
+      animation: floatAround 4s ease-in-out infinite;
+
+      &:nth-child(1) {
+        top: -10px;
+        left: 10px;
+        animation-delay: 0s;
+      }
+      &:nth-child(2) {
+        top: 20px;
+        right: -5px;
+        animation-delay: 1s;
+      }
+      &:nth-child(3) {
+        bottom: 20px;
+        left: -5px;
+        animation-delay: 2s;
+      }
+      &:nth-child(4) {
+        bottom: -5px;
+        right: 15px;
+        animation-delay: 3s;
+      }
+    }
+  }
+
+  .empty-title {
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0 0 12px 0;
+  }
+
+  .empty-desc {
+    font-size: 15px;
+    color: #9ca3af;
+    margin: 0 0 24px 0;
+  }
+
+  // 波浪动画
+  .empty-wave {
+    display: flex;
+    gap: 6px;
+    align-items: flex-end;
+    height: 20px;
+
+    span {
+      width: 4px;
+      background: linear-gradient(180deg, #667eea 0%, #f093fb 100%);
+      border-radius: 2px;
+      animation: wave 1.2s ease-in-out infinite;
+
+      &:nth-child(1) {
+        height: 8px;
+        animation-delay: 0s;
+      }
+      &:nth-child(2) {
+        height: 12px;
+        animation-delay: 0.1s;
+      }
+      &:nth-child(3) {
+        height: 16px;
+        animation-delay: 0.2s;
+      }
+      &:nth-child(4) {
+        height: 12px;
+        animation-delay: 0.3s;
+      }
+      &:nth-child(5) {
+        height: 8px;
+        animation-delay: 0.4s;
+      }
+    }
+  }
+}
+
+@keyframes avatarBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes glowPulse {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+@keyframes floatDecor {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(10deg);
+  }
+}
+
+@keyframes floatAround {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  25% {
+    transform: translate(5px, -5px) scale(1.1);
+  }
+  50% {
+    transform: translate(0, -10px) scale(1);
+    opacity: 0.7;
+  }
+  75% {
+    transform: translate(-5px, -5px) scale(1.1);
+  }
+}
+
+@keyframes wave {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+  50% {
+    transform: scaleY(1.8);
+  }
 }
 
 // 文章内容区域
