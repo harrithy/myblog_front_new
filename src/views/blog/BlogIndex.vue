@@ -1,72 +1,141 @@
 <template>
   <div class="blog-layout">
+    <!-- 顶部导航栏 -->
+    <div class="top-nav"></div>
     <!-- 左侧分类导航 -->
     <CategorySidebar @select="handleCategorySelect" />
 
     <!-- 中间内容区 -->
     <main class="main-content">
+      <!-- 顶部分类导航 -->
+      <div v-if="currentCategory" class="category-header">
+        <div class="breadcrumb">
+          <span class="breadcrumb-item">Blog</span>
+          <span class="breadcrumb-separator">/</span>
+          <span class="breadcrumb-item active">{{ currentCategory.name }}</span>
+        </div>
+        <h1 class="category-title">{{ currentCategory.name }}</h1>
+        <div class="category-meta">
+          <span class="meta-dot"></span>
+          <span>总共有 {{ currentCategory?.children?.length || 0 }} 个内容</span>
+        </div>
+      </div>
+      <!-- 有两种可能, 1. 当前分类下有文章, 2. 当前分类下有子分类 -->
+      <div v-if="currentCategory?.children?.length" class="category-list">
+        <!-- 子分类/文章卡片列表 -->
+        <div
+          v-for="item in currentCategory.children"
+          :key="item.id"
+          class="article-card"
+          @click="handleCategorySelect(item)"
+        >
+          <!-- 左侧封面图 -->
+          <div class="card-cover">
+            <img v-if="item.img_url" :src="item.img_url" :alt="item.name" class="cover-img" />
+            <div v-else class="cover-placeholder">
+              <SvgIcon name="document" />
+            </div>
+          </div>
+          <!-- 右侧内容 -->
+          <div class="card-content">
+            <!-- 顶部标签和日期 -->
+            <div class="card-header">
+              <span v-if="item.type === 'article'" class="meta-tag">ARTICLE</span>
+              <span v-else class="meta-tag folder-tag">FOLDER</span>
+              <span class="meta-date">
+                <SvgIcon name="calendar" />
+                {{ formatDate(item.created_at) }}
+              </span>
+            </div>
+            <!-- 标题 -->
+            <h3 class="card-title">{{ item.name }}</h3>
+            <!-- 描述 -->
+            <p v-if="item.description" class="card-desc">{{ item.description }}</p>
+            <!-- 底部信息 -->
+            <div class="card-footer">
+              <span class="meta-time">
+                <SvgIcon name="clock" />
+                {{ estimateReadTime(item.description) }} min read
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="content-wrapper">
-        <!-- 未选择文章时显示欢迎卡片 -->
-        <div v-if="!currentCategory" class="welcome-card">
-          <div class="welcome-content">
-            <div class="welcome-emoji">📚</div>
-            <h1>欢迎来到我的博客</h1>
-            <p>这里记录着技术、生活与思考</p>
-            <p class="sub-text">👈 请从左侧选择一篇文章开始阅读</p>
-          </div>
-          <div class="welcome-decoration">
-            <div class="floating-shape shape-1"></div>
-            <div class="floating-shape shape-2"></div>
-            <div class="floating-shape shape-3"></div>
-          </div>
-        </div>
-
-        <!-- 加载中状态 -->
-        <div v-else-if="loading" class="loading-card">
-          <div class="loading-spinner"></div>
-          <p>正在加载文章...</p>
-        </div>
-
         <!-- 文章内容 & 评论 -->
-        <div v-else class="article-container">
-          <article class="article-card">
+        <div class="article-container">
+          <!-- <article class="article-card">
             <MarkdownRenderer :content="articleContent" />
-          </article>
+          </article> -->
 
           <!-- 评论区 (移动到文章下方) -->
-          <CommentSection :article-id="currentCategory?.id" />
+          <!-- <CommentSection :article-id="currentCategory?.id" /> -->
         </div>
       </div>
     </main>
+    <!-- 右边内容区 -->
+    <div class="right-content">
+      <!-- 热门标签 -->
+      <div class="hot-tags">
+        <h3 class="hot-tags-title">Popular Tags</h3>
+        <div class="tags-list">
+          <span v-for="tag in hotTags" :key="tag.id" class="tag-item">#{{ tag.name }}</span>
+        </div>
+      </div>
+      <!-- 右侧目录 (仅在有文章且不加载时显示) -->
+      <!-- <TableOfContents v-if="currentCategory && !loading" :content="articleContent" /> -->
+    </div>
 
     <!-- 右侧目录 (仅在有文章且不加载时显示) -->
-    <TableOfContents v-if="currentCategory && !loading" :content="articleContent" />
+    <!-- <TableOfContents v-if="currentCategory && !loading" :content="articleContent" /> -->
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import CategorySidebar from './components/CategorySidebar.vue'
-import type { Category } from './components/CategorySidebar.vue'
-import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
-import TableOfContents from './components/TableOfContents.vue'
-import CommentSection from './components/CommentSection.vue'
+import type { Category } from '@/types/Category'
+import { categoryApi } from '@/api'
+// import MarkdownRenderer from '@/components/MarkdownRenderer.vue'
+// import TableOfContents from './components/TableOfContents.vue'
+import SvgIcon from '@/components/SvgIcon.vue'
+// import CommentSection from './components/CommentSection.vue'
 
 // 当前选中的分类
 const currentCategory = ref<Category | null>(null)
+// 热门标签
+const hotTags = ref<Category[]>([])
 // 文章内容
-const articleContent = ref('')
+// const articleContent = ref('')
 // 加载状态
-const loading = ref(false)
+// const loading = ref(false)
+
+// 格式化日期
+const formatDate = (dateStr: string): string => {
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
+}
+
+// 估算阅读时间(分钟)
+const estimateReadTime = (description?: string): number => {
+  if (!description) return 5
+  // 简单估算: 每200字约1分钟
+  const charCount = description.length
+  return Math.max(1, Math.ceil(charCount / 200))
+}
 
 // 将外部URL转换为代理URL
-const getProxiedUrl = (url: string): string => {
-  const imageHost = 'https://image.harrio.xyz'
-  if (url.startsWith(imageHost)) {
-    return url.replace(imageHost, '/image-proxy')
-  }
-  return url
-}
+// const getProxiedUrl = (url: string): string => {
+//   const imageHost = 'https://image.harrio.xyz'
+//   if (url.startsWith(imageHost)) {
+//     return url.replace(imageHost, '/image-proxy')
+//   }
+//   return url
+// }
 
 // 处理分类选择
 const handleCategorySelect = async (category: Category) => {
@@ -74,275 +143,289 @@ const handleCategorySelect = async (category: Category) => {
   console.log('选中分类:', currentCategory.value)
 
   // 如果有url，直接fetch获取Markdown内容
-  if (category.url) {
-    loading.value = true
-    try {
-      const fetchUrl = getProxiedUrl(category.url)
-      const response = await fetch(fetchUrl)
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
-      articleContent.value = await response.text()
-    } catch (error) {
-      console.error('获取文章内容失败:', error)
-      articleContent.value = '# 加载失败\n\n文章内容加载失败，请稍后重试。'
-    } finally {
-      loading.value = false
-    }
-  } else {
-    articleContent.value = '# 暂无内容\n\n该分类暂无文章内容。'
+  // if (category.url) {
+  //   loading.value = true
+  //   try {
+  //     const fetchUrl = getProxiedUrl(category.url)
+  //     const response = await fetch(fetchUrl)
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP error! status: ${response.status}`)
+  //     }
+  //     articleContent.value = await response.text()
+  //   } catch (error) {
+  //     console.error('获取文章内容失败:', error)
+  //     articleContent.value = '# 加载失败\n\n文章内容加载失败，请稍后重试。'
+  //   } finally {
+  //     loading.value = false
+  //   }
+  // } else {
+  //   articleContent.value = '# 暂无内容\n\n该分类暂无文章内容。'
+  // }
+}
+
+// 获取热门标签
+const fetchHotTags = async () => {
+  try {
+    const data = await categoryApi.getHotTags()
+    hotTags.value = data as Category[]
+  } catch (error) {
+    console.error('获取热门标签失败:', error)
   }
 }
+
+onMounted(() => {
+  fetchHotTags()
+})
 </script>
 
 <style lang="scss" scoped>
-// 配色系统 - 莫兰迪色系 & 柔和渐变
-$primary: #e8a0bf;
-$primary-light: #f4c7d5;
-$secondary: #b4e4d3;
-$bg-cream: #fdfbf7;
-$bg-pink: #fff0f5;
-$text-primary: #4a4a4a;
-$text-secondary: #8c8c8c;
-$glass-bg: rgba(255, 255, 255, 0.7);
-$glass-border: rgba(255, 255, 255, 0.5);
-$shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-
 .blog-layout {
   display: flex;
-  height: 100vh;
-  // 柔和渐变背景
-  // background: linear-gradient(90deg, rgb(255, 225, 225), rgb(227, 244, 255));
-}
-
-// 主内容区
-.main-content {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-  // 隐藏主滚动条，让内部滚动更自然
-  // scrollbar-width: none;
-  // &::-webkit-scrollbar {
-  //   display: none;
-  // }
-  /* 隐藏滚动条上下箭头 */
-  ::-moz-scrollbar-button,
-  ::-webkit-scrollbar-button {
-    width: 0px;
-  }
-}
-
-.content-wrapper {
-  max-width: 960px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-// 通用卡片样式 - Glassmorphism
-@mixin glass-card {
-  background: $glass-bg;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid $glass-border;
-  border-radius: 24px;
-  box-shadow: $shadow-soft;
-}
-
-// 欢迎卡片
-.welcome-card {
-  @include glass-card;
-  min-height: 500px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-  padding: 40px;
-  margin-top: 40px;
-
-  .welcome-content {
-    position: relative;
-    z-index: 2;
-  }
-
-  .welcome-emoji {
-    font-size: 80px;
-    margin-bottom: 24px;
-    animation: float 3s ease-in-out infinite;
-  }
-
-  h1 {
-    font-size: 36px;
-    font-weight: 700;
-    color: $text-primary;
-    margin-bottom: 16px;
-    background: linear-gradient(45deg, $primary, #dfaec3);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  p {
-    color: $text-secondary;
-    font-size: 18px;
-    margin-bottom: 8px;
-
-    &.sub-text {
-      font-size: 14px;
-      margin-top: 24px;
-      opacity: 0.8;
-    }
-  }
-
-  // 背景装饰
-  .welcome-decoration {
-    position: absolute;
+  height: 100vh;
+  background-color: rgb(246 246 248 / var(--tw-bg-opacity, 1));
+  .top-nav {
+    position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 1;
-    pointer-events: none;
+    right: 0;
+    z-index: 1000;
+    background-color: #fff;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .main-content {
+    // flex: 1;
+    margin-top: 64px;
+    padding: 24px;
+    overflow-y: auto;
+    // width: 560px;
+  }
+}
 
-    .floating-shape {
-      position: absolute;
+// 分类头部
+.category-header {
+  margin-bottom: 24px;
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 16px;
+    font-size: 14px;
+
+    .breadcrumb-item {
+      color: #6b7280;
+
+      &.active {
+        color: #1a73e8;
+        font-weight: 500;
+      }
+    }
+
+    .breadcrumb-separator {
+      color: #9ca3af;
+    }
+  }
+
+  .category-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 12px 0;
+    letter-spacing: -0.02em;
+  }
+
+  .category-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #6b7280;
+
+    .meta-dot {
+      width: 8px;
+      height: 8px;
+      background-color: #1a73e8;
       border-radius: 50%;
-      filter: blur(40px);
-      opacity: 0.6;
-      animation: drift 10s infinite alternate;
-
-      &.shape-1 {
-        width: 200px;
-        height: 200px;
-        background: $primary-light;
-        top: -50px;
-        left: -50px;
-      }
-
-      &.shape-2 {
-        width: 300px;
-        height: 300px;
-        background: rgba($secondary, 0.3);
-        bottom: -50px;
-        right: -50px;
-        animation-delay: -5s;
-      }
-
-      &.shape-3 {
-        width: 150px;
-        height: 150px;
-        background: rgba(255, 214, 165, 0.3);
-        top: 40%;
-        left: 60%;
-        animation-duration: 15s;
-      }
     }
   }
 }
 
-// 加载卡片
-.loading-card {
-  @include glass-card;
-  min-height: 400px;
+// 分类列表
+.category-list {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-top: 20px;
-
-  .loading-spinner {
-    width: 50px;
-    height: 50px;
-    border: 4px solid rgba($primary, 0.2);
-    border-top-color: $primary;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-bottom: 24px;
-  }
-
-  p {
-    color: $text-secondary;
-    letter-spacing: 1px;
-  }
-}
-
-// 文章容器
-.article-container {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  padding-bottom: 40px;
-  overflow-y: auto;
+  gap: 16px;
+  width: 560px;
 }
 
 // 文章卡片
 .article-card {
-  @include glass-card;
-  background: rgba(255, 255, 255, 0.9); // 文章背景稍微不透明一点，提高阅读体验
-  padding: 48px 64px;
-  animation: slideUp 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
-}
+  display: flex;
+  gap: 24px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
-// 动画定义
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-}
-
-@keyframes drift {
-  0% {
-    transform: translate(0, 0) rotate(0deg);
-  }
-  100% {
-    transform: translate(30px, 30px) rotate(10deg);
-  }
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// 响应式
-@media (max-width: 768px) {
-  .main-content {
-    padding: 16px;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
   }
 
-  .welcome-card {
-    padding: 24px;
-    min-height: 300px;
+  .card-cover {
+    flex-shrink: 0;
+    width: 180px;
+    height: 180px;
+    border-radius: 12px;
+    overflow: hidden;
 
-    .welcome-emoji {
-      font-size: 60px;
+    .cover-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
-    h1 {
-      font-size: 24px;
+    .cover-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+
+      svg {
+        width: 48px;
+        height: 48px;
+        color: #94a3b8;
+      }
     }
   }
 
-  .article-card {
-    padding: 24px;
-    border-radius: 16px;
+  .card-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+
+    .meta-tag {
+      padding: 6px 14px;
+      background: #e0e7ff;
+      color: #4f46e5;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+
+      &.folder-tag {
+        background: #d1fae5;
+        color: #059669;
+      }
+    }
+
+    .meta-date {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #6b7280;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        color: #9ca3af;
+      }
+    }
+  }
+
+  .card-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+    margin: 0 0 12px 0;
+    line-height: 1.4;
+  }
+
+  .card-desc {
+    font-size: 15px;
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0 0 auto 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-top: 16px;
+    padding-top: 12px;
+
+    .meta-time {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      color: #6b7280;
+
+      svg {
+        width: 16px;
+        height: 16px;
+        color: #9ca3af;
+      }
+    }
+  }
+}
+
+// 热门标签
+.hot-tags {
+  padding: 20px;
+  background: #f6f6f8;
+  border-radius: 12px;
+  margin-top: 64px;
+
+  .hot-tags-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 16px 0;
+  }
+
+  .tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .tag-item {
+    padding: 6px 12px;
+    background: #fff;
+    color: #4b5563;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #e5e7eb;
+      color: #1f2937;
+    }
   }
 }
 </style>

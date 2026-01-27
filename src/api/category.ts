@@ -42,6 +42,11 @@ export const categoryApi = {
   deleteCategory: (id: string | number) => {
     return http.delete(`/categories/${id}`)
   },
+
+  // 获取热门标签
+  getHotTags: () => {
+    return http.get('/categories/hot-tags')
+  },
 }
 
 export default categoryApi
