@@ -97,15 +97,61 @@ const setupImageLoading = () => {
   })
 }
 
+// 为代码块添加复制按钮
+const setupCodeCopy = () => {
+  if (!containerRef.value) return
+
+  const codeBlocks = containerRef.value.querySelectorAll('pre')
+  codeBlocks.forEach((pre) => {
+    // 跳过已经处理过的
+    if (pre.querySelector('.copy-btn')) return
+
+    // 创建复制按钮
+    const copyBtn = document.createElement('button')
+    copyBtn.className = 'copy-btn'
+    copyBtn.innerHTML = '复制'
+    copyBtn.title = '复制代码'
+
+    // 点击复制
+    copyBtn.addEventListener('click', async () => {
+      const code = pre.querySelector('code')
+      const text = code?.textContent || ''
+
+      try {
+        await navigator.clipboard.writeText(text)
+        copyBtn.innerHTML = '已复制 ✓'
+        copyBtn.classList.add('copied')
+        setTimeout(() => {
+          copyBtn.innerHTML = '复制'
+          copyBtn.classList.remove('copied')
+        }, 2000)
+      } catch {
+        copyBtn.innerHTML = '复制失败'
+        setTimeout(() => {
+          copyBtn.innerHTML = '复制'
+        }, 2000)
+      }
+    })
+
+    pre.appendChild(copyBtn)
+  })
+}
+
+// 初始化增强功能
+const setupEnhancements = () => {
+  setupImageLoading()
+  setupCodeCopy()
+}
+
 // 监听内容变化
 onMounted(() => {
-  nextTick(setupImageLoading)
+  nextTick(setupEnhancements)
 })
 
 watch(
   () => props.content,
   () => {
-    nextTick(setupImageLoading)
+    nextTick(setupEnhancements)
   },
 )
 </script>
@@ -301,6 +347,33 @@ $color-bg-quote: #faf6f1;
       &::-webkit-scrollbar-thumb {
         background-color: #5d5a5e;
         border-radius: 4px;
+      }
+
+      // 复制按钮样式
+      .copy-btn {
+        position: absolute;
+        top: 10px;
+        right: 12px;
+        padding: 4px 12px;
+        font-size: 12px;
+        color: #abb2bf;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-family: $font-sans;
+
+        &:hover {
+          background: rgba(255, 255, 255, 0.2);
+          color: #fff;
+        }
+
+        &.copied {
+          background: rgba(39, 201, 63, 0.2);
+          border-color: rgba(39, 201, 63, 0.4);
+          color: #27c93f;
+        }
       }
     }
 
