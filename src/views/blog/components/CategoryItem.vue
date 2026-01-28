@@ -35,23 +35,39 @@ const handleClick = () => {
   display: flex;
   flex-direction: column;
   .nav-item {
+    position: relative;
     padding-top: 0.75rem;
     padding-bottom: 0.75rem;
-    padding-left: 1rem;
+    padding-left: 1.25rem;
     padding-right: 1rem;
     border-radius: 0.75rem;
     color: rgb(13 18 27 / var(--tw-text-opacity, 1));
     cursor: pointer;
     transition: all 0.2s ease;
 
-    &:hover {
-      --tw-bg-opacity: 1;
-      background-color: rgb(231 235 243 / var(--tw-bg-opacity, 1));
+    &:hover:not(.active) {
+      background-color: rgba(26, 115, 232, 0.08);
+
+      .nav-text {
+        color: #1a73e8;
+      }
     }
 
     &.active {
-      background-color: #1a73e8;
+      background: linear-gradient(90deg, #4a9ff5 0%, #7ec4ff 100%);
       color: white;
+
+      // &::before {
+      //   content: '';
+      //   position: absolute;
+      //   left: 8px;
+      //   top: 50%;
+      //   transform: translateY(-50%);
+      //   width: 3px;
+      //   height: 16px;
+      //   background: white;
+      //   border-radius: 2px;
+      // }
 
       .nav-text {
         color: white;

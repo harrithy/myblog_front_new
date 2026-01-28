@@ -292,7 +292,7 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   min-height: 100vh;
-  background-color: rgb(246 246 248 / var(--tw-bg-opacity, 1));
+  background: linear-gradient(180deg, #fafcfd 0%, #e8f6f8 100%);
   padding-top: 64px;
 
   .top-nav {
