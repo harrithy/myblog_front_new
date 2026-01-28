@@ -1,5 +1,14 @@
 <template>
   <div class="blog-layout">
+    <!-- 浮动吉祥物 -->
+    <div
+      ref="floatingPet"
+      class="floating-pet"
+      :style="{ left: petPos.x + 'px', top: petPos.y + 'px' }"
+      @mousedown="startDrag"
+    >
+      <img src="@/assets/source/changyeyueyao.gif" alt="pet" draggable="false" />
+    </div>
     <!-- 顶部导航栏 -->
     <div class="top-nav">
       <div class="nav-box">
@@ -224,7 +233,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, reactive } from 'vue'
 import CategorySidebar from './components/CategorySidebar.vue'
 import type { Category } from '@/types/Category'
 import { categoryApi } from '@/api'
@@ -343,12 +352,108 @@ const fetchHotTags = async () => {
   }
 }
 
+// 浮动宠物相关
+const floatingPet = ref<HTMLElement | null>(null)
+const petPos = reactive({ x: 100, y: 200 })
+const petVelocity = reactive({ x: 2, y: 1.5 })
+let isDragging = false
+let animationId: number | null = null
+const dragOffset = { x: 0, y: 0 }
+
+// 随机移动动画
+const animatePet = () => {
+  if (isDragging) {
+    animationId = requestAnimationFrame(animatePet)
+    return
+  }
+
+  const maxX = window.innerWidth - 80
+  const maxY = window.innerHeight - 80
+
+  petPos.x += petVelocity.x
+  petPos.y += petVelocity.y
+
+  // 边界反弹
+  if (petPos.x <= 0 || petPos.x >= maxX) {
+    petVelocity.x *= -1
+    petVelocity.x += (Math.random() - 0.5) * 0.5 // 随机性
+  }
+  if (petPos.y <= 0 || petPos.y >= maxY) {
+    petVelocity.y *= -1
+    petVelocity.y += (Math.random() - 0.5) * 0.5
+  }
+
+  // 限制速度
+  petVelocity.x = Math.max(-3, Math.min(3, petVelocity.x))
+  petVelocity.y = Math.max(-3, Math.min(3, petVelocity.y))
+
+  animationId = requestAnimationFrame(animatePet)
+}
+
+// 拖拽开始
+const startDrag = (e: MouseEvent) => {
+  isDragging = true
+  dragOffset.x = e.clientX - petPos.x
+  dragOffset.y = e.clientY - petPos.y
+  document.addEventListener('mousemove', onDrag)
+  document.addEventListener('mouseup', stopDrag)
+}
+
+// 拖拽中
+const onDrag = (e: MouseEvent) => {
+  if (!isDragging) return
+  petPos.x = e.clientX - dragOffset.x
+  petPos.y = e.clientY - dragOffset.y
+}
+
+// 拖拽结束
+const stopDrag = () => {
+  isDragging = false
+  // 拖拽结束后给一个随机方向
+  petVelocity.x = (Math.random() - 0.5) * 4
+  petVelocity.y = (Math.random() - 0.5) * 4
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', stopDrag)
+}
+
 onMounted(() => {
   fetchHotTags()
+  // 初始化随机位置
+  petPos.x = Math.random() * (window.innerWidth - 100)
+  petPos.y = Math.random() * (window.innerHeight - 100)
+  animatePet()
+})
+
+onUnmounted(() => {
+  if (animationId) cancelAnimationFrame(animationId)
+  document.removeEventListener('mousemove', onDrag)
+  document.removeEventListener('mouseup', stopDrag)
 })
 </script>
 
 <style lang="scss" scoped>
+// 浮动宠物
+.floating-pet {
+  position: fixed;
+  z-index: 9999;
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.1s ease;
+
+  &:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+  }
+
+  img {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  }
+}
+
 .blog-layout {
   display: flex;
   justify-content: center;
