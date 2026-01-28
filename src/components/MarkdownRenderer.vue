@@ -158,43 +158,37 @@ watch(
 
 <style scoped lang="scss">
 // 字体变量
-$font-serif: 'Georgia', 'Times New Roman', 'Songti SC', serif;
-$font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-$font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+$font-serif: 'Georgia', 'Noto Serif SC', serif;
+$font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif;
+$font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 
-// 颜色变量
-$color-text-primary: #433422;
-$color-text-secondary: #5d4037;
-$color-accent: #d4a373;
-$color-link: #b5835a;
-$color-link-hover: #8d6e63;
-$color-border: #e0d0c0;
-$color-bg-code: #f4efe9;
-$color-bg-quote: #faf6f1;
+// 简约色彩
+$color-text: #2d3748;
+$color-text-light: #718096;
+$color-accent: #4a9ff5;
+$color-border: #e2e8f0;
+$color-bg-light: #f7fafc;
 
 .markdown-body {
-  color: $color-text-primary;
-  font-size: 17px;
-  line-height: 1.85;
+  color: $color-text;
+  font-size: 16px;
+  line-height: 1.8;
   word-wrap: break-word;
   font-family: $font-sans;
+  letter-spacing: 0.02em;
 
-  // 使用 :deep() 穿透 scoped，让样式应用到 v-html 生成的内容
   :deep() {
-    // 标题样式 - 衬线字体，文学感
+    // 标题 - 简洁有力
     h1,
     h2,
     h3,
     h4,
     h5,
     h6 {
-      margin-top: 40px;
-      margin-bottom: 24px;
-      font-weight: 700;
-      line-height: 1.3;
-      color: #2c1810;
-      font-family: $font-serif;
-      position: relative;
+      margin: 2em 0 1em;
+      font-weight: 600;
+      line-height: 1.4;
+      color: #1a202c;
 
       &:first-child {
         margin-top: 0;
@@ -202,151 +196,106 @@ $color-bg-quote: #faf6f1;
     }
 
     h1 {
-      font-size: 2.2em;
-      border-bottom: 2px solid $color-border;
-      padding-bottom: 0.3em;
-      text-align: left;
-      color: $color-text-primary;
+      font-size: 1.875em;
+      padding-bottom: 0.5em;
+      border-bottom: 1px solid $color-border;
     }
 
     h2 {
-      font-size: 1.7em;
+      font-size: 1.5em;
       padding-bottom: 0.3em;
-      border-bottom: 1px solid rgba($color-border, 0.5);
+      border-bottom: 1px solid rgba($color-border, 0.6);
     }
 
     h3 {
-      font-size: 1.4em;
-      color: $color-text-primary;
-    }
-
-    h4 {
       font-size: 1.25em;
-      font-weight: 600;
     }
-
+    h4 {
+      font-size: 1.125em;
+    }
     h5 {
-      font-size: 1.1em;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: $color-text-secondary;
-    }
-
-    h6 {
       font-size: 1em;
-      color: #8d6e63;
-      font-style: italic;
+      color: $color-text-light;
+    }
+    h6 {
+      font-size: 0.875em;
+      color: $color-text-light;
     }
 
-    // 段落样式
+    // 段落
     p {
-      margin-top: 0;
-      margin-bottom: 24px;
-      text-align: justify;
+      margin: 0 0 1.5em;
     }
 
-    // 链接样式
+    // 链接 - 简约下划线
     a {
-      color: $color-link;
+      color: $color-accent;
       text-decoration: none;
       border-bottom: 1px solid transparent;
-      transition: all 0.3s ease;
-      padding-bottom: 1px;
+      transition: border-color 0.2s;
 
       &:hover {
-        color: $color-link-hover;
-        border-bottom-color: $color-link-hover;
-        background-color: rgba(212, 163, 115, 0.1);
+        border-bottom-color: $color-accent;
       }
     }
 
-    // 强调样式
     strong {
-      font-weight: 700;
-      color: #2c1810;
+      font-weight: 600;
+      color: #1a202c;
     }
 
     em {
       font-style: italic;
-      font-family: $font-serif;
-      color: $color-text-secondary;
     }
 
-    // 引用样式
+    // 引用 - 极简风格
     blockquote {
-      padding: 16px 20px;
-      margin: 24px 0;
-      color: $color-text-secondary;
-      background-color: rgba($color-accent, 0.1);
-      border-left: 4px solid $color-accent;
-      border-radius: 4px;
-      font-family: $font-serif;
+      margin: 1.5em 0;
+      padding: 0 0 0 1.5em;
+      border-left: 3px solid $color-accent;
+      color: $color-text-light;
 
-      p {
-        margin-bottom: 8px;
-        &:last-child {
-          margin-bottom: 0;
-        }
+      p:last-child {
+        margin-bottom: 0;
       }
     }
 
-    // 代码块样式
+    // 行内代码
     code {
-      padding: 0.2em 0.4em;
-      margin: 0 0.2em;
-      font-size: 0.85em;
-      background-color: rgba($color-accent, 0.15);
-      border-radius: 4px;
+      padding: 0.15em 0.4em;
+      font-size: 0.875em;
+      background: $color-bg-light;
+      border-radius: 3px;
       font-family: $font-mono;
-      color: #c05850;
+      color: #e53e3e;
     }
 
+    // 代码块 - 简洁暗色
     pre {
-      padding: 40px 20px 20px;
-      margin: 24px 0;
+      margin: 1.5em 0;
+      padding: 1.25em;
       overflow-x: auto;
-      font-size: 0.9em;
-      line-height: 1.6;
-      background-color: #282c34;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      font-size: 0.875em;
+      line-height: 1.7;
+      background: #1e1e1e;
+      border-radius: 6px;
       position: relative;
-
-      &::before {
-        content: '';
-        position: absolute;
-        top: 14px;
-        left: 16px;
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background-color: #ff5f56;
-        box-shadow:
-          18px 0 0 #ffbd2e,
-          36px 0 0 #27c93f;
-      }
 
       code {
         display: block;
         padding: 0;
-        margin: 0;
-        overflow: visible;
-        line-height: inherit;
-        word-wrap: normal;
-        background-color: transparent;
-        border: 0;
-        color: #abb2bf;
+        background: transparent;
+        color: #d4d4d4;
         font-family: $font-mono;
       }
 
       &::-webkit-scrollbar {
-        height: 8px;
-        background-color: #282c34;
+        height: 6px;
       }
 
       &::-webkit-scrollbar-thumb {
-        background-color: #5d5a5e;
-        border-radius: 4px;
+        background: #4a5568;
+        border-radius: 3px;
       }
 
       // 复制按钮样式
@@ -377,121 +326,72 @@ $color-bg-quote: #faf6f1;
       }
     }
 
-    // 列表样式
+    // 列表
     ul,
     ol {
       padding-left: 1.5em;
-      margin-bottom: 24px;
+      margin: 0 0 1.5em;
     }
 
     ul {
-      list-style-type: none;
-
-      li {
-        position: relative;
-        padding-left: 1.2em;
-
-        &::before {
-          content: '•';
-          position: absolute;
-          left: 0;
-          color: $color-accent;
-          font-size: 1.2em;
-          line-height: 1.6;
-        }
-      }
+      list-style: disc;
     }
 
     ol {
-      list-style-type: decimal;
-
-      li {
-        padding-left: 0.5em;
-        &::marker {
-          color: $color-text-secondary;
-          font-weight: 600;
-          font-family: $font-serif;
-        }
-      }
+      list-style: decimal;
     }
 
     li {
-      margin-bottom: 10px;
+      margin-bottom: 0.5em;
+      padding-left: 0.25em;
 
       > p {
-        margin-bottom: 10px;
+        margin-bottom: 0.5em;
       }
     }
 
-    // 表格样式
+    // 表格 - 简洁线框
     table {
-      border-spacing: 0;
-      border-collapse: collapse;
-      margin: 32px 0;
       width: 100%;
-      overflow: auto;
-      font-size: 0.95em;
+      margin: 1.5em 0;
+      border-collapse: collapse;
+      font-size: 0.9em;
 
-      thead {
-        border-bottom: 2px solid $color-accent;
-
-        th {
-          color: #2c1810;
-          font-weight: 700;
-          padding: 12px 16px;
-          text-align: left;
-          font-family: $font-serif;
-        }
-      }
-
+      th,
       td {
-        padding: 12px 16px;
+        padding: 0.75em 1em;
+        text-align: left;
         border-bottom: 1px solid $color-border;
       }
 
-      tr {
-        transition: background-color 0.2s ease;
+      th {
+        font-weight: 600;
+        color: #1a202c;
+        background: $color-bg-light;
+      }
 
-        &:hover {
-          background-color: rgba(212, 163, 115, 0.05);
-        }
+      tr:hover td {
+        background: rgba($color-accent, 0.05);
       }
     }
 
-    // 水平线样式
+    // 分割线 - 极简
     hr {
-      height: 1px;
-      padding: 0;
-      margin: 48px auto;
-      background: transparent;
-      border: 0;
+      margin: 3em 0;
+      border: none;
       border-top: 1px solid $color-border;
-      width: 60%;
-      position: relative;
-
-      &::after {
-        content: '❦';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: #fffcf9;
-        padding: 0 10px;
-        color: $color-accent;
-        font-size: 20px;
-      }
     }
 
-    // 图片包裹器样式
+    // 图片包裹器
     .img-wrapper {
       position: relative;
-      margin: 24px auto;
+      margin: 1.5em auto;
       text-align: center;
 
       &.loading {
-        min-height: 200px;
-        background: linear-gradient(135deg, #f5f0eb 0%, #ebe5df 100%);
-        border-radius: 8px;
+        min-height: 150px;
+        background: $color-bg-light;
+        border-radius: 4px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -505,40 +405,37 @@ $color-bg-quote: #faf6f1;
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 12px;
-          color: $color-text-secondary;
-          font-size: 14px;
+          gap: 8px;
+          color: $color-text-light;
+          font-size: 13px;
         }
       }
 
-      &:not(.loading) {
-        .img-loading {
-          display: none;
-        }
+      &:not(.loading) .img-loading {
+        display: none;
+      }
 
-        img {
-          opacity: 1;
-          transition: opacity 0.3s ease;
-        }
+      &:not(.loading) img {
+        opacity: 1;
+        transition: opacity 0.3s;
       }
 
       &.error {
-        min-height: 120px;
+        min-height: 100px;
         background: #fef2f2;
 
         .img-loading {
-          color: #ef4444;
+          color: #e53e3e;
         }
-
         img {
           display: none;
         }
       }
 
       .loading-spinner {
-        width: 36px;
-        height: 36px;
-        border: 3px solid rgba($color-accent, 0.2);
+        width: 28px;
+        height: 28px;
+        border: 2px solid $color-border;
         border-top-color: $color-accent;
         border-radius: 50%;
         animation: spin 0.8s linear infinite;
@@ -551,60 +448,48 @@ $color-bg-quote: #faf6f1;
       }
     }
 
-    // 图片样式
+    // 图片 - 简洁圆角
     img {
       max-width: 100%;
       height: auto;
       display: block;
-      margin: 10px auto;
-      border-radius: 2px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-      border: 8px solid white;
-      transition: transform 0.3s ease;
-
-      &:hover {
-        transform: scale(1.01);
-      }
+      margin: 0 auto;
+      border-radius: 4px;
     }
 
-    // 任务列表样式
+    // 任务列表
     input[type='checkbox'] {
       appearance: none;
-      width: 16px;
-      height: 16px;
-      border: 1px solid $color-accent;
+      width: 14px;
+      height: 14px;
+      border: 1.5px solid $color-border;
       border-radius: 3px;
-      margin-right: 8px;
-      position: relative;
-      top: 2px;
+      margin-right: 6px;
+      vertical-align: middle;
       cursor: pointer;
 
       &:checked {
-        background-color: $color-accent;
+        background: $color-accent;
+        border-color: $color-accent;
 
         &::after {
           content: '✓';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
+          display: block;
+          text-align: center;
           color: white;
-          font-size: 12px;
+          font-size: 10px;
+          line-height: 14px;
         }
       }
     }
 
-    // 删除线
     del {
-      color: #a1887f;
-      text-decoration-color: $color-accent;
+      color: $color-text-light;
     }
 
-    // 脚注
     sup {
       color: $color-accent;
       font-size: 0.75em;
-      margin-left: 2px;
     }
   }
 }
