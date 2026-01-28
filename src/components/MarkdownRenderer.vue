@@ -1,20 +1,113 @@
 <template>
-  <div class="markdown-body" v-html="renderedHtml"></div>
+  <div class="markdown-body" ref="containerRef" v-html="renderedHtml"></div>
+  <!-- 图片预览 -->
+  <el-image-viewer
+    v-if="showViewer"
+    :url-list="previewImages"
+    :initial-index="previewIndex"
+    @close="showViewer = false"
+    teleported
+  />
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch, nextTick, onMounted } from 'vue'
 import { renderMarkdown } from '@/utils/markdown'
+import { ElImageViewer } from 'element-plus'
 
 interface Props {
   content: string
 }
 
 const props = defineProps<Props>()
+const containerRef = ref<HTMLElement | null>(null)
+
+// 图片预览相关
+const showViewer = ref(false)
+const previewImages = ref<string[]>([])
+const previewIndex = ref(0)
 
 const renderedHtml = computed(() => {
   return renderMarkdown(props.content)
 })
+
+// 打开图片预览
+const openPreview = (src: string) => {
+  if (!containerRef.value) return
+
+  // 收集所有图片
+  const images = containerRef.value.querySelectorAll('img')
+  const urls: string[] = []
+  let index = 0
+
+  images.forEach((img, i) => {
+    urls.push(img.src)
+    if (img.src === src) {
+      index = i
+    }
+  })
+
+  previewImages.value = urls
+  previewIndex.value = index
+  showViewer.value = true
+}
+
+// 为图片添加 loading 效果
+const setupImageLoading = () => {
+  if (!containerRef.value) return
+
+  const images = containerRef.value.querySelectorAll('img')
+  images.forEach((img) => {
+    // 跳过已经处理过的图片
+    if (img.parentElement?.classList.contains('img-wrapper')) return
+
+    // 创建 wrapper
+    const wrapper = document.createElement('div')
+    wrapper.className = 'img-wrapper loading'
+
+    // 创建 loading 元素
+    const loader = document.createElement('div')
+    loader.className = 'img-loading'
+    loader.innerHTML = '<div class="loading-spinner"></div><span>图片加载中...</span>'
+
+    // 包裹图片
+    img.parentNode?.insertBefore(wrapper, img)
+    wrapper.appendChild(loader)
+    wrapper.appendChild(img)
+
+    // 监听加载完成
+    if (img.complete) {
+      wrapper.classList.remove('loading')
+    } else {
+      img.onload = () => {
+        wrapper.classList.remove('loading')
+      }
+      img.onerror = () => {
+        wrapper.classList.remove('loading')
+        wrapper.classList.add('error')
+        loader.innerHTML = '<span>图片加载失败</span>'
+      }
+    }
+
+    // 添加点击预览
+    img.style.cursor = 'zoom-in'
+    img.addEventListener('click', () => {
+      openPreview(img.src)
+    })
+  })
+}
+
+// 监听内容变化
+onMounted(() => {
+  nextTick(setupImageLoading)
+})
+
+watch(
+  () => props.content,
+  () => {
+    nextTick(setupImageLoading)
+  },
+)
 </script>
 
 <style scoped lang="scss">
@@ -313,6 +406,75 @@ $color-bg-quote: #faf6f1;
         padding: 0 10px;
         color: $color-accent;
         font-size: 20px;
+      }
+    }
+
+    // 图片包裹器样式
+    .img-wrapper {
+      position: relative;
+      margin: 24px auto;
+      text-align: center;
+
+      &.loading {
+        min-height: 200px;
+        background: linear-gradient(135deg, #f5f0eb 0%, #ebe5df 100%);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        img {
+          opacity: 0;
+          position: absolute;
+        }
+
+        .img-loading {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 12px;
+          color: $color-text-secondary;
+          font-size: 14px;
+        }
+      }
+
+      &:not(.loading) {
+        .img-loading {
+          display: none;
+        }
+
+        img {
+          opacity: 1;
+          transition: opacity 0.3s ease;
+        }
+      }
+
+      &.error {
+        min-height: 120px;
+        background: #fef2f2;
+
+        .img-loading {
+          color: #ef4444;
+        }
+
+        img {
+          display: none;
+        }
+      }
+
+      .loading-spinner {
+        width: 36px;
+        height: 36px;
+        border: 3px solid rgba($color-accent, 0.2);
+        border-top-color: $color-accent;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
       }
     }
 
