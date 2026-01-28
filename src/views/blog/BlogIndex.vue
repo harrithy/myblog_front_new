@@ -55,6 +55,9 @@
               :alt="item.name"
               class="cover-img"
               fit="cover"
+              :preview-src-list="[item.img_url]"
+              preview-teleported
+              @click.stop
             >
               <template #placeholder>
                 <div class="image-loading">
