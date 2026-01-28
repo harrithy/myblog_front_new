@@ -9,5 +9,6 @@ export interface Category {
   url?: string // 文章类型时的Markdown文件URL
   description?: string // 文章描述
   img_url?: string // 封面图片URL
+  tags?: string[] // 标签列表
   children?: Category[]
 }

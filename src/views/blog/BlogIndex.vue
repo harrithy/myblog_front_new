@@ -29,11 +29,51 @@
       <div v-if="currentCategory" class="category-header">
         <div class="breadcrumb">
           <span class="breadcrumb-item">Blog</span>
-          <span class="breadcrumb-separator">/</span>
-          <span class="breadcrumb-item active">{{ currentCategory.name }}</span>
+          <template v-for="(item, index) in breadcrumbPath" :key="item.id">
+            <span class="breadcrumb-separator">/</span>
+            <span
+              class="breadcrumb-item"
+              :class="{
+                active: index === breadcrumbPath.length - 1,
+                clickable: index < breadcrumbPath.length - 1,
+              }"
+              @click="index < breadcrumbPath.length - 1 && handleBreadcrumbClick(index)"
+            >
+              {{ item.name }}
+            </span>
+          </template>
         </div>
         <h1 class="category-title">{{ currentCategory.name }}</h1>
-        <div class="category-meta">
+        <!-- 详细信息 -->
+        <div class="category-detail">
+          <div class="detail-dates">
+            <span class="detail-item">
+              <SvgIcon name="calendar" class="detail-icon" />
+              创建: {{ formatDate(currentCategory.created_at) }}
+            </span>
+            <span class="detail-item">
+              <SvgIcon name="clock" class="detail-icon" />
+              更新: {{ formatDate(currentCategory.updated_at) }}
+            </span>
+          </div>
+          <el-tooltip
+            v-if="currentCategory.description"
+            :content="currentCategory.description"
+            placement="bottom"
+            :show-after="300"
+            popper-class="desc-tooltip"
+          >
+            <p class="detail-desc">
+              {{ currentCategory.description }}
+            </p>
+          </el-tooltip>
+          <div v-if="currentCategory.tags?.length" class="detail-tags">
+            <span v-for="tag in currentCategory.tags" :key="tag" class="detail-tag">
+              #{{ tag }}
+            </span>
+          </div>
+        </div>
+        <div v-if="!showArticle" class="category-meta">
           <span class="meta-dot"></span>
           <span>总共有 {{ currentCategory?.children?.length || 0 }} 个内容</span>
         </div>
@@ -91,10 +131,14 @@
             <p v-if="item.description" class="card-desc">{{ item.description }}</p>
             <!-- 底部信息 -->
             <div class="card-footer">
-              <span class="meta-time">
-                <SvgIcon name="clock" />
-                {{ estimateReadTime(item.description) }} min read
-              </span>
+              <div v-if="item.tags?.length" class="tags-wrapper">
+                <span v-for="tag in item.tags.slice(0, 4)" :key="tag" class="footer-tag">
+                  {{ tag }}
+                </span>
+                <span v-if="item.tags.length > 4" class="more-tags"
+                  >+{{ item.tags.length - 4 }}</span
+                >
+              </div>
             </div>
           </div>
         </div>
@@ -104,8 +148,8 @@
         v-if="!showArticle && currentCategory && !currentCategory?.children?.length"
         class="empty-state"
       >
-        <div class="empty-decoration top-left">🌸</div>
-        <div class="empty-decoration top-right">🌼</div>
+        <!-- <div class="empty-decoration top-left">🌸</div> -->
+        <!-- <div class="empty-decoration top-right">🌼</div> -->
         <div class="empty-illustration">
           <div class="avatar-glow"></div>
           <img src="@/assets/source/avatar.gif" alt="empty" class="empty-avatar" />
@@ -121,8 +165,8 @@
         <div class="empty-wave">
           <span></span><span></span><span></span><span></span><span></span>
         </div>
-        <div class="empty-decoration bottom-left">🌿</div>
-        <div class="empty-decoration bottom-right">🌷</div>
+        <!-- <div class="empty-decoration bottom-left">🌿</div> -->
+        <!-- <div class="empty-decoration bottom-right">🌷</div> -->
       </div>
       <div class="content-wrapper">
         <!-- 文章内容 -->
@@ -191,6 +235,8 @@ import SvgIcon from '@/components/SvgIcon.vue'
 
 // 当前选中的分类
 const currentCategory = ref<Category | null>(null)
+// 面包屑路径
+const breadcrumbPath = ref<Category[]>([])
 // 热门标签
 const hotTags = ref<Category[]>([])
 // 文章内容
@@ -219,14 +265,6 @@ const formatDate = (dateStr: string): string => {
   })
 }
 
-// 估算阅读时间(分钟)
-const estimateReadTime = (description?: string): number => {
-  if (!description) return 5
-  // 简单估算: 每200字约1分钟
-  const charCount = description.length
-  return Math.max(1, Math.ceil(charCount / 200))
-}
-
 // 将外部URL转换为代理URL
 const getProxiedUrl = (url: string): string => {
   const imageHost = 'https://image.harrio.xyz'
@@ -239,6 +277,18 @@ const getProxiedUrl = (url: string): string => {
 // 处理分类选择
 const handleCategorySelect = async (category: Category) => {
   console.log('选中分类:', category)
+
+  // 更新面包屑路径
+  // 判断是否是当前分类的子级，如果是则追加，否则重置路径
+  const isChildOfCurrent = currentCategory.value?.children?.some(
+    (child) => child.id === category.id,
+  )
+  if (isChildOfCurrent) {
+    breadcrumbPath.value.push(category)
+  } else {
+    // 不是子级，重置路径
+    breadcrumbPath.value = [category]
+  }
 
   // 判断是文件夹还是文章
   if (category.type === 'article') {
@@ -270,6 +320,17 @@ const handleCategorySelect = async (category: Category) => {
     articleContent.value = ''
     currentCategory.value = category
   }
+}
+
+// 点击面包屑导航
+const handleBreadcrumbClick = (index: number) => {
+  const targetCategory = breadcrumbPath.value[index]
+  // 截断路径到点击的位置
+  breadcrumbPath.value = breadcrumbPath.value.slice(0, index + 1)
+  // 重新设置当前分类
+  showArticle.value = false
+  articleContent.value = ''
+  currentCategory.value = targetCategory
 }
 
 // 获取热门标签
@@ -351,11 +412,25 @@ onMounted(() => {
           background: #f1f5f9;
           border-radius: 10px;
           min-width: 220px;
+          border: 2px solid transparent;
+          transition: all 0.3s ease;
+
+          &:focus-within {
+            background: #fff;
+            border-color: #4a9ff5;
+            box-shadow: 0 0 0 4px rgba(74, 159, 245, 0.15);
+            min-width: 260px;
+
+            .search-icon {
+              color: #4a9ff5;
+            }
+          }
 
           .search-icon {
             width: 18px;
             height: 18px;
             color: #94a3b8;
+            transition: color 0.3s ease;
           }
 
           .search-input {
@@ -418,6 +493,15 @@ onMounted(() => {
     .breadcrumb-item {
       color: #6b7280;
 
+      &.clickable {
+        cursor: pointer;
+        transition: color 0.2s ease;
+
+        &:hover {
+          color: #1a73e8;
+        }
+      }
+
       &.active {
         color: #1a73e8;
         font-weight: 500;
@@ -435,6 +519,64 @@ onMounted(() => {
     color: #111827;
     margin: 0 0 12px 0;
     letter-spacing: -0.02em;
+  }
+
+  .category-detail {
+    margin-bottom: 16px;
+
+    .detail-dates {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 12px;
+
+      .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        color: #6b7280;
+
+        .detail-icon {
+          width: 16px;
+          height: 16px;
+          color: #9ca3af;
+        }
+      }
+    }
+
+    .detail-desc {
+      font-size: 15px;
+      color: #4b5563;
+      line-height: 1.6;
+      margin: 0 0 12px 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 400px;
+      cursor: default;
+    }
+
+    .detail-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      .detail-tag {
+        padding: 4px 12px;
+        background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+        color: #4a9ff5;
+        border-radius: 14px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+          color: #0284c7;
+        }
+      }
+    }
   }
 
   .category-meta {
@@ -863,17 +1005,33 @@ onMounted(() => {
     // margin-top: 16px;
     padding-top: 12px;
 
-    .meta-time {
+    .tags-wrapper {
       display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 14px;
-      color: #6b7280;
+      flex-wrap: wrap;
+      gap: 8px;
 
-      svg {
-        width: 16px;
-        height: 16px;
-        color: #9ca3af;
+      .footer-tag {
+        padding: 4px 10px;
+        background: linear-gradient(135deg, #f0f7ff 0%, #e8f4fd 100%);
+        color: #4a9ff5;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+          color: #0284c7;
+        }
+      }
+
+      .more-tags {
+        padding: 4px 10px;
+        background: #f1f5f9;
+        color: #64748b;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 500;
       }
     }
   }
@@ -1069,4 +1227,20 @@ onMounted(() => {
   }
 }
 // 热门标签
+</style>
+
+<style lang="scss">
+// Tooltip 全局样式（不能 scoped）
+.desc-tooltip {
+  max-width: 600px !important;
+  background: #fff !important;
+  color: #333 !important;
+  border: 1px solid #e4e7ed !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+
+  .el-popper__arrow::before {
+    background: #fff !important;
+    border-color: #e4e7ed !important;
+  }
+}
 </style>
