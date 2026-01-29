@@ -1,5 +1,6 @@
 // 分类相关接口
 import { http } from './alova'
+import type { Category } from '@/types/Category'
 
 // 创建分类请求数据
 export interface CreateCategoryData {
@@ -30,7 +31,7 @@ export const categoryApi = {
 
   // 获取单个分类详情
   getCategoryById: (id: string | number) => {
-    return http.get(`/categories/${id}`, { meta: { skipAuth: true } })
+    return http.get<Category>(`/categories/${id}`, { meta: { skipAuth: true } })
   },
 
   // 更新分类
@@ -45,7 +46,7 @@ export const categoryApi = {
 
   // 获取热门标签
   getHotTags: () => {
-    return http.get('/categories/hot-tags')
+    return http.get<Category[]>('/categories/hot-tags')
   },
 }
 

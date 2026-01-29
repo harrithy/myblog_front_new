@@ -107,38 +107,38 @@ export default alova
 // 封装的 HTTP 请求方法
 export const http = {
   // GET 请求
-  get: (url: string, config?: RequestConfig) => {
-    return alova.Get(url, config)
+  get: <T = unknown>(url: string, config?: RequestConfig) => {
+    return alova.Get<T>(url, config)
   },
 
   // POST 请求
-  post: (url: string, data?: RequestData, config?: RequestConfig) => {
-    return alova.Post(url, data, config)
+  post: <T = unknown>(url: string, data?: RequestData, config?: RequestConfig) => {
+    return alova.Post<T>(url, data, config)
   },
 
   // PUT 请求
-  put: (url: string, data?: RequestData, config?: RequestConfig) => {
-    return alova.Put(url, data, config)
+  put: <T = unknown>(url: string, data?: RequestData, config?: RequestConfig) => {
+    return alova.Put<T>(url, data, config)
   },
 
   // DELETE 请求
-  delete: (url: string, config?: RequestConfig) => {
-    return alova.Delete(url, config)
+  delete: <T = unknown>(url: string, config?: RequestConfig) => {
+    return alova.Delete<T>(url, config)
   },
 
   // HEAD 请求
-  head: (url: string, config?: RequestConfig) => {
-    return alova.Head(url, config)
+  head: <T = unknown>(url: string, config?: RequestConfig) => {
+    return alova.Head<T>(url, config)
   },
 
   // OPTIONS 请求
-  options: (url: string, config?: RequestConfig) => {
-    return alova.Options(url, config)
+  options: <T = unknown>(url: string, config?: RequestConfig) => {
+    return alova.Options<T>(url, config)
   },
 
   // PATCH 请求
-  patch: (url: string, data?: RequestData, config?: RequestConfig) => {
-    return alova.Patch(url, data, config)
+  patch: <T = unknown>(url: string, data?: RequestData, config?: RequestConfig) => {
+    return alova.Patch<T>(url, data, config)
   },
 }
 

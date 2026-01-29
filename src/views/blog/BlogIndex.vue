@@ -324,10 +324,14 @@ const handleCategorySelect = async (category: Category) => {
       articleContent.value = '# 暂无内容\n\n该文章暂无内容。'
     }
   } else {
+    // 根据id获取分类列表
+    await categoryApi.getCategoryById(category.id).then((res) => {
+      // console.log('获取分类列表:', res)
+      currentCategory.value = res
+    })
     // 是文件夹，更新当前分类并显示子分类列表
     showArticle.value = false
     articleContent.value = ''
-    currentCategory.value = category
   }
 }
 
@@ -346,7 +350,7 @@ const handleBreadcrumbClick = (index: number) => {
 const fetchHotTags = async () => {
   try {
     const data = await categoryApi.getHotTags()
-    hotTags.value = data as Category[]
+    hotTags.value = data
   } catch (error) {
     console.error('获取热门标签失败:', error)
   }
