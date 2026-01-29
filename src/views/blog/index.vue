@@ -143,7 +143,9 @@ const fetchArticle = async () => {
     startLoading()
     loading.value = true
 
-    const res = (await categoryApi.getCategoryById(id)) as { data?: ArticleDetail } & ArticleDetail
+    const res = (await categoryApi.getCategoryById(id)) as unknown as {
+      data?: ArticleDetail
+    } & ArticleDetail
     article.value = res.data || res
 
     if (article.value?.url) {
