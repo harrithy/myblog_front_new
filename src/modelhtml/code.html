@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Ultra-Dynamic Neo-Brutalist Profile</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Lexend+Mega:wght@700;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>tailwind.config = {darkMode: "class", theme: {extend: {colors: {primary: "#D0BB95", "secondary-yellow": "#FFEB3B", "secondary-pink": "#FF69B4", "background-light": "#f7f7f6", "background-dark": "#1d1a15", "text-main": "#111418"}, fontFamily: {display: "Space Grotesk", heavy: ["Lexend Mega", "sans-serif"]}, boxShadow: {hard: "5px 5px 0px 0px #000000", "hard-sm": "3px 3px 0px 0px #000000", "hard-lg": "8px 8px 0px 0px #000000"}, borderWidth: {"3": "3px"}, animation: {marquee: "marquee 25s linear infinite"}, keyframes: {marquee: {"0%": {transform: "translateX(0%)"}, "100%": {transform: "translateX(-100%)"}}}, borderRadius: {DEFAULT: "0.125rem", lg: "0.25rem", xl: "0.5rem", full: "0.75rem"}}}};</script>
+<style>
+        .neo-brutalist-card {
+            border: 3px solid #000000;
+            box-shadow: 5px 5px 0px 0px #000000;
+            transition: all 0.2s ease-in-out;
+        }
+        .neo-brutalist-card:hover {
+            transform: translate(-2px, -2px) rotate(-1deg);
+            box-shadow: 8px 8px 0px 0px #000000;
+            z-index: 10;
+        }
+        .neo-brutalist-card:active {
+            transform: translate(2px, 2px);
+            box-shadow: 3px 3px 0px 0px #000000;
+        }
+        .text-stroke {
+            -webkit-text-stroke: 1px #000;
+            color: transparent;
+        }
+        .clip-star {
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+        .sticker-effect {
+            filter: drop-shadow(4px 4px 0px #ffffff) drop-shadow(8px 8px 0px #000000);
+            transition: transform 0.3s ease;
+        }
+        .sticker-effect:hover {
+            transform: scale(1.05) rotate(5deg);
+        }::-webkit-scrollbar {
+            width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #ffffff; 
+            border-left: 3px solid black;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #000000; 
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-text-main overflow-x-hidden relative">
+<a class="fixed bottom-8 right-8 z-50 bg-secondary-yellow border-3 border-black h-16 w-16 rounded-full flex items-center justify-center shadow-hard hover:-translate-y-1 hover:shadow-hard-lg transition-all group" href="#">
+<span class="material-symbols-outlined !text-4xl font-black group-hover:animate-bounce">arrow_upward</span>
+</a>
+<header class="sticky top-0 z-50 w-full border-b-3 border-black bg-white">
+<div class="flex items-center justify-between px-6 py-4 md:px-10">
+<div class="flex items-center gap-2">
+<div class="flex h-10 w-10 items-center justify-center bg-black text-white transform hover:rotate-180 transition-transform duration-500">
+<span class="material-symbols-outlined !text-3xl">bolt</span>
+</div>
+<h1 class="text-2xl font-heavy tracking-tighter uppercase">ALEX R.</h1>
+</div>
+<nav class="hidden md:flex items-center gap-6">
+<a class="text-lg font-bold uppercase hover:underline decoration-4 underline-offset-4 decoration-primary" href="#">Work</a>
+<a class="text-lg font-bold uppercase hover:underline decoration-4 underline-offset-4 decoration-secondary-pink" href="#">Journal</a>
+<a class="text-lg font-bold uppercase hover:underline decoration-4 underline-offset-4 decoration-secondary-yellow" href="#">About</a>
+</nav>
+<button class="neo-brutalist-card bg-primary px-6 py-2 text-base font-bold text-white hover:bg-blue-600 active:bg-blue-700">
+            SUBSCRIBE
+        </button>
+</div>
+</header>
+<div class="w-full border-b-3 border-black bg-black text-secondary-yellow overflow-hidden py-3 sticky top-[75px] z-40">
+<div class="flex w-max">
+<div class="animate-marquee flex gap-12 font-heavy text-lg uppercase tracking-widest whitespace-nowrap px-6">
+<span>● CURRENT STATUS: CAFFEINATING</span>
+<span>● LISTENING TO: SYNTHWAVE MIX VOL. 4</span>
+<span>● LATEST COMMIT: FIXED THE BUG (I HOPE)</span>
+<span>● MOOD: CHAOTIC GOOD</span>
+<span>● READING: THE ART OF NOISE</span>
+<span>● DEPLOYING: FRIDAY 5PM</span>
+</div>
+<div class="animate-marquee flex gap-12 font-heavy text-lg uppercase tracking-widest whitespace-nowrap px-6">
+<span>● CURRENT STATUS: CAFFEINATING</span>
+<span>● LISTENING TO: SYNTHWAVE MIX VOL. 4</span>
+<span>● LATEST COMMIT: FIXED THE BUG (I HOPE)</span>
+<span>● MOOD: CHAOTIC GOOD</span>
+<span>● READING: THE ART OF NOISE</span>
+<span>● DEPLOYING: FRIDAY 5PM</span>
+</div>
+</div>
+</div>
+<main class="flex min-h-screen flex-col items-center pt-10 pb-20 px-4 md:px-10">
+<div class="w-full max-w-[1200px] mb-16">
+<div class="relative flex flex-col md:flex-row gap-8 items-center md:items-start p-8 md:p-12 border-3 border-black bg-secondary-yellow shadow-hard-lg">
+<div class="absolute -top-6 -right-6 md:-right-8 rotate-12 bg-secondary-pink border-3 border-black px-4 py-2 shadow-hard hover:rotate-0 transition-transform cursor-pointer">
+<span class="text-xl font-heavy uppercase">Open for work!</span>
+</div>
+<div class="relative shrink-0 group perspective-1000">
+<div class="sticker-effect transform -rotate-3 group-hover:rotate-3 transition-all duration-300">
+<div class="h-48 w-48 md:h-64 md:w-64 bg-black clip-star flex items-center justify-center overflow-hidden border-black relative">
+<img alt="Portrait of a creative person looking confident" class="h-full w-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuW9mSnydIle2SDk00WU_9sKide0PJuZdZKHYGEak1K1woavGJ3sFtQHWloFXQqK8C8vBJ49JzjcNTgxznzij6aTVT4ZW-YID1VQDMM275ie3MedQZrrkGNrJ87IwamonMN-Upos7izo6clZGahzt65W3-qSNAEWlz5c1Z-872W9X2ziYeI8h-nhwtF3aNXcEfc-LLTRRkF4tStbrOjJAr2Ba1MmKSrYQnFg5h8tnNLtL7CzA9HaAp25v1T1OQb20QXa8RpfAqjJU"/>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-6 w-full text-center md:text-left">
+<div>
+<h2 class="text-5xl md:text-8xl font-heavy leading-[0.9] tracking-tighter mb-4">
+                    DIGITAL<br/>ALCHEMIST
+                </h2>
+<p class="text-xl md:text-2xl font-medium border-l-4 border-black pl-4 bg-white/50 py-2">
+                    I break things to fix them. Designing the future with pixels &amp; chaos. Based in San Francisco.
+                </p>
+</div>
+<div class="flex gap-4 mt-2 justify-center md:justify-start">
+<a class="h-14 w-14 border-3 border-black bg-white flex items-center justify-center shadow-hard-sm hover:translate-y-1 hover:shadow-none transition-all rotate-3 hover:rotate-0" href="#">
+<span class="material-symbols-outlined text-3xl">mail</span>
+</a>
+<a class="h-14 w-14 border-3 border-black bg-white flex items-center justify-center shadow-hard-sm hover:translate-y-1 hover:shadow-none transition-all -rotate-2 hover:rotate-0" href="#">
+<span class="material-symbols-outlined text-3xl">language</span>
+</a>
+<a class="h-14 w-14 border-3 border-black bg-white flex items-center justify-center shadow-hard-sm hover:translate-y-1 hover:shadow-none transition-all rotate-1 hover:rotate-0" href="#">
+<span class="material-symbols-outlined text-3xl">draw</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+<div class="w-full max-w-[1200px] mb-20">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="neo-brutalist-card bg-white p-6 flex flex-col items-center justify-center -rotate-1">
+<span class="material-symbols-outlined !text-5xl mb-2 text-primary">groups</span>
+<p class="text-4xl font-heavy">12.5K</p>
+<p class="text-lg font-bold uppercase tracking-widest border-b-3 border-primary">Followers</p>
+</div>
+<div class="neo-brutalist-card bg-primary text-white p-6 flex flex-col items-center justify-center rotate-2 mt-4 md:mt-0">
+<span class="material-symbols-outlined !text-5xl mb-2">article</span>
+<p class="text-4xl font-heavy">142</p>
+<p class="text-lg font-bold uppercase tracking-widest border-b-3 border-white">Posts</p>
+</div>
+<div class="neo-brutalist-card bg-white p-6 flex flex-col items-center justify-center -rotate-1">
+<span class="material-symbols-outlined !text-5xl mb-2 text-secondary-pink">favorite</span>
+<p class="text-4xl font-heavy">8.9M</p>
+<p class="text-lg font-bold uppercase tracking-widest border-b-3 border-secondary-pink">Likes</p>
+</div>
+</div>
+</div>
+<div class="w-full max-w-[1200px] mb-14 flex items-center gap-4">
+<span class="material-symbols-outlined !text-6xl animate-bounce">arrow_downward</span>
+<h2 class="text-5xl md:text-7xl font-heavy uppercase tracking-tighter bg-black text-white px-6 py-2 transform -skew-x-6 border-3 border-transparent hover:border-white hover:text-secondary-yellow transition-colors cursor-default shadow-hard">Latest Chaos</h2>
+</div>
+<div class="w-full max-w-[1200px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-20">
+<article class="neo-brutalist-card bg-white flex flex-col h-full transform -rotate-1 hover:rotate-0 mt-8">
+<div class="w-full aspect-video border-b-3 border-black overflow-hidden relative group">
+<div class="absolute inset-0 bg-primary opacity-0 group-hover:opacity-20 transition-opacity z-10"></div>
+<img alt="Abstract minimalist white room with a single chair" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAEoPDwp6RnN_WOaF-e0r3zb3Z10JRW_BbpQUorhqJv7kiwOdYLTaolbOqj7ZqzL4f9fI8wnOy76bX3vNjIv0NxvrnsyBuMdb2erenspTzlGRguQQRoc03GyaGohgwpje19pDXlVXa7Sagz1j9C7ZXoFryYc88gkN3Ehj7WiLZ9anUDAMNfCqgDQJ5EZBzVs-B6Fx1nlarePq1FUF1TuWvj_GFFL1aCQafFnVmeD1JBD1p38xZdQyrUM_CwkEXcrR1mQ1DNiCTMbj8"/>
+<div class="absolute top-4 left-4 bg-secondary-pink border-3 border-black px-3 py-1 font-heavy text-sm shadow-hard-sm z-20 rotate-3">DESIGN</div>
+</div>
+<div class="p-6 flex flex-col grow justify-between bg-white">
+<div>
+<h3 class="text-2xl font-heavy leading-tight mb-3 uppercase">Why Minimalism is Dead</h3>
+<p class="font-medium text-gray-800 mb-6">A deep dive into why complex, raw designs are taking over the web. Clean is out, chaos is in.</p>
+</div>
+<div class="flex items-center justify-between mt-auto pt-4 border-t-3 border-gray-200 border-dashed">
+<span class="font-bold text-sm">JUNE 12, 2024</span>
+<a class="flex items-center gap-1 font-bold hover:underline decoration-2 underline-offset-2" href="#">
+                    READ <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</a>
+</div>
+</div>
+</article>
+<article class="neo-brutalist-card bg-secondary-pink flex flex-col h-full md:col-span-1 lg:col-span-1 transform rotate-2 hover:rotate-0 z-10 -mt-4">
+<div class="w-full aspect-square border-b-3 border-black overflow-hidden relative">
+<img alt="Neon cyberpunk street scene with coding symbols overlay" class="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDDyYZ91NPuKivMT33qZPBMqsfiC7bXct5ZEda86kfBvbPzp7GVl1ErrgcENtTXXNDXYUPKVWsyz6p2G-kzXWPU6DyKdCstoy28odNRkAiQ8wQ1mbztaeFa13fNBg-aTqVJ2KqvTvNJ5YTn_PSZonwScueeYWxjGNNQ2wVKVSumgN9Iv_VpLMSuBue7ELNexOlsjAQIQTEBR9z8dReKWNXGAuUZEWl699BOjpRktovn7-dl8qprxuzAidlkuszfVjucrUfXeFbQq4M"/>
+<div class="absolute top-4 right-4 bg-white border-3 border-black px-3 py-1 font-heavy text-sm shadow-hard-sm -rotate-6">CODE</div>
+</div>
+<div class="p-6 flex flex-col grow justify-between">
+<div>
+<h3 class="text-3xl font-heavy leading-tight mb-3 uppercase bg-white inline-block px-2 border-3 border-black transform -skew-x-3">CSS Grid for Anarchists</h3>
+<p class="font-bold text-black mt-4 mb-6">Forget frameworks. Let's break the grid and make browsers cry. A tutorial on unholy layouts.</p>
+</div>
+<button class="w-full bg-black text-white font-heavy py-3 border-3 border-transparent hover:bg-white hover:text-black hover:border-black transition-colors shadow-hard-sm">
+                DECODE NOW
+            </button>
+</div>
+</article>
+<article class="neo-brutalist-card bg-white flex flex-col h-full transform rotate-1 mt-12 hover:rotate-0">
+<div class="w-full aspect-video border-b-3 border-black overflow-hidden relative">
+<img alt="Glitch art abstract background with blue liquid distortion" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-Xd2orNmCvHmOBvAEiGrX0Ae2AfS3FjngNoxmMb3wHAk8hiEZ4NgD0efewZtglqv1vh65thkkNKR1nwtpkCFxgiYiM1N_lQ3J91Ot3S9uC2OtDFyph5A1ZpMK5-7Z_TW5eZm-bMQM4jCS5JMoA2gS46V4UM6k50_XbBVITHRitvxYQpdjBHUfszw4vPiKkCjNqbbjnnnn6_PqUPFcfNBJ4Uo5OyKNFGkyfBDARXKQfyOcfEvJ_geW45HPcHKs99onQd5A_PW5Fwo"/>
+<div class="absolute top-4 left-4 bg-secondary-yellow border-3 border-black px-3 py-1 font-heavy text-sm shadow-hard-sm rotate-2">LIFE</div>
+</div>
+<div class="p-6 flex flex-col grow justify-between bg-white">
+<div>
+<h3 class="text-2xl font-heavy leading-tight mb-3 uppercase">The Blue Screen of Life</h3>
+<p class="font-medium text-gray-800 mb-6">Sometimes you need to crash to reboot. Personal reflections on burnout and recovery.</p>
+</div>
+<div class="flex items-center justify-between mt-auto pt-4 border-t-3 border-gray-200 border-dashed">
+<span class="font-bold text-sm">MAY 28, 2024</span>
+<a class="flex items-center gap-1 font-bold hover:underline decoration-2 underline-offset-2" href="#">
+                    READ <span class="material-symbols-outlined text-lg">arrow_forward</span>
+</a>
+</div>
+</div>
+</article>
+<article class="neo-brutalist-card bg-primary text-white flex flex-col h-full transform -rotate-2 hover:rotate-0 mt-6">
+<div class="p-8 flex flex-col h-full justify-center items-center text-center border-b-3 border-black md:border-b-0">
+<span class="material-symbols-outlined !text-7xl mb-4 animate-pulse">podcasts</span>
+<h3 class="text-3xl font-heavy uppercase mb-2">New Podcast</h3>
+<p class="font-bold mb-6">"Echoes of the Web"</p>
+<button class="bg-white text-black px-6 py-2 font-bold border-3 border-black shadow-hard hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">LISTEN</button>
+</div>
+</article>
+<article class="neo-brutalist-card bg-secondary-yellow flex flex-col h-full md:col-span-2 transform rotate-1 hover:rotate-0">
+<div class="flex flex-col md:flex-row h-full">
+<div class="w-full md:w-1/2 border-b-3 md:border-b-0 md:border-r-3 border-black h-64 md:h-auto">
+<img alt="Retro computer terminal with green code on screen" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjTiuP6FnC7AWPj797HKSz470sYlarAYS8JanpyEikjK_W3UA7UldE_vphq2TkGmuvfM0ZW3IkhGbQZag5a-wov5d5XqUPFHHij6zHOxdZG-wJo1M4Wdu0JpyHCpegKE1fES8megNz58J6pgxxXjmb4xSQegpFdSw99btJO2KPw2t10wBUgSBDGf8jQ3w22vVioqCUQYdCgBIvrk6nK_rFH9z8_EneoxwIVWR5iXNB4TzFL48VFB1WfZdmsYbxHtqZrvW8d0kzDk0"/>
+</div>
+<div class="p-6 md:p-8 w-full md:w-1/2 flex flex-col justify-center">
+<div class="flex items-center gap-2 mb-2">
+<span class="bg-black text-white px-2 py-1 text-xs font-bold uppercase">Tutorial</span>
+<span class="font-bold text-xs">15 MIN READ</span>
+</div>
+<h3 class="text-3xl md:text-4xl font-heavy leading-none mb-4 uppercase">Terminal Velocity</h3>
+<p class="font-bold text-black text-lg mb-6">Mastering the command line is the closest thing to being a wizard in real life.</p>
+<button class="self-start flex items-center gap-2 bg-transparent border-3 border-black px-6 py-3 font-heavy text-lg hover:bg-black hover:text-white transition-colors">
+                    ENTER THE VOID <span class="material-symbols-outlined">terminal</span>
+</button>
+</div>
+</div>
+</article>
+</div>
+<div class="w-full max-w-[1000px] mb-20 relative">
+<div class="absolute -top-10 left-1/2 transform -translate-x-1/2 bg-white border-3 border-black px-6 py-2 shadow-hard z-10 rotate-2">
+<h3 class="text-3xl font-heavy uppercase">Popular Tags</h3>
+</div>
+<div class="border-3 border-black bg-white p-12 shadow-hard-lg flex flex-wrap gap-4 justify-center items-center">
+<a class="border-3 border-black bg-primary text-white px-6 py-4 text-2xl font-heavy shadow-hard-sm hover:translate-y-1 hover:shadow-none -rotate-2 hover:rotate-0 transition-all" href="#">#DESIGN</a>
+<a class="border-3 border-black bg-secondary-yellow text-black px-4 py-2 text-lg font-bold shadow-hard-sm hover:translate-y-1 hover:shadow-none rotate-3 hover:rotate-0 transition-all" href="#">#RETRO</a>
+<a class="border-3 border-black bg-secondary-pink text-black px-8 py-5 text-3xl font-black shadow-hard-sm hover:translate-y-1 hover:shadow-none rotate-1 hover:rotate-0 transition-all" href="#">#CHAOS</a>
+<a class="border-3 border-black bg-white text-black px-3 py-1 text-sm font-bold shadow-hard-sm hover:translate-y-1 hover:shadow-none -rotate-3 hover:rotate-0 transition-all" href="#">#minimalism_is_boring</a>
+<a class="border-3 border-black bg-black text-white px-5 py-3 text-xl font-heavy shadow-hard-sm hover:translate-y-1 hover:shadow-none rotate-2 hover:rotate-0 transition-all" href="#">#CODE</a>
+<a class="border-3 border-black bg-primary text-white px-3 py-2 text-base font-bold shadow-hard-sm hover:translate-y-1 hover:shadow-none -rotate-1 hover:rotate-0 transition-all" href="#">#UI/UX</a>
+<a class="border-3 border-black bg-secondary-yellow text-black px-7 py-4 text-2xl font-heavy shadow-hard-sm hover:translate-y-1 hover:shadow-none rotate-6 hover:rotate-0 transition-all" href="#">#BRUTALISM</a>
+<a class="border-3 border-black bg-white text-black px-4 py-2 text-lg font-bold shadow-hard-sm hover:translate-y-1 hover:shadow-none -rotate-2 hover:rotate-0 transition-all" href="#">#thoughts</a>
+</div>
+</div>
+<div class="w-full max-w-[800px] mb-20">
+<div class="border-3 border-black bg-white p-8 md:p-12 shadow-hard-lg relative overflow-hidden transform rotate-1">
+<div class="absolute -right-10 -top-10 w-40 h-40 bg-secondary-pink rounded-full border-3 border-black z-0"></div>
+<div class="relative z-10 text-center">
+<h2 class="text-4xl md:text-5xl font-heavy uppercase mb-2">Don't Miss The Noise</h2>
+<p class="text-lg font-bold mb-8 max-w-md mx-auto">Join the newsletter. No spam, just pure, unfiltered digital chaos delivered to your inbox.</p>
+<form class="flex flex-col md:flex-row gap-4">
+<input class="w-full border-3 border-black bg-gray-100 p-4 font-bold placeholder-gray-500 focus:outline-none focus:ring-0 focus:bg-secondary-yellow focus:border-black transition-colors" placeholder="YOUR@EMAIL.COM" type="email"/>
+<button class="bg-black text-white border-3 border-black px-8 py-4 font-heavy uppercase hover:bg-primary hover:text-black transition-colors whitespace-nowrap shadow-hard-sm hover:translate-y-1 hover:shadow-none" type="button">
+                    Hit Me
+                </button>
+</form>
+</div>
+</div>
+</div>
+</main>
+<footer class="border-t-3 border-black bg-secondary-yellow pt-16 pb-8 px-6">
+<div class="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+<div>
+<h2 class="text-6xl font-heavy uppercase tracking-tighter leading-none mb-4">ALEX R.</h2>
+<div class="flex flex-col gap-2 font-bold text-lg">
+<a class="hover:bg-black hover:text-white inline-block px-1 w-fit transition-colors" href="#">Twitter / X</a>
+<a class="hover:bg-black hover:text-white inline-block px-1 w-fit transition-colors" href="#">Instagram</a>
+<a class="hover:bg-black hover:text-white inline-block px-1 w-fit transition-colors" href="#">LinkedIn</a>
+<a class="hover:bg-black hover:text-white inline-block px-1 w-fit transition-colors" href="#">Github</a>
+</div>
+</div>
+<div class="flex flex-col items-start md:items-end gap-2">
+<p class="font-bold text-sm uppercase">© 2024 Alex R. All rights reserved.</p>
+<p class="font-bold text-sm uppercase">Designed with chaos in mind.</p>
+<div class="flex gap-2 mt-4">
+<div class="w-8 h-8 bg-primary border-2 border-black"></div>
+<div class="w-8 h-8 bg-secondary-pink border-2 border-black"></div>
+<div class="w-8 h-8 bg-white border-2 border-black"></div>
+</div>
+</div>
+</div>
+</footer>
+</body></html>

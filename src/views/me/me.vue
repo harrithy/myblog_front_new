@@ -1,164 +1,230 @@
 <template>
   <div class="me-page">
-    <!-- 背景装饰 -->
-    <div class="bg-decoration">
-      <div class="circle circle-1"></div>
-      <div class="circle circle-2"></div>
-      <div class="circle circle-3"></div>
+    <!-- 返回顶部按钮 -->
+    <a href="#" class="back-to-top">
+      <span class="arrow-icon">↑</span>
+    </a>
+
+    <!-- 滚动状态栏 -->
+    <div class="status-marquee">
+      <div class="marquee-track">
+        <div class="marquee-content">
+          <span>● 当前状态：正在写代码</span>
+          <span>● 最近在听：Synthwave Mix</span>
+          <span>● 心情：充满活力</span>
+          <span>● 阅读中：技术博客</span>
+          <span>● 正在学习：新技术</span>
+          <span>● 当前状态：正在写代码</span>
+          <span>● 最近在听：Synthwave Mix</span>
+          <span>● 心情：充满活力</span>
+          <span>● 阅读中：技术博客</span>
+          <span>● 正在学习：新技术</span>
+        </div>
+      </div>
     </div>
 
-    <div class="me-container">
-      <!-- 左侧：个人卡片 -->
-      <aside class="profile-card">
-        <div class="avatar-wrapper">
-          <img :src="avatarImg" alt="avatar" class="avatar" />
-          <div class="status-dot"></div>
-        </div>
-        <h1 class="name">{{ profile.name }}</h1>
-        <p class="title">{{ profile.title }}</p>
-        <p class="bio">{{ profile.bio }}</p>
-
-        <!-- 社交链接 -->
-        <div class="social-links">
-          <a
-            v-for="(link, index) in socialLinks"
-            :key="index"
-            :href="link.url"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="social-link"
-            :style="{ '--brand-color': link.color }"
-          >
-            <component :is="link.icon" class="social-icon" />
-          </a>
-        </div>
-
-        <!-- 联系信息 -->
-        <div class="contact-info">
-          <div class="contact-item">
-            <span class="icon">📍</span>
-            <span>{{ profile.location }}</span>
-          </div>
-          <div class="contact-item">
-            <span class="icon">📧</span>
-            <span>{{ profile.email }}</span>
-          </div>
-        </div>
-      </aside>
-
-      <!-- 右侧：详细内容 -->
-      <main class="content-area">
-        <!-- 关于我 -->
-        <section class="section about-section">
-          <h2 class="section-title">
-            <span class="title-icon">👋</span>
-            关于我
-          </h2>
-          <div class="about-content">
-            <p v-for="(text, index) in aboutTexts" :key="index">{{ text }}</p>
-          </div>
-        </section>
-
-        <!-- 技能 -->
-        <section class="section skills-section">
-          <h2 class="section-title">
-            <span class="title-icon">🛠️</span>
-            技术栈
-          </h2>
-          <div class="skills-grid">
-            <div
-              v-for="(skill, index) in skills"
-              :key="index"
-              class="skill-card"
-              :style="{ animationDelay: `${index * 0.1}s` }"
-            >
-              <span class="skill-icon">{{ skill.icon }}</span>
-              <span class="skill-name">{{ skill.name }}</span>
-              <div class="skill-level">
-                <div
-                  class="level-fill"
-                  :style="{ width: `${skill.level}%`, background: skill.color }"
-                ></div>
+    <main class="main-content">
+      <!-- Hero 区域 -->
+      <section class="hero-section">
+        <div class="hero-badge">Open for work!</div>
+        <div class="hero-container">
+          <!-- 头像区域 -->
+          <div class="avatar-wrapper">
+            <div class="avatar-sticker">
+              <div class="avatar-star">
+                <img :src="avatarImg" alt="avatar" class="avatar" />
               </div>
             </div>
           </div>
-        </section>
-
-        <!-- 经历时间线 -->
-        <section class="section timeline-section">
-          <h2 class="section-title">
-            <span class="title-icon">📚</span>
-            个人经历
-          </h2>
-          <div class="timeline">
-            <div
-              v-for="(item, index) in timeline"
-              :key="index"
-              class="timeline-item"
-              :style="{ animationDelay: `${index * 0.15}s` }"
-            >
-              <div class="timeline-dot"></div>
-              <div class="timeline-content">
-                <div class="timeline-header">
-                  <h3 class="timeline-title">{{ item.title }}</h3>
-                  <span class="timeline-date">{{ item.date }}</span>
-                </div>
-                <p class="timeline-subtitle">{{ item.subtitle }}</p>
-                <p class="timeline-desc">{{ item.description }}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <!-- 项目展示 -->
-        <section class="section projects-section">
-          <h2 class="section-title">
-            <span class="title-icon">💻</span>
-            项目作品
-          </h2>
-          <div class="projects-grid">
-            <div
-              v-for="(project, index) in projects"
-              :key="index"
-              class="project-card"
-              :style="{ animationDelay: `${index * 0.1}s` }"
-            >
-              <div class="project-header">
-                <span class="project-icon">{{ project.icon }}</span>
-                <h3 class="project-name">{{ project.name }}</h3>
-              </div>
-              <p class="project-desc">{{ project.description }}</p>
-              <div class="project-tags">
-                <span v-for="tag in project.tags" :key="tag" class="tag">{{ tag }}</span>
-              </div>
+          <!-- 信息区域 -->
+          <div class="hero-info">
+            <h1 class="hero-title">{{ profile.name }}</h1>
+            <p class="hero-subtitle">{{ profile.title }}</p>
+            <p class="hero-bio">{{ profile.bio }}</p>
+            <!-- 社交链接 -->
+            <div class="social-links">
               <a
-                v-if="project.link"
-                :href="project.link"
+                v-for="(link, index) in socialLinks"
+                :key="index"
+                :href="link.url"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="project-link"
+                class="social-link"
+                :class="`rotate-${(index % 3) - 1}`"
               >
-                查看项目 →
+                <component :is="link.icon" class="social-icon" />
               </a>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <!-- 兴趣爱好 -->
-        <section class="section hobbies-section">
-          <h2 class="section-title">
-            <span class="title-icon">🎮</span>
-            兴趣爱好
-          </h2>
-          <div class="hobbies-grid">
-            <div v-for="(hobby, index) in hobbies" :key="index" class="hobby-item">
-              <span class="hobby-icon">{{ hobby.icon }}</span>
-              <span class="hobby-name">{{ hobby.name }}</span>
-            </div>
+      <!-- 统计数据 -->
+      <section class="stats-section">
+        <div class="stat-card rotate-n1">
+          <span class="stat-icon">📍</span>
+          <p class="stat-value">{{ profile.location }}</p>
+          <p class="stat-label">Location</p>
+        </div>
+        <div class="stat-card primary rotate-2">
+          <span class="stat-icon">📧</span>
+          <p class="stat-value">CONTACT</p>
+          <p class="stat-label">Email Me</p>
+        </div>
+        <div class="stat-card rotate-n1">
+          <span class="stat-icon">💼</span>
+          <p class="stat-value">{{ skills.length }}+</p>
+          <p class="stat-label">Tech Stack</p>
+        </div>
+      </section>
+
+      <!-- 关于我 -->
+      <section class="content-section">
+        <div class="section-header">
+          <span class="section-arrow">↓</span>
+          <h2 class="section-title-neo">关于我</h2>
+        </div>
+        <div class="about-card">
+          <p v-for="(text, index) in aboutTexts" :key="index" class="about-text">{{ text }}</p>
+        </div>
+      </section>
+
+      <!-- 技能标签云 -->
+      <section class="content-section">
+        <div class="section-header">
+          <span class="section-arrow">↓</span>
+          <h2 class="section-title-neo">技术栈</h2>
+        </div>
+        <div class="tags-cloud">
+          <a
+            v-for="(skill, index) in skills"
+            :key="index"
+            href="#"
+            class="skill-tag"
+            :class="getTagClass(index)"
+            :style="{ '--tag-color': skill.color }"
+          >
+            <span class="skill-icon">{{ skill.icon }}</span>
+            {{ skill.name }}
+          </a>
+        </div>
+      </section>
+
+      <!-- 经历时间线 -->
+      <section class="content-section">
+        <div class="section-header">
+          <span class="section-arrow">↓</span>
+          <h2 class="section-title-neo">个人经历</h2>
+        </div>
+        <div class="timeline-grid">
+          <div
+            v-for="(item, index) in timeline"
+            :key="index"
+            class="timeline-card"
+            :class="getCardRotation(index)"
+          >
+            <div class="timeline-badge">{{ item.date }}</div>
+            <h3 class="timeline-title">{{ item.title }}</h3>
+            <p class="timeline-subtitle">{{ item.subtitle }}</p>
+            <p class="timeline-desc">{{ item.description }}</p>
           </div>
-        </section>
-      </main>
-    </div>
+        </div>
+      </section>
+
+      <!-- 项目展示 -->
+      <section class="content-section">
+        <div class="section-header">
+          <span class="section-arrow">↓</span>
+          <h2 class="section-title-neo">项目作品</h2>
+        </div>
+        <div class="projects-grid">
+          <article
+            v-for="(project, index) in projects"
+            :key="index"
+            class="project-card"
+            :class="getCardRotation(index)"
+          >
+            <div class="project-category">{{ project.tags[0] }}</div>
+            <div class="project-icon">{{ project.icon }}</div>
+            <h3 class="project-name">{{ project.name }}</h3>
+            <p class="project-desc">{{ project.description }}</p>
+            <div class="project-tags">
+              <span v-for="tag in project.tags" :key="tag" class="tag">{{ tag }}</span>
+            </div>
+            <a
+              v-if="project.link"
+              :href="project.link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="project-link"
+            >
+              查看项目 <span>→</span>
+            </a>
+          </article>
+        </div>
+      </section>
+
+      <!-- 兴趣爱好 -->
+      <section class="content-section">
+        <div class="section-header">
+          <span class="section-arrow">↓</span>
+          <h2 class="section-title-neo">兴趣爱好</h2>
+        </div>
+        <div class="hobbies-container">
+          <div class="hobbies-title-box">
+            <h3>我的爱好</h3>
+          </div>
+          <div class="hobbies-tags">
+            <a
+              v-for="(hobby, index) in hobbies"
+              :key="index"
+              href="#"
+              class="hobby-tag"
+              :class="getTagClass(index)"
+            >
+              <span class="hobby-icon">{{ hobby.icon }}</span>
+              {{ hobby.name }}
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 订阅区域 -->
+      <section class="subscribe-section">
+        <div class="subscribe-decoration"></div>
+        <div class="subscribe-content">
+          <h2 class="subscribe-title">保持联系</h2>
+          <p class="subscribe-text">欢迎通过邮件或社交媒体与我联系，期待与你交流！</p>
+          <div class="subscribe-buttons">
+            <a :href="'mailto:' + profile.email" class="subscribe-btn primary">发送邮件</a>
+            <a href="https://github.com/harrithy" target="_blank" class="subscribe-btn">GitHub</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="neo-footer">
+      <div class="footer-content">
+        <div class="footer-left">
+          <h2 class="footer-name">{{ profile.name }}</h2>
+          <div class="footer-links">
+            <a v-for="(link, index) in socialLinks" :key="index" :href="link.url" target="_blank">
+              {{ link.label }}
+            </a>
+          </div>
+        </div>
+        <div class="footer-right">
+          <p>© 2024 {{ profile.name }}. All rights reserved.</p>
+          <p>Designed with ❤️ and chaos.</p>
+          <div class="footer-colors">
+            <div class="color-box primary"></div>
+            <div class="color-box pink"></div>
+            <div class="color-box white"></div>
+          </div>
+        </div>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -287,291 +353,469 @@ interface SocialLink {
   url: string
   icon: Component
   color: string
+  label: string
 }
 
 const socialLinks: SocialLink[] = [
-  { url: 'https://github.com/harrithy', icon: GithubIcon, color: '#24292e' },
-  { url: 'https://space.bilibili.com/209674243', icon: BilibiliIcon, color: '#fb7299' },
-  { url: 'mailto:2656450899@qq.com', icon: EmailIcon, color: '#1296db' },
+  { url: 'https://github.com/harrithy', icon: GithubIcon, color: '#24292e', label: 'GitHub' },
+  {
+    url: 'https://space.bilibili.com/209674243',
+    icon: BilibiliIcon,
+    color: '#fb7299',
+    label: 'Bilibili',
+  },
+  { url: 'mailto:2656450899@qq.com', icon: EmailIcon, color: '#1296db', label: 'Email' },
 ]
+
+// 获取标签样式类
+const getTagClass = (index: number): string => {
+  const classes = ['tag-primary', 'tag-yellow', 'tag-pink', 'tag-white', 'tag-black']
+  const rotations = ['rotate-n2', 'rotate-3', 'rotate-1', 'rotate-n3', 'rotate-2', 'rotate-n1']
+  return `${classes[index % classes.length]} ${rotations[index % rotations.length]}`
+}
+
+// 获取卡片旋转样式
+const getCardRotation = (index: number): string => {
+  const rotations = ['rotate-n1', 'rotate-2', 'rotate-1', 'rotate-n2']
+  return rotations[index % rotations.length]
+}
 </script>
 
 <style lang="scss" scoped>
+// 颜色变量
+$primary: #d0bb95;
+$secondary-yellow: #ffeb3b;
+$secondary-pink: #ff69b4;
+$bg-light: #f7f7f6;
+$text-main: #111418;
+
+// Neo-Brutalist 基础样式
 .me-page {
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 40px 20px;
-  position: relative;
+  background: $bg-light;
+  font-family: 'Space Grotesk', sans-serif;
+  color: $text-main;
   overflow-x: hidden;
 }
 
-// 背景装饰
-.bg-decoration {
+// 返回顶部按钮
+.back-to-top {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: 0;
-
-  .circle {
-    position: absolute;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    animation: float 20s infinite ease-in-out;
-  }
-
-  .circle-1 {
-    width: 400px;
-    height: 400px;
-    top: -100px;
-    right: -100px;
-    animation-delay: 0s;
-  }
-
-  .circle-2 {
-    width: 300px;
-    height: 300px;
-    bottom: -50px;
-    left: -50px;
-    animation-delay: -7s;
-  }
-
-  .circle-3 {
-    width: 200px;
-    height: 200px;
-    top: 50%;
-    left: 50%;
-    animation-delay: -14s;
-  }
-}
-
-@keyframes float {
-  0%,
-  100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -30px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
-}
-
-.me-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 300px 1fr;
-  gap: 30px;
-  position: relative;
-  z-index: 1;
-}
-
-// 左侧个人卡片
-.profile-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  padding: 30px;
-  text-align: center;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-  position: sticky;
-  top: 40px;
-  height: fit-content;
-  animation: slideInLeft 0.6s ease-out;
-
-  .avatar-wrapper {
-    position: relative;
-    display: inline-block;
-    margin-bottom: 20px;
-
-    .avatar {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid #9b59b6;
-      box-shadow: 0 10px 30px rgba(155, 89, 182, 0.3);
-    }
-
-    .status-dot {
-      position: absolute;
-      bottom: 8px;
-      right: 8px;
-      width: 20px;
-      height: 20px;
-      background: #2ecc71;
-      border-radius: 50%;
-      border: 3px solid white;
-      animation: pulse 2s infinite;
-    }
-  }
-
-  .name {
-    font-size: 24px;
-    font-weight: 700;
-    color: #333;
-    margin: 0 0 8px 0;
-  }
-
-  .title {
-    font-size: 14px;
-    color: #9b59b6;
-    margin: 0 0 15px 0;
-    font-weight: 500;
-  }
-
-  .bio {
-    font-size: 14px;
-    color: #666;
-    line-height: 1.6;
-    margin: 0 0 25px 0;
-  }
-
-  .social-links {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 25px;
-
-    .social-link {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: #f5f5f5;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      color: var(--brand-color);
-
-      &:hover {
-        background: var(--brand-color);
-        color: white;
-        transform: translateY(-3px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-      }
-
-      .social-icon {
-        width: 20px;
-        height: 20px;
-      }
-    }
-  }
-
-  .contact-info {
-    border-top: 1px solid #eee;
-    padding-top: 20px;
-
-    .contact-item {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #666;
-      margin-bottom: 10px;
-
-      &:last-child {
-        margin-bottom: 0;
-      }
-
-      .icon {
-        font-size: 16px;
-      }
-    }
-  }
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 10px rgba(46, 204, 113, 0);
-  }
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-// 右侧内容区
-.content-area {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-}
-
-.section {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 20px;
-  padding: 30px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-  animation: fadeInUp 0.6s ease-out both;
-
-  &:nth-child(1) {
-    animation-delay: 0.1s;
-  }
-  &:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  &:nth-child(3) {
-    animation-delay: 0.3s;
-  }
-  &:nth-child(4) {
-    animation-delay: 0.4s;
-  }
-  &:nth-child(5) {
-    animation-delay: 0.5s;
-  }
-}
-
-.section-title {
+  bottom: 32px;
+  right: 32px;
+  z-index: 50;
+  background: $secondary-yellow;
+  border: 3px solid #000;
+  height: 64px;
+  width: 64px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 20px;
-  font-weight: 700;
-  color: #333;
-  margin: 0 0 20px 0;
-  padding-bottom: 15px;
-  border-bottom: 2px solid #f0f0f0;
+  justify-content: center;
+  box-shadow: 5px 5px 0px 0px #000;
+  transition: all 0.2s ease;
+  text-decoration: none;
 
-  .title-icon {
-    font-size: 24px;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 0px 0px #000;
+  }
+
+  .arrow-icon {
+    font-size: 32px;
+    font-weight: 900;
+    color: #000;
   }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+// 状态滚动栏
+.status-marquee {
+  width: 100%;
+  border-bottom: 3px solid #000;
+  background: #000;
+  color: $secondary-yellow;
+  overflow: hidden;
+  padding: 12px 0;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
   }
-  to {
-    opacity: 1;
+
+  .marquee-content {
+    display: flex;
+    gap: 48px;
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    padding: 0 24px;
+    animation: marquee 25s linear infinite;
+
+    span {
+      display: inline-block;
+    }
+  }
+}
+
+@keyframes marquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+// 主内容区
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 16px 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Hero 区域
+.hero-section {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 32px 48px;
+  border: 3px solid #000;
+  background: $secondary-yellow;
+  box-shadow: 8px 8px 0px 0px #000;
+  margin-bottom: 64px;
+
+  .hero-badge {
+    position: absolute;
+    top: -24px;
+    right: -32px;
+    transform: rotate(12deg);
+    background: $secondary-pink;
+    border: 3px solid #000;
+    padding: 8px 16px;
+    box-shadow: 5px 5px 0px 0px #000;
+    font-weight: 900;
+    font-size: 18px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: rotate(0deg);
+    }
+  }
+
+  .hero-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: flex-start;
+    }
+  }
+}
+
+// 头像样式
+.avatar-wrapper {
+  flex-shrink: 0;
+
+  .avatar-sticker {
+    filter: drop-shadow(4px 4px 0px #fff) drop-shadow(8px 8px 0px #000);
+    transform: rotate(-3deg);
+    transition: transform 0.3s ease;
+
+    &:hover {
+      transform: scale(1.05) rotate(5deg);
+    }
+  }
+
+  .avatar-star {
+    width: 192px;
+    height: 192px;
+    background: #000;
+    clip-path: polygon(
+      50% 0%,
+      61% 35%,
+      98% 35%,
+      68% 57%,
+      79% 91%,
+      50% 70%,
+      21% 91%,
+      32% 57%,
+      2% 35%,
+      39% 35%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    @media (min-width: 768px) {
+      width: 256px;
+      height: 256px;
+    }
+  }
+
+  .avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+// Hero 信息
+.hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: center;
+  width: 100%;
+
+  @media (min-width: 768px) {
+    text-align: left;
+  }
+
+  .hero-title {
+    font-size: 48px;
+    font-weight: 900;
+    line-height: 0.9;
+    letter-spacing: -2px;
+    margin: 0;
+    text-transform: uppercase;
+
+    @media (min-width: 768px) {
+      font-size: 72px;
+    }
+  }
+
+  .hero-subtitle {
+    font-size: 18px;
+    font-weight: 600;
+    border-left: 4px solid #000;
+    padding-left: 16px;
+    background: rgba(255, 255, 255, 0.5);
+    padding: 8px 16px;
+    margin: 0;
+
+    @media (min-width: 768px) {
+      font-size: 24px;
+    }
+  }
+
+  .hero-bio {
+    font-size: 16px;
+    font-weight: 500;
+    margin: 0;
+    max-width: 500px;
+  }
+}
+
+// 社交链接
+.social-links {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  justify-content: center;
+
+  @media (min-width: 768px) {
+    justify-content: flex-start;
+  }
+
+  .social-link {
+    width: 56px;
+    height: 56px;
+    border: 3px solid #000;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 3px 3px 0px 0px #000;
+    transition: all 0.2s ease;
+    color: #000;
+
+    &:hover {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    &.rotate-0 {
+      transform: rotate(3deg);
+      &:hover {
+        transform: rotate(0deg) translateY(2px);
+      }
+    }
+    &.rotate--1 {
+      transform: rotate(-2deg);
+      &:hover {
+        transform: rotate(0deg) translateY(2px);
+      }
+    }
+    &.rotate-1 {
+      transform: rotate(1deg);
+      &:hover {
+        transform: rotate(0deg) translateY(2px);
+      }
+    }
+
+    .social-icon {
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+// 统计数据
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 24px;
+  width: 100%;
+  margin-bottom: 64px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.stat-card {
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0px 0px #000;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: translate(-2px, -2px) rotate(-1deg);
+    box-shadow: 8px 8px 0px 0px #000;
+    z-index: 10;
+  }
+
+  &.primary {
+    background: $primary;
+    color: #fff;
+
+    .stat-label {
+      border-color: #fff;
+    }
+  }
+
+  &.rotate-n1 {
+    transform: rotate(-1deg);
+  }
+  &.rotate-2 {
+    transform: rotate(2deg);
+  }
+
+  .stat-icon {
+    font-size: 40px;
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-size: 32px;
+    font-weight: 900;
+    margin: 0;
+  }
+
+  .stat-label {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 3px solid $primary;
+    padding-bottom: 4px;
+    margin: 0;
+  }
+}
+
+// 内容区域标题
+.content-section {
+  width: 100%;
+  margin-bottom: 64px;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  .section-arrow {
+    font-size: 48px;
+    font-weight: 900;
+    animation: bounce 1s infinite;
+  }
+
+  .section-title-neo {
+    font-size: 36px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    background: #000;
+    color: #fff;
+    padding: 8px 24px;
+    transform: skewX(-6deg);
+    border: 3px solid transparent;
+    box-shadow: 5px 5px 0px 0px #000;
+    margin: 0;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #fff;
+      color: $secondary-yellow;
+    }
+
+    @media (min-width: 768px) {
+      font-size: 48px;
+    }
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
     transform: translateY(0);
   }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-// 关于我
-.about-content {
-  p {
-    font-size: 15px;
+// 关于我卡片
+.about-card {
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0px 0px #000;
+  padding: 32px;
+  transform: rotate(1deg);
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: rotate(0deg) translate(-2px, -2px);
+    box-shadow: 8px 8px 0px 0px #000;
+  }
+
+  .about-text {
+    font-size: 16px;
     line-height: 1.8;
-    color: #555;
-    margin: 0 0 15px 0;
+    margin: 0 0 16px 0;
+    font-weight: 500;
 
     &:last-child {
       margin-bottom: 0;
@@ -579,281 +823,580 @@ const socialLinks: SocialLink[] = [
   }
 }
 
-// 技能
-.skills-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 15px;
+// 技能标签云
+.tags-cloud {
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 8px 8px 0px 0px #000;
+  padding: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
 }
 
-.skill-card {
-  display: flex;
+.skill-tag {
+  border: 3px solid #000;
+  padding: 8px 24px;
+  font-weight: 700;
+  box-shadow: 3px 3px 0px 0px #000;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: #000;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 12px;
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.5s ease-out both;
+  gap: 8px;
 
   &:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(2px);
+    box-shadow: none;
   }
 
   .skill-icon {
-    font-size: 24px;
-    flex-shrink: 0;
+    font-size: 20px;
   }
 
-  .skill-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #333;
-    flex-shrink: 0;
+  // 颜色变体
+  &.tag-primary {
+    background: $primary;
+    color: #fff;
+  }
+  &.tag-yellow {
+    background: $secondary-yellow;
+  }
+  &.tag-pink {
+    background: $secondary-pink;
+  }
+  &.tag-white {
+    background: #fff;
+  }
+  &.tag-black {
+    background: #000;
+    color: #fff;
   }
 
-  .skill-level {
-    flex: 1;
-    height: 6px;
-    background: #e0e0e0;
-    border-radius: 3px;
-    overflow: hidden;
-
-    .level-fill {
-      height: 100%;
-      border-radius: 3px;
-      transition: width 1s ease-out;
-    }
+  // 旋转变体
+  &.rotate-n1 {
+    transform: rotate(-1deg);
+  }
+  &.rotate-n2 {
+    transform: rotate(-2deg);
+  }
+  &.rotate-n3 {
+    transform: rotate(-3deg);
+  }
+  &.rotate-1 {
+    transform: rotate(1deg);
+  }
+  &.rotate-2 {
+    transform: rotate(2deg);
+  }
+  &.rotate-3 {
+    transform: rotate(3deg);
   }
 }
 
-// 时间线
-.timeline {
-  position: relative;
-  padding-left: 30px;
+// 时间线网格
+.timeline-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
 
-  &::before {
-    content: '';
-    position: absolute;
-    left: 8px;
-    top: 0;
-    bottom: 0;
-    width: 2px;
-    background: linear-gradient(to bottom, #9b59b6, #667eea);
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
-.timeline-item {
+.timeline-card {
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0px 0px #000;
+  padding: 24px;
   position: relative;
-  padding-bottom: 25px;
-  animation: fadeInUp 0.5s ease-out both;
+  transition: all 0.2s ease;
 
-  &:last-child {
-    padding-bottom: 0;
+  &:hover {
+    transform: translate(-2px, -2px) rotate(0deg) !important;
+    box-shadow: 8px 8px 0px 0px #000;
+    z-index: 10;
   }
 
-  .timeline-dot {
+  &.rotate-n1 {
+    transform: rotate(-1deg);
+  }
+  &.rotate-n2 {
+    transform: rotate(-2deg);
+  }
+  &.rotate-1 {
+    transform: rotate(1deg);
+  }
+  &.rotate-2 {
+    transform: rotate(2deg);
+  }
+
+  .timeline-badge {
     position: absolute;
-    left: -26px;
-    top: 5px;
-    width: 14px;
-    height: 14px;
-    background: #9b59b6;
-    border-radius: 50%;
-    border: 3px solid white;
-    box-shadow: 0 0 0 3px rgba(155, 89, 182, 0.2);
-  }
-
-  .timeline-content {
-    background: #f8f9fa;
-    padding: 20px;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-
-    &:hover {
-      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
-    }
-  }
-
-  .timeline-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+    top: -12px;
+    right: 16px;
+    background: $secondary-pink;
+    border: 3px solid #000;
+    padding: 4px 12px;
+    font-weight: 700;
+    font-size: 12px;
+    box-shadow: 3px 3px 0px 0px #000;
   }
 
   .timeline-title {
-    font-size: 16px;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
-  }
-
-  .timeline-date {
-    font-size: 12px;
-    color: #9b59b6;
-    font-weight: 500;
+    font-size: 20px;
+    font-weight: 900;
+    margin: 0 0 8px 0;
+    text-transform: uppercase;
   }
 
   .timeline-subtitle {
     font-size: 14px;
+    font-weight: 600;
     color: #666;
-    margin: 0 0 8px 0;
+    margin: 0 0 12px 0;
   }
 
   .timeline-desc {
-    font-size: 13px;
-    color: #888;
+    font-size: 14px;
     line-height: 1.6;
     margin: 0;
+    color: #444;
   }
 }
 
-// 项目
+// 项目展示
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  grid-template-columns: 1fr;
+  gap: 40px;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 .project-card {
-  background: #f8f9fa;
-  border-radius: 16px;
-  padding: 25px;
-  transition: all 0.3s ease;
-  animation: fadeInUp 0.5s ease-out both;
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 5px 5px 0px 0px #000;
+  padding: 24px;
+  position: relative;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
 
   &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    transform: translate(-2px, -2px) rotate(0deg) !important;
+    box-shadow: 8px 8px 0px 0px #000;
+    z-index: 10;
   }
 
-  .project-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
+  &.rotate-n1 {
+    transform: rotate(-1deg);
+  }
+  &.rotate-n2 {
+    transform: rotate(-2deg);
+  }
+  &.rotate-1 {
+    transform: rotate(1deg);
+  }
+  &.rotate-2 {
+    transform: rotate(2deg);
+  }
+
+  .project-category {
+    position: absolute;
+    top: -12px;
+    left: 16px;
+    background: $secondary-yellow;
+    border: 3px solid #000;
+    padding: 4px 12px;
+    font-weight: 700;
+    font-size: 12px;
+    box-shadow: 3px 3px 0px 0px #000;
+    transform: rotate(3deg);
   }
 
   .project-icon {
-    font-size: 28px;
+    font-size: 48px;
+    margin-bottom: 16px;
   }
 
   .project-name {
-    font-size: 18px;
-    font-weight: 600;
-    color: #333;
-    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+    margin: 0 0 12px 0;
+    text-transform: uppercase;
   }
 
   .project-desc {
     font-size: 14px;
-    color: #666;
     line-height: 1.6;
-    margin: 0 0 15px 0;
+    margin: 0 0 16px 0;
+    color: #444;
+    flex-grow: 1;
   }
 
   .project-tags {
     display: flex;
     flex-wrap: wrap;
     gap: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 16px;
 
     .tag {
       font-size: 12px;
       padding: 4px 10px;
-      background: rgba(155, 89, 182, 0.1);
-      color: #9b59b6;
-      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.1);
+      border: 2px solid #000;
+      font-weight: 600;
     }
   }
 
   .project-link {
-    display: inline-block;
-    font-size: 14px;
-    color: #9b59b6;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #000;
+    color: #fff;
+    border: 3px solid #000;
+    padding: 12px 24px;
+    font-weight: 700;
     text-decoration: none;
-    font-weight: 500;
-    transition: all 0.3s ease;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
 
     &:hover {
-      color: #764ba2;
-      transform: translateX(5px);
+      background: $primary;
+      color: #000;
     }
   }
 }
 
 // 兴趣爱好
-.hobbies-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px;
+.hobbies-container {
+  background: #fff;
+  border: 3px solid #000;
+  box-shadow: 8px 8px 0px 0px #000;
+  padding: 48px;
+  position: relative;
+  overflow: hidden;
+  transform: rotate(1deg);
 }
 
-.hobby-item {
+.hobbies-title-box {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 3px solid #000;
+  padding: 8px 24px;
+  box-shadow: 5px 5px 0px 0px #000;
+  z-index: 10;
+
+  h3 {
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+    text-transform: uppercase;
+  }
+}
+
+.hobbies-tags {
   display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.hobby-tag {
+  border: 3px solid #000;
+  padding: 12px 24px;
+  font-weight: 700;
+  font-size: 18px;
+  box-shadow: 3px 3px 0px 0px #000;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: #000;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
-  background: #f8f9fa;
-  border-radius: 30px;
-  transition: all 0.3s ease;
 
   &:hover {
-    background: #9b59b6;
-    transform: scale(1.05);
-
-    .hobby-name {
-      color: white;
-    }
+    transform: translateY(2px) rotate(0deg) !important;
+    box-shadow: none;
   }
 
   .hobby-icon {
-    font-size: 20px;
+    font-size: 24px;
   }
 
-  .hobby-name {
-    font-size: 14px;
-    font-weight: 500;
-    color: #555;
-    transition: color 0.3s ease;
+  // 颜色变体
+  &.tag-primary {
+    background: $primary;
+    color: #fff;
+  }
+  &.tag-yellow {
+    background: $secondary-yellow;
+  }
+  &.tag-pink {
+    background: $secondary-pink;
+  }
+  &.tag-white {
+    background: #fff;
+  }
+  &.tag-black {
+    background: #000;
+    color: #fff;
+  }
+
+  // 旋转变体
+  &.rotate-n1 {
+    transform: rotate(-1deg);
+  }
+  &.rotate-n2 {
+    transform: rotate(-2deg);
+  }
+  &.rotate-n3 {
+    transform: rotate(-3deg);
+  }
+  &.rotate-1 {
+    transform: rotate(1deg);
+  }
+  &.rotate-2 {
+    transform: rotate(2deg);
+  }
+  &.rotate-3 {
+    transform: rotate(3deg);
   }
 }
 
-// 响应式设计
-@media (max-width: 900px) {
-  .me-container {
-    grid-template-columns: 1fr;
+// 订阅区域
+.subscribe-section {
+  width: 100%;
+  max-width: 800px;
+  border: 3px solid #000;
+  background: #fff;
+  padding: 32px 48px;
+  box-shadow: 8px 8px 0px 0px #000;
+  position: relative;
+  overflow: hidden;
+  transform: rotate(1deg);
+  margin-bottom: 64px;
+
+  .subscribe-decoration {
+    position: absolute;
+    top: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    background: $secondary-pink;
+    border-radius: 50%;
+    border: 3px solid #000;
+    z-index: 0;
   }
 
-  .profile-card {
+  .subscribe-content {
     position: relative;
-    top: 0;
+    z-index: 10;
+    text-align: center;
+  }
+
+  .subscribe-title {
+    font-size: 36px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin: 0 0 8px 0;
+
+    @media (min-width: 768px) {
+      font-size: 48px;
+    }
+  }
+
+  .subscribe-text {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 0 0 24px 0;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .subscribe-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+  }
+
+  .subscribe-btn {
+    border: 3px solid #000;
+    padding: 16px 32px;
+    font-weight: 900;
+    text-transform: uppercase;
+    text-decoration: none;
+    box-shadow: 3px 3px 0px 0px #000;
+    transition: all 0.2s ease;
+    background: #fff;
+    color: #000;
+
+    &:hover {
+      transform: translateY(2px);
+      box-shadow: none;
+    }
+
+    &.primary {
+      background: #000;
+      color: #fff;
+
+      &:hover {
+        background: $primary;
+        color: #000;
+      }
+    }
   }
 }
 
-@media (max-width: 600px) {
-  .me-page {
-    padding: 20px 15px;
+// Footer
+.neo-footer {
+  border-top: 3px solid #000;
+  background: $secondary-yellow;
+  padding: 64px 24px 32px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
+.footer-left {
+  .footer-name {
+    font-size: 48px;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: -2px;
+    line-height: 1;
+    margin: 0 0 16px 0;
   }
 
-  .section {
-    padding: 20px;
-  }
-
-  .skills-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .projects-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .timeline-item .timeline-header {
+  .footer-links {
+    display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 5px;
+    gap: 8px;
+
+    a {
+      font-weight: 700;
+      font-size: 16px;
+      text-decoration: none;
+      color: #000;
+      display: inline-block;
+      padding: 2px 4px;
+      width: fit-content;
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: #000;
+        color: #fff;
+      }
+    }
+  }
+}
+
+.footer-right {
+  text-align: left;
+
+  @media (min-width: 768px) {
+    text-align: right;
+  }
+
+  p {
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+    margin: 0 0 8px 0;
+  }
+
+  .footer-colors {
+    display: flex;
+    gap: 8px;
+    margin-top: 16px;
+
+    @media (min-width: 768px) {
+      justify-content: flex-end;
+    }
+
+    .color-box {
+      width: 32px;
+      height: 32px;
+      border: 2px solid #000;
+
+      &.primary {
+        background: $primary;
+      }
+      &.pink {
+        background: $secondary-pink;
+      }
+      &.white {
+        background: #fff;
+      }
+    }
+  }
+}
+
+// 响应式调整
+@media (max-width: 600px) {
+  .hero-section {
+    padding: 24px;
+    margin-bottom: 40px;
+
+    .hero-badge {
+      top: -16px;
+      right: -8px;
+      font-size: 14px;
+    }
+  }
+
+  .section-header {
+    .section-arrow {
+      font-size: 32px;
+    }
+
+    .section-title-neo {
+      font-size: 24px;
+      padding: 8px 16px;
+    }
+  }
+
+  .tags-cloud,
+  .hobbies-container {
+    padding: 32px 16px;
+  }
+
+  .subscribe-section {
+    padding: 24px;
   }
 }
 </style>
