@@ -1,7 +1,12 @@
 <template>
   <div class="me-page">
+    <!-- 返回上一页按钮 -->
+    <a href="#" class="back-btn" @click.prevent="goBack">
+      <span class="back-icon">←</span>
+    </a>
+
     <!-- 返回顶部按钮 -->
-    <a href="#" class="back-to-top">
+    <a href="#" class="back-to-top" @click.prevent="scrollToTop">
       <span class="arrow-icon">↑</span>
     </a>
 
@@ -230,26 +235,45 @@
 
 <script lang="ts" setup>
 import { h, type Component } from 'vue'
+import { useRouter } from 'vue-router'
 import avatarImg from '@/assets/source/avatar.gif'
+
+const router = useRouter()
 
 defineOptions({
   name: 'MeView',
 })
 
+// 返回上一页
+const goBack = () => {
+  router.back()
+}
+
+// 返回顶部
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth',
+  })
+}
+
 // 个人资料
 const profile = {
   name: 'Harrithy',
-  title: '全栈开发者 / 前端工程师',
-  bio: '热爱编程，热爱生活。在代码的世界里探索无限可能。',
+  title: '全栈开发者 / 前端开发工程师',
+  bio: '一个有点忧郁的帅哥，决定要成为一个优秀的AI开发者。',
   location: '中国',
   email: '2656450899@qq.com',
 }
 
 // 关于我的文本
 const aboutTexts = [
-  '你好！我是一名热爱技术的全栈开发者，专注于 Web 开发领域。',
-  '我喜欢用代码创造有趣的东西，享受从0到1构建产品的过程。对新技术保持好奇心，持续学习和探索。',
-  '在工作之余，我喜欢看动漫、玩游戏、听音乐。我相信技术可以让生活更美好，希望能通过代码为这个世界带来一些积极的改变。',
+  '哼，吾乃潜伏于代码深渊的全栈开发者…… 区区 Web 开发，不过是吾力量的冰山一角。',
+  '以代码之名，创造世间万物，乃是吾的宿命！',
+  '从无到有，构筑产品的过程，是灵魂的升华！',
+  '对未知技术的渴望，如同黑炎般燃烧！学习与探索，永无止境！',
+  '闲暇之时，动漫、游戏、音乐，皆是吾磨砺精神的食粮。',
+  '吾坚信，技术拥有改变世界的力量，吾将用代码，为这个腐朽的世界带来新的秩序！',
 ]
 
 // 技能数据
@@ -386,16 +410,47 @@ const getCardRotation = (index: number): string => {
 $primary: #d0bb95;
 $secondary-yellow: #ffeb3b;
 $secondary-pink: #ff69b4;
-$bg-light: #f7f7f6;
+$bg-start: rgb(225, 225, 225);
+$bg-end: rgb(227, 244, 255);
 $text-main: #111418;
 
 // Neo-Brutalist 基础样式
 .me-page {
   min-height: 100vh;
-  background: $bg-light;
+  background: linear-gradient(180deg, $bg-start 0%, $bg-end 100%);
   font-family: 'Space Grotesk', sans-serif;
   color: $text-main;
   overflow-x: hidden;
+}
+
+// 返回上一页按钮
+.back-btn {
+  position: fixed;
+  top: 80px;
+  left: 32px;
+  z-index: 50;
+  background: #fff;
+  border: 3px solid #000;
+  height: 56px;
+  width: 56px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 5px 5px 0px 0px #000;
+  transition: all 0.2s ease;
+  text-decoration: none;
+
+  &:hover {
+    transform: translateX(-4px);
+    box-shadow: 8px 8px 0px 0px #000;
+  }
+
+  .back-icon {
+    font-size: 28px;
+    font-weight: 900;
+    color: #000;
+  }
 }
 
 // 返回顶部按钮
