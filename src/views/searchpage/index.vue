@@ -51,6 +51,7 @@ import UserCard from '@/components/UserCard.vue'
 import SearchBox from '@/views/searchpage/components/SearchBox.vue'
 import NavMenu from '@/views/searchpage/components/NavMenu.vue'
 import TourGuide, { type TourStep } from '@/components/TourGuide/index.vue'
+import { userApi } from '@/api'
 
 // 用户状态
 const userStore = useUserStore()
@@ -116,9 +117,26 @@ const handleSearch = (value: string) => {
   console.log('搜索内容:', value)
 }
 
-// 初始化时恢复用户信息
-onMounted(() => {
+// 验证 token 是否过期
+const verifyToken = async () => {
+  // 如果没有 token，直接跳过验证喵～
+  if (!userStore.token) return
+
+  try {
+    await userApi.checkToken()
+    // token 有效，什么都不用做喵～
+  } catch {
+    // token 过期或无效，清空用户信息喵 QAQ
+    console.log('Token 已过期，正在清理用户信息喵～')
+    userStore.logout()
+    localStorage.removeItem('userInfo')
+  }
+}
+
+// 初始化时恢复用户信息并验证 token
+onMounted(async () => {
   userStore.restoreUserInfo()
+  await verifyToken()
   checkShowTour()
 })
 </script>

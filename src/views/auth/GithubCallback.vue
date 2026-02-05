@@ -58,7 +58,7 @@ onMounted(async () => {
       }
     }
 
-    console.log('GitHub 登录返回数据:', result)
+    // console.log('GitHub 登录返回数据:', result)
 
     // 保存 token 和用户信息
     userStore.setToken(result.token)

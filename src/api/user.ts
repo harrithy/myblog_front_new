@@ -83,6 +83,12 @@ export const userApi = {
       meta: { skipAuth: true },
     })
   },
+
+  // 新增检测token是否过期
+
+  checkToken: () => {
+    return http.get('/auth/verify')
+  },
 }
 
 export default userApi
