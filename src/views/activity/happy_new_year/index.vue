@@ -342,6 +342,7 @@ interface BlessingShareCardExpose {
 }
 
 const MAX_RECENT = 20
+const MAX_GENERATE_HISTORY = 20
 const RECENT_KEY = 'happy_new_year_recent_copies_v2'
 const GENERATE_DEBOUNCE_MS = 260
 const GENERATE_THROTTLE_MS = 2000
@@ -423,6 +424,7 @@ const glowVisible = ref(false)
 const horseAnimating = ref(false)
 const fireworkParticles = ref<FireworkParticle[]>([])
 const recentCopyRecords = ref<CopyRecord[]>([])
+const generatedBlessingHistory = ref<string[]>([])
 const toastVisible = ref(false)
 const toastText = ref('贺词已复制到剪贴板！')
 const fireworksLayerRef = ref<HTMLElement | null>(null)
@@ -480,14 +482,39 @@ const isBlessingLengthMatched = (text: string, mode: BlessingLengthMode) => {
   return textLength >= min && textLength <= max
 }
 
-const buildHorseYearBlessingPrompt = (mode: BlessingLengthMode) => {
+const getPromptHistoryBlessings = () => {
+  return generatedBlessingHistory.value
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0)
+    .slice(-MAX_GENERATE_HISTORY)
+}
+
+const pushGeneratedBlessingHistory = (text: string) => {
+  const normalizedText = normalizeBlessingText(text)
+  if (!normalizedText) return
+  generatedBlessingHistory.value = [...generatedBlessingHistory.value, normalizedText].slice(
+    -MAX_GENERATE_HISTORY,
+  )
+}
+
+const buildHorseYearBlessingPrompt = (mode: BlessingLengthMode, historyBlessings: string[]) => {
   const { hint } = BLESSING_LENGTH_RULES[mode]
-  return [
+  const promptLines = [
     '你是一位资深中文节庆文案作者。',
     '请创作1条马年新春祝贺语，语气真挚、喜庆、文采自然。',
     `字数要求：${hint}`,
-    '只返回最终贺词正文，不要标题、解释、引号、序号、markdown。',
-  ].join('\n')
+  ]
+
+  if (historyBlessings.length > 0) {
+    promptLines.push('以下是之前已返回的贺词，请避免和它们过于相似：')
+    promptLines.push(...historyBlessings.map((item, index) => `${index + 1}. ${item}`))
+    promptLines.push(
+      '请确保新贺词在关键词、句式和意象上与以上内容明显不同，不要仅做近义词替换。',
+    )
+  }
+
+  promptLines.push('只返回最终贺词正文，不要标题、解释、引号、序号、markdown。')
+  return promptLines.join('\n')
 }
 
 const pickFallbackBlessing = (mode: BlessingLengthMode) => {
@@ -852,6 +879,7 @@ const requestGenerateBlessing = async () => {
   if (isGenerating.value) return
 
   const targetLengthMode = selectedBlessingLength.value
+  const historyBlessings = getPromptHistoryBlessings()
 
   isGenerating.value = true
   lastGenerateStartedAt = Date.now()
@@ -868,8 +896,11 @@ const requestGenerateBlessing = async () => {
   }
 
   try {
-    const aiPrompt = buildHorseYearBlessingPrompt(targetLengthMode)
-    const aiResult = await aiApi.getAIContent(aiPrompt)
+    const aiPrompt = buildHorseYearBlessingPrompt(targetLengthMode, historyBlessings)
+    const aiResult = await aiApi.getAIContent(aiPrompt, {
+      historyBlessings,
+      maxHistory: MAX_GENERATE_HISTORY,
+    })
     const normalizedBlessing = normalizeBlessingText(extractBlessingText(aiResult))
 
     if (!normalizedBlessing) {
@@ -882,9 +913,12 @@ const requestGenerateBlessing = async () => {
     }
 
     applyBlessingWithFade(normalizedBlessing)
+    pushGeneratedBlessingHistory(normalizedBlessing)
   } catch (error) {
     console.error('AI 生成贺词失败:', error)
-    applyBlessingWithFade(pickFallbackBlessing(targetLengthMode))
+    const fallbackBlessing = pickFallbackBlessing(targetLengthMode)
+    applyBlessingWithFade(fallbackBlessing)
+    pushGeneratedBlessingHistory(fallbackBlessing)
     const { hint } = BLESSING_LENGTH_RULES[targetLengthMode]
     ElMessage.warning(`AI生成失败，已切换为${hint}贺词`)
   } finally {
