@@ -341,6 +341,7 @@ const toastText = ref('贺词已复制到剪贴板！')
 const fireworksLayerRef = ref<HTMLElement | null>(null)
 const timerPool = new Set<number>()
 const bgmAudioRef = ref<HTMLAudioElement | null>(null)
+let bgmUnlockHandler: (() => void) | null = null
 let generateDebounceTimer: number | null = null
 let lastGenerateStartedAt = 0
 
@@ -498,26 +499,63 @@ const pauseBgm = () => {
   audio.pause()
 }
 
+const removeBgmUnlockListeners = () => {
+  if (!bgmUnlockHandler) return
+  window.removeEventListener('pointerdown', bgmUnlockHandler)
+  window.removeEventListener('keydown', bgmUnlockHandler)
+  window.removeEventListener('touchstart', bgmUnlockHandler)
+  bgmUnlockHandler = null
+}
+
+const setupBgmUnlockOnFirstInteraction = () => {
+  if (bgmUnlockHandler) return
+
+  bgmUnlockHandler = () => {
+    if (!isSoundOn.value) {
+      removeBgmUnlockListeners()
+      return
+    }
+
+    void playBgm().then((played) => {
+      if (played) {
+        removeBgmUnlockListeners()
+      }
+    })
+  }
+
+  window.addEventListener('pointerdown', bgmUnlockHandler, { passive: true })
+  window.addEventListener('keydown', bgmUnlockHandler)
+  window.addEventListener('touchstart', bgmUnlockHandler, { passive: true })
+}
+
 const toggleSound = async () => {
   const willEnable = !isSoundOn.value
   if (!willEnable) {
     pauseBgm()
     isSoundOn.value = false
+    removeBgmUnlockListeners()
     return
   }
 
   const played = await playBgm()
-  isSoundOn.value = played
+  isSoundOn.value = true
   if (!played) {
-    ElMessage.warning('浏览器限制自动播放，请再次点击开启音效')
+    setupBgmUnlockOnFirstInteraction()
+    ElMessage.warning('已开启音效，点击页面任意位置后将自动播放')
+    return
   }
+  removeBgmUnlockListeners()
 }
 
 const tryAutoPlayBgm = async () => {
   if (!isSoundOn.value) return
 
   const played = await playBgm()
-  isSoundOn.value = played
+  if (!played) {
+    setupBgmUnlockOnFirstInteraction()
+    return
+  }
+  removeBgmUnlockListeners()
 }
 
 const isValidSource = (source: unknown): source is BlessingSource => {
@@ -788,6 +826,7 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   pauseBgm()
+  removeBgmUnlockListeners()
   bgmAudioRef.value = null
   clearGenerateDebounce()
   timerPool.forEach((id) => clearTimeout(id))
