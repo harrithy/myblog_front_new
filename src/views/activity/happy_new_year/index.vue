@@ -50,11 +50,11 @@
 
       <section class="generator-card">
         <div class="ornament-symbol" aria-hidden="true">✦</div>
-        <div class="horse-track" aria-hidden="true">
+        <!-- <div class="horse-track" aria-hidden="true">
           <span class="material-icons horse-runner" :class="{ 'horse-anim': horseAnimating }"
             >pets</span
           >
-        </div>
+        </div> -->
         <div ref="fireworksLayerRef" class="fireworks-layer" aria-hidden="true">
           <span
             v-for="particle in fireworkParticles"
@@ -85,8 +85,25 @@
           </div>
 
           <div class="wish-block">
-            <h2 class="wish-text" :class="{ fading: wishFading }">"{{ currentBlessing }}"</h2>
-            <p class="wish-source">— 传统吉言</p>
+            <h2 class="wish-text" :class="{ fading: wishFading }">
+              {{ isGenerating ? '贺词正在生成中...' : `"${currentBlessing}"` }}
+            </h2>
+            <!-- <p class="wish-source">— 传统吉言</p> -->
+          </div>
+
+          <div class="length-control">
+            <span class="length-title">贺词长度</span>
+            <button
+              v-for="option in blessingLengthOptions"
+              :key="option.value"
+              class="length-chip"
+              :class="{ active: selectedBlessingLength === option.value }"
+              :disabled="isGenerating"
+              @click="setBlessingLength(option.value)"
+            >
+              {{ option.label }}
+            </button>
+            <span class="length-hint">{{ selectedLengthRule.hint }}</span>
           </div>
 
           <div class="action-row">
@@ -111,24 +128,28 @@
           <header class="panel-header">
             <h3 class="panel-title">
               <span class="material-icons panel-icon">trending_up</span>
-              热门贺词
+              推荐贺词
             </h3>
-            <button class="link-button">查看全部</button>
+            <button class="link-button" @click="switchRecommendedBlessings">换一批</button>
           </header>
 
           <ul class="hot-list">
-            <li v-for="(item, index) in hotBlessings" :key="`${item}-${index}`" class="hot-item">
+            <li
+              v-for="(item, index) in recommendedBlessings"
+              :key="`${item.text}-${index}`"
+              class="hot-item"
+            >
               <div class="item-content">
-                <p class="item-text">{{ item }}</p>
+                <p class="item-text">{{ item.text }}</p>
                 <div class="item-meta">
-                  <span class="item-tag">{{ hotTags[index % hotTags.length] }}</span>
-                  <span class="item-used">已使用 {{ hotUsed[index % hotUsed.length] }}</span>
+                  <span class="item-tag">{{ item.typeLabel }}</span>
+                  <span class="item-used">推荐指数 {{ formatRecommendStars(item.stars) }}</span>
                 </div>
               </div>
               <button
                 class="copy-button"
-                :aria-label="`复制热门贺词 ${index + 1}`"
-                @click="handleCopyHot(item)"
+                :aria-label="`复制推荐贺词 ${index + 1}`"
+                @click="handleCopyRecommend(item.text)"
               >
                 <span class="material-icons">content_copy</span>
               </button>
@@ -172,9 +193,9 @@
       </section>
 
       <section class="knowledge-card">
-        <div class="knowledge-icon" aria-hidden="true">
+        <!-- <div class="knowledge-icon" aria-hidden="true">
           <span class="material-icons">pets</span>
-        </div>
+        </div> -->
         <div class="knowledge-content">
           <h3>民俗小知识：关于马年</h3>
           <p>
@@ -199,10 +220,18 @@ defineOptions({
   name: 'HappyNewYearPage',
 })
 
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ElMessage } from 'element-plus'
+import { aiApi } from '@/api/ai'
+import {
+  type HorseYearRecommendMessage,
+  HORSE_YEAR_RECOMMEND_MESSAGES,
+  HORSE_YEAR_RECOMMEND_PAGE_SIZE,
+} from '@/constants/NewYearMessage'
+import newYearBgmSrc from '@/assets/music/恭喜发财.m4a'
 
 type BlessingSource = 'generated' | 'hot' | 'recent'
+type BlessingLengthMode = 'short' | 'medium' | 'long'
 
 interface CopyRecord {
   id: string
@@ -220,32 +249,87 @@ interface FireworkParticle {
   color: string
 }
 
+interface BlessingLengthRule {
+  label: string
+  hint: string
+  min: number
+  max: number
+}
+
 const MAX_RECENT = 20
 const RECENT_KEY = 'happy_new_year_recent_copies_v2'
+const GENERATE_DEBOUNCE_MS = 260
+const GENERATE_THROTTLE_MS = 2000
+const BGM_VOLUME = 0.55
 
-const hotBlessings = [
-  '金戈铁马闻征鼓，只争朝夕启新程。祝您在新的一年里，马到成功，一马当先！',
-  '马年到来喜事多，合家团圆幸福多。祝您身体健康，万事如意，笑口常开！',
-  '龙马精神身体棒，事业有成财运旺。祝您新年快乐，福气满满！',
-]
+const BLESSING_LENGTH_RULES: Record<BlessingLengthMode, BlessingLengthRule> = {
+  short: {
+    label: '短',
+    hint: '20字以内',
+    min: 1,
+    max: 20,
+  },
+  medium: {
+    label: '中',
+    hint: '20-40字',
+    min: 20,
+    max: 40,
+  },
+  long: {
+    label: '长',
+    hint: '40-80字',
+    min: 40,
+    max: 80,
+  },
+}
 
-const hotTags = ['职场祝愿', '家庭祝福', '健康长寿']
-const hotUsed = ['1.2万次', '8500次', '6200次']
+const blessingLengthOptions = [
+  { value: 'short', label: '短' },
+  { value: 'medium', label: '中' },
+  { value: 'long', label: '长' },
+] as const
 
-const wishes = [
-  '马蹄声声辞旧岁，喜气洋洋迎新春。祝您马年行大运，前程似锦步步高！',
-  '金戈铁马闻征鼓，只争朝夕启新程。祝您在新的一年里，马到成功，一马当先！',
-  '龙马精神身体棒，事业有成财运旺。祝您新年快乐，福气满满！',
-  '策马扬鞭奔小康，欣欣向荣家业旺。祝您万事如意，阖家幸福！',
-  '新的一年，愿您如千里马般驰骋疆场，大展宏图，马到成功！',
-  '马年到，好运到，祝您身体健康，工作顺利，财源广进，万事胜意！',
-  '龙马精神，万事如意！祝您马年吉祥，幸福安康！',
-  '春风得意马蹄疾，一日看尽长安花。祝您马年心想事成，快乐无边！',
-]
+const recommendStartIndex = ref(0)
+const selectedBlessingLength = ref<BlessingLengthMode>('medium')
+
+const recommendedBlessings = computed<HorseYearRecommendMessage[]>(() => {
+  const recommendSource = HORSE_YEAR_RECOMMEND_MESSAGES
+  const total = recommendSource.length
+  if (total === 0) return []
+
+  const batchSize = Math.min(HORSE_YEAR_RECOMMEND_PAGE_SIZE, total)
+  const start = recommendStartIndex.value % total
+
+  return Array.from({ length: batchSize }, (_, offset) => {
+    const index = (start + offset) % total
+    return recommendSource[index]
+  })
+})
+
+const switchRecommendedBlessings = () => {
+  const total = HORSE_YEAR_RECOMMEND_MESSAGES.length
+  if (total <= HORSE_YEAR_RECOMMEND_PAGE_SIZE) return
+
+  recommendStartIndex.value = (recommendStartIndex.value + HORSE_YEAR_RECOMMEND_PAGE_SIZE) % total
+}
+
+const fallbackBlessingsByLength: Record<BlessingLengthMode, string[]> = {
+  short: ['马年大吉，万事顺遂！', '龙马精神，新春快乐！', '马到成功，平安喜乐！'],
+  medium: [
+    '马年到来喜事多，阖家团圆福满门，万事皆顺意。',
+    '龙马精神迎新岁，愿你新年好运连连，笑口常开。',
+    '新春启新程，愿你马年步步高，事业生活双丰收。',
+  ],
+  long: [
+    '春风送暖迎马年，愿你在新的一年里龙马精神、奋勇向前，事业蒸蒸日上，生活喜乐安康。',
+    '马蹄声声报春来，愿你马年心有热爱、眼有光芒，所行皆坦途，所愿皆可期，幸福常伴左右。',
+    '新春已至，愿你在马年乘风而起，敢闯敢拼收获成长，家人平安顺遂，日子越过越红火。',
+  ],
+}
 
 const isGenerating = ref(false)
 const isSoundOn = ref(true)
-const currentBlessing = ref(wishes[0])
+const currentBlessing = ref(fallbackBlessingsByLength.medium[0])
 const wishFading = ref(false)
 const iconPulse = ref(false)
 const glowVisible = ref(false)
@@ -256,6 +340,9 @@ const toastVisible = ref(false)
 const toastText = ref('贺词已复制到剪贴板！')
 const fireworksLayerRef = ref<HTMLElement | null>(null)
 const timerPool = new Set<number>()
+const bgmAudioRef = ref<HTMLAudioElement | null>(null)
+let generateDebounceTimer: number | null = null
+let lastGenerateStartedAt = 0
 
 const runAfter = (callback: () => void, delay: number) => {
   const id = window.setTimeout(() => {
@@ -266,14 +353,171 @@ const runAfter = (callback: () => void, delay: number) => {
   return id
 }
 
+const clearGenerateDebounce = () => {
+  if (generateDebounceTimer === null) return
+  clearTimeout(generateDebounceTimer)
+  timerPool.delete(generateDebounceTimer)
+  generateDebounceTimer = null
+}
+
 const createRecordId = () => {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
 const randomPick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)]
 
-const toggleSound = () => {
-  isSoundOn.value = !isSoundOn.value
+const selectedLengthRule = computed(() => BLESSING_LENGTH_RULES[selectedBlessingLength.value])
+
+const setBlessingLength = (mode: BlessingLengthMode) => {
+  selectedBlessingLength.value = mode
+}
+
+const formatRecommendStars = (stars: number) => {
+  return `${'★'.repeat(stars)}${'☆'.repeat(Math.max(0, 5 - stars))}（${stars}颗星）`
+}
+
+const countBlessingChars = (text: string) => {
+  return text.replace(/\s+/g, '').replace(/[，。！？；：“”‘’、,.!?;:()（）《》【】[\]'"`~…—-]/g, '')
+    .length
+}
+
+const isBlessingLengthMatched = (text: string, mode: BlessingLengthMode) => {
+  const { min, max } = BLESSING_LENGTH_RULES[mode]
+  const textLength = countBlessingChars(text)
+  return textLength >= min && textLength <= max
+}
+
+const buildHorseYearBlessingPrompt = (mode: BlessingLengthMode) => {
+  const { hint } = BLESSING_LENGTH_RULES[mode]
+  return [
+    '你是一位资深中文节庆文案作者。',
+    '请创作1条马年新春祝贺语，语气真挚、喜庆、文采自然。',
+    `字数要求：${hint}`,
+    '只返回最终贺词正文，不要标题、解释、引号、序号、markdown。',
+  ].join('\n')
+}
+
+const pickFallbackBlessing = (mode: BlessingLengthMode) => {
+  const matched = fallbackBlessingsByLength[mode].filter((item) =>
+    isBlessingLengthMatched(item, mode),
+  )
+  if (matched.length > 0) return randomPick(matched)
+
+  const recommendPool = HORSE_YEAR_RECOMMEND_MESSAGES.map((item) => item.text).filter((item) =>
+    isBlessingLengthMatched(item, mode),
+  )
+
+  if (recommendPool.length > 0) return randomPick(recommendPool)
+  return randomPick(fallbackBlessingsByLength.medium)
+}
+
+const extractBlessingText = (payload: unknown): string => {
+  if (typeof payload === 'string') return payload.trim()
+
+  if (Array.isArray(payload)) {
+    for (const item of payload) {
+      const candidate = extractBlessingText(item)
+      if (candidate) return candidate
+    }
+    return ''
+  }
+
+  if (!payload || typeof payload !== 'object') return ''
+
+  const record = payload as Record<string, unknown>
+  const directFields = ['content', 'message', 'text', 'result', 'output', 'reply']
+
+  for (const key of directFields) {
+    const value = record[key]
+    if (typeof value === 'string' && value.trim()) return value.trim()
+  }
+
+  if (Array.isArray(record.choices)) {
+    for (const choice of record.choices) {
+      const candidate = extractBlessingText(choice)
+      if (candidate) return candidate
+    }
+  }
+
+  for (const value of Object.values(record)) {
+    const candidate = extractBlessingText(value)
+    if (candidate) return candidate
+  }
+
+  return ''
+}
+
+const normalizeBlessingText = (text: string) => {
+  return text
+    .replace(/```[\w-]*\s*/g, '')
+    .replace(/```/g, '')
+    .replace(/^[\d一二三四五六七八九十]+[、.]\s*/u, '')
+    .replace(/^(?:贺词|祝福语|提示词)[:：]\s*/u, '')
+    .replace(/^[“"'`]+|[“"'`]+$/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+const applyBlessingWithFade = (blessing: string) => {
+  wishFading.value = true
+  runAfter(() => {
+    currentBlessing.value = blessing
+    wishFading.value = false
+  }, 220)
+}
+
+const getOrCreateBgmAudio = () => {
+  if (bgmAudioRef.value) return bgmAudioRef.value
+
+  const audio = document.createElement('audio')
+  audio.src = newYearBgmSrc
+  audio.preload = 'auto'
+  audio.loop = true
+  audio.volume = BGM_VOLUME
+  audio.setAttribute('playsinline', 'true')
+  audio.setAttribute('webkit-playsinline', 'true')
+  bgmAudioRef.value = audio
+  return audio
+}
+
+const playBgm = async () => {
+  const audio = getOrCreateBgmAudio()
+  audio.volume = BGM_VOLUME
+
+  try {
+    await audio.play()
+    return true
+  } catch {
+    return false
+  }
+}
+
+const pauseBgm = () => {
+  const audio = bgmAudioRef.value
+  if (!audio) return
+  audio.pause()
+}
+
+const toggleSound = async () => {
+  const willEnable = !isSoundOn.value
+  if (!willEnable) {
+    pauseBgm()
+    isSoundOn.value = false
+    return
+  }
+
+  const played = await playBgm()
+  isSoundOn.value = played
+  if (!played) {
+    ElMessage.warning('浏览器限制自动播放，请再次点击开启音效')
+  }
+}
+
+const tryAutoPlayBgm = async () => {
+  if (!isSoundOn.value) return
+
+  const played = await playBgm()
+  isSoundOn.value = played
 }
 
 const isValidSource = (source: unknown): source is BlessingSource => {
@@ -448,10 +692,13 @@ const triggerHorseAnimation = () => {
   })
 }
 
-const handleGenerate = async () => {
+const requestGenerateBlessing = async () => {
   if (isGenerating.value) return
 
+  const targetLengthMode = selectedBlessingLength.value
+
   isGenerating.value = true
+  lastGenerateStartedAt = Date.now()
   iconPulse.value = true
   glowVisible.value = true
   runAfter(() => {
@@ -459,27 +706,63 @@ const handleGenerate = async () => {
     glowVisible.value = false
   }, 320)
 
-  wishFading.value = true
-  runAfter(() => {
-    currentBlessing.value = randomPick(wishes)
-    wishFading.value = false
-  }, 220)
-
   if (isSoundOn.value) {
     void createFireworks()
     triggerHorseAnimation()
   }
 
-  runAfter(() => {
-    isGenerating.value = false
-  }, 360)
+  try {
+    const aiPrompt = buildHorseYearBlessingPrompt(targetLengthMode)
+    const aiResult = await aiApi.getAIContent(aiPrompt)
+    const normalizedBlessing = normalizeBlessingText(extractBlessingText(aiResult))
+
+    if (!normalizedBlessing) {
+      throw new Error('AI 返回内容为空')
+    }
+
+    if (!isBlessingLengthMatched(normalizedBlessing, targetLengthMode)) {
+      const { hint } = BLESSING_LENGTH_RULES[targetLengthMode]
+      throw new Error(`AI 返回字数不符合 ${hint}`)
+    }
+
+    applyBlessingWithFade(normalizedBlessing)
+  } catch (error) {
+    console.error('AI 生成贺词失败:', error)
+    applyBlessingWithFade(pickFallbackBlessing(targetLengthMode))
+    const { hint } = BLESSING_LENGTH_RULES[targetLengthMode]
+    ElMessage.warning(`AI生成失败，已切换为${hint}贺词`)
+  } finally {
+    runAfter(() => {
+      isGenerating.value = false
+    }, 360)
+  }
+}
+
+const handleGenerate = () => {
+  clearGenerateDebounce()
+
+  generateDebounceTimer = runAfter(() => {
+    generateDebounceTimer = null
+
+    if (isGenerating.value) return
+
+    const now = Date.now()
+    const elapsed = now - lastGenerateStartedAt
+    if (elapsed < GENERATE_THROTTLE_MS) {
+      const remainMs = GENERATE_THROTTLE_MS - elapsed
+      ElMessage.warning(`操作过于频繁，请${Math.max(1, Math.ceil(remainMs / 1000))}秒后再试`)
+      return
+    }
+
+    void requestGenerateBlessing()
+  }, GENERATE_DEBOUNCE_MS)
 }
 
 const handleCopyCurrent = async () => {
   await copyText(currentBlessing.value, 'generated')
 }
 
-const handleCopyHot = async (text: string) => {
+const handleCopyRecommend = async (text: string) => {
   await copyText(text, 'hot')
 }
 
@@ -500,9 +783,13 @@ const formatCopiedAt = (value: string) => {
 
 onMounted(() => {
   loadRecentFromStorage()
+  void tryAutoPlayBgm()
 })
 
 onBeforeUnmount(() => {
+  pauseBgm()
+  bgmAudioRef.value = null
+  clearGenerateDebounce()
   timerPool.forEach((id) => clearTimeout(id))
   timerPool.clear()
 })
@@ -944,6 +1231,61 @@ onBeforeUnmount(() => {
   letter-spacing: 0.22em;
 }
 
+.length-control {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.length-title {
+  font-size: 13px;
+  color: #8d6550;
+  font-weight: 700;
+}
+
+.length-chip {
+  min-height: 34px;
+  min-width: 56px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 24, 43, 0.25);
+  background: #fff;
+  color: #7e4633;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.length-chip:hover:not(:disabled) {
+  border-color: rgba(201, 24, 43, 0.45);
+}
+
+.length-chip.active {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(to right, var(--primary), var(--primary-hover));
+  box-shadow: 0 6px 14px rgba(201, 24, 43, 0.22);
+}
+
+.length-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.length-hint {
+  font-size: 12px;
+  color: #8f6a57;
+  font-weight: 600;
+}
+
 .action-row {
   width: 100%;
   display: flex;
@@ -1339,9 +1681,61 @@ onBeforeUnmount(() => {
     font-size: clamp(29px, 9vw, 44px);
   }
 
+  .length-control {
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .length-title {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .length-chip {
+    min-width: 0;
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .length-hint {
+    width: 100%;
+    font-size: 11px;
+  }
+
+  .action-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    align-items: stretch;
+  }
+
   .primary-button,
   .secondary-button {
     width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 10px 8px;
+    border-radius: 11px;
+    font-size: 15px;
+    line-height: 1;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  .primary-button {
+    box-shadow: 0 8px 16px rgba(201, 24, 43, 0.24);
+  }
+
+  .secondary-button {
+    background: linear-gradient(180deg, #ffffff 0%, #fff5ee 100%);
+    border-color: rgba(201, 24, 43, 0.18);
+    box-shadow: 0 6px 12px rgba(111, 63, 35, 0.08);
+  }
+
+  .action-row .material-icons {
+    font-size: 19px;
   }
 
   .knowledge-card {
@@ -1361,6 +1755,27 @@ onBeforeUnmount(() => {
 
   .panel-title {
     font-size: 21px;
+  }
+
+  .length-title,
+  .length-hint {
+    text-align: left;
+  }
+
+  .action-row {
+    gap: 6px;
+  }
+
+  .primary-button,
+  .secondary-button {
+    min-height: 44px;
+    padding: 9px 6px;
+    border-radius: 10px;
+    font-size: 14px;
+  }
+
+  .action-row .material-icons {
+    font-size: 18px;
   }
 
   .knowledge-content h3 {
