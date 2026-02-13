@@ -115,8 +115,13 @@
               <span class="material-icons">content_copy</span>
               复制
             </button>
-            <button class="secondary-button" aria-label="分享贺词">
-              <span class="material-icons">share</span>
+            <button
+              class="secondary-button"
+              :disabled="isSharingCard"
+              aria-label="分享贺词"
+              @click="handleShareCard"
+            >
+              <span class="material-icons">{{ isSharingCard ? 'hourglass_top' : 'share' }}</span>
             </button>
           </div>
         </div>
@@ -206,6 +211,42 @@
       </section>
     </main>
 
+    <blessing-share-card ref="shareCardRef" :blessing="currentBlessing" />
+
+    <div
+      v-if="showSharePreviewModal"
+      class="share-preview-backdrop"
+      role="dialog"
+      aria-modal="true"
+      aria-label="分享卡面预览"
+      @click.self="closeSharePreviewModal"
+    >
+      <div class="share-preview-modal">
+        <button class="share-preview-close-btn" aria-label="关闭预览" @click="closeSharePreviewModal">
+          <span class="material-icons">close</span>
+        </button>
+
+        <h3 class="share-preview-title">分享卡面预览</h3>
+        <div class="share-preview-image-wrap">
+          <img
+            v-if="sharePreviewImageUrl"
+            class="share-preview-image"
+            :src="sharePreviewImageUrl"
+            alt="新春贺词分享卡面预览"
+          />
+        </div>
+
+        <button
+          class="share-preview-download-btn"
+          :disabled="!sharePreviewBlob"
+          @click="handleDownloadShareCard"
+        >
+          <span class="material-icons">download</span>
+          下载卡面
+        </button>
+      </div>
+    </div>
+
     <footer class="page-footer">© 2026 马年新春贺词生成器. 用心设计，传递喜悦。</footer>
 
     <div class="toast" :class="{ show: toastVisible }">
@@ -263,6 +304,7 @@ import {
   HORSE_YEAR_RECOMMEND_PAGE_SIZE,
 } from '@/constants/NewYearMessage'
 import newYearBgmSrc from '@/assets/music/恭喜发财.m4a'
+import BlessingShareCard from './components/BlessingShareCard.vue'
 
 type BlessingSource = 'generated' | 'hot' | 'recent'
 type BlessingLengthMode = 'short' | 'medium' | 'long'
@@ -288,6 +330,15 @@ interface BlessingLengthRule {
   hint: string
   min: number
   max: number
+}
+
+interface ShareCardImagePayload {
+  blob: Blob
+  fileName: string
+}
+
+interface BlessingShareCardExpose {
+  generateImage: () => Promise<ShareCardImagePayload | null>
 }
 
 const MAX_RECENT = 20
@@ -362,6 +413,7 @@ const fallbackBlessingsByLength: Record<BlessingLengthMode, string[]> = {
 }
 
 const isGenerating = ref(false)
+const isSharingCard = ref(false)
 const isSoundOn = ref(false)
 const showBgmModal = ref(false)
 const currentBlessing = ref(fallbackBlessingsByLength.medium[0])
@@ -374,6 +426,11 @@ const recentCopyRecords = ref<CopyRecord[]>([])
 const toastVisible = ref(false)
 const toastText = ref('贺词已复制到剪贴板！')
 const fireworksLayerRef = ref<HTMLElement | null>(null)
+const shareCardRef = ref<BlessingShareCardExpose | null>(null)
+const showSharePreviewModal = ref(false)
+const sharePreviewBlob = ref<Blob | null>(null)
+const sharePreviewImageUrl = ref('')
+const sharePreviewFileName = ref('')
 const timerPool = new Set<number>()
 const bgmAudioRef = ref<HTMLAudioElement | null>(null)
 let bgmUnlockHandler: (() => void) | null = null
@@ -869,6 +926,75 @@ const handleCopyRecent = async (text: string) => {
   await copyText(text, 'recent')
 }
 
+const downloadBlob = (blob: Blob, fileName: string) => {
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = fileName
+  link.rel = 'noopener'
+  link.style.display = 'none'
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  runAfter(() => {
+    URL.revokeObjectURL(url)
+  }, 520)
+}
+
+const revokeSharePreviewUrl = () => {
+  if (!sharePreviewImageUrl.value) return
+  URL.revokeObjectURL(sharePreviewImageUrl.value)
+  sharePreviewImageUrl.value = ''
+}
+
+const setSharePreviewImage = (payload: ShareCardImagePayload) => {
+  revokeSharePreviewUrl()
+  sharePreviewBlob.value = payload.blob
+  sharePreviewFileName.value = payload.fileName
+  sharePreviewImageUrl.value = URL.createObjectURL(payload.blob)
+  showSharePreviewModal.value = true
+}
+
+const handleShareCard = async () => {
+  if (isSharingCard.value) return
+
+  const cardComponent = shareCardRef.value
+  if (!cardComponent) {
+    ElMessage.error('分享组件尚未准备好，请稍后重试')
+    return
+  }
+
+  isSharingCard.value = true
+  try {
+    const shareCardImage = await cardComponent.generateImage()
+    if (!shareCardImage) {
+      throw new Error('分享卡面生成失败')
+    }
+
+    setSharePreviewImage(shareCardImage)
+  } catch (error) {
+    console.error('生成分享卡面失败:', error)
+    ElMessage.error('生成分享卡面失败，请稍后重试')
+  } finally {
+    isSharingCard.value = false
+  }
+}
+
+const closeSharePreviewModal = () => {
+  showSharePreviewModal.value = false
+}
+
+const handleDownloadShareCard = () => {
+  if (!sharePreviewBlob.value) {
+    ElMessage.warning('请先生成分享卡面')
+    return
+  }
+
+  const fileName = sharePreviewFileName.value || `马年新春贺词-${Date.now()}.png`
+  downloadBlob(sharePreviewBlob.value, fileName)
+  showToast('分享卡面已下载')
+}
+
 const formatCopiedAt = (value: string) => {
   const target = new Date(value)
   if (Number.isNaN(target.getTime())) return value
@@ -888,6 +1014,7 @@ onMounted(() => {
 onBeforeUnmount(() => {
   pauseBgm()
   removeBgmUnlockListeners()
+  revokeSharePreviewUrl()
   if (bgmAudioRef.value?.parentNode) {
     bgmAudioRef.value.parentNode.removeChild(bgmAudioRef.value)
   }
@@ -1442,9 +1569,14 @@ onBeforeUnmount(() => {
   border-color: rgba(145, 124, 113, 0.25);
 }
 
-.secondary-button:hover {
+.secondary-button:hover:not(:disabled) {
   background: #fff2e8;
   color: var(--primary);
+}
+
+.secondary-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .bottom-gold-line {
@@ -1691,6 +1823,107 @@ onBeforeUnmount(() => {
 
 .toast-icon {
   color: #52c26d;
+}
+
+.share-preview-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(31, 23, 15, 0.72);
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.share-preview-modal {
+  position: relative;
+  width: min(520px, 100%);
+  max-height: calc(100vh - 40px);
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid rgba(201, 24, 43, 0.2);
+  background: linear-gradient(180deg, #fffaf2 0%, #ffeede 100%);
+  box-shadow: 0 24px 54px rgba(44, 25, 15, 0.35);
+  padding: 18px 18px 20px;
+}
+
+.share-preview-close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: rgba(201, 24, 43, 0.08);
+  color: #7f2732;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.share-preview-close-btn:hover {
+  background: rgba(201, 24, 43, 0.14);
+  color: #b01626;
+}
+
+.share-preview-title {
+  margin: 2px 44px 14px 4px;
+  color: #7a1a26;
+  font-size: 24px;
+  line-height: 1.3;
+}
+
+.share-preview-image-wrap {
+  border-radius: 14px;
+  border: 1px solid rgba(201, 24, 43, 0.16);
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+}
+
+.share-preview-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.share-preview-download-btn {
+  margin-top: 14px;
+  width: 100%;
+  min-height: 48px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  color: #fff;
+  background: linear-gradient(to right, var(--primary), var(--primary-hover));
+  box-shadow: 0 10px 22px rgba(201, 24, 43, 0.28);
+  font-size: 16px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.share-preview-download-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(201, 24, 43, 0.32);
+}
+
+.share-preview-download-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .bgm-modal-backdrop {
@@ -1955,7 +2188,9 @@ onBeforeUnmount(() => {
   .toast,
   .primary-button,
   .secondary-button,
-  .copy-button {
+  .copy-button,
+  .share-preview-close-btn,
+  .share-preview-download-btn {
     transition: none;
   }
 }
@@ -2049,6 +2284,25 @@ onBeforeUnmount(() => {
   .knowledge-card {
     flex-direction: column;
   }
+
+  .share-preview-backdrop {
+    padding: 14px;
+  }
+
+  .share-preview-modal {
+    padding: 16px 14px 16px;
+    border-radius: 14px;
+  }
+
+  .share-preview-title {
+    font-size: 21px;
+    margin-right: 40px;
+  }
+
+  .share-preview-download-btn {
+    min-height: 46px;
+    font-size: 15px;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2101,6 +2355,24 @@ onBeforeUnmount(() => {
   .bgm-btn {
     min-height: 46px;
     font-size: 16px;
+  }
+
+  .share-preview-backdrop {
+    padding: 10px;
+  }
+
+  .share-preview-modal {
+    padding: 14px 10px 14px;
+  }
+
+  .share-preview-title {
+    font-size: 19px;
+    margin-bottom: 10px;
+  }
+
+  .share-preview-close-btn {
+    top: 6px;
+    right: 6px;
   }
 }
 </style>
