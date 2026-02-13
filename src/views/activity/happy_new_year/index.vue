@@ -212,6 +212,40 @@
       <span class="material-icons toast-icon">check_circle</span>
       <span>{{ toastText }}</span>
     </div>
+
+    <div v-if="showBgmModal" class="bgm-modal-backdrop">
+      <div class="bgm-modal" role="dialog" aria-modal="true" aria-label="背景音乐设置">
+        <div class="bgm-corner bgm-corner-tl" />
+        <div class="bgm-corner bgm-corner-tr" />
+        <div class="bgm-corner bgm-corner-bl" />
+        <div class="bgm-corner bgm-corner-br" />
+        <div class="bgm-modal-pattern" />
+
+        <div class="bgm-modal-content">
+          <div class="bgm-icon-wrap">
+            <div class="bgm-icon-glow" />
+            <div class="bgm-icon-core">
+              <span class="material-icons">bakery_dining</span>
+              <span class="material-icons bgm-icon-spark">auto_awesome</span>
+            </div>
+          </div>
+
+          <h3 class="bgm-title">开启新春音乐</h3>
+          <!-- <p class="bgm-description">是否开启背景音乐</p> -->
+
+          <div class="bgm-actions">
+            <button class="bgm-btn bgm-btn-primary" @click="handleEnableBgmFromModal">开启</button>
+            <button class="bgm-btn bgm-btn-ghost" @click="handleSkipBgmFromModal">暂不开启</button>
+          </div>
+
+          <div class="bgm-footer-note">
+            <span class="line" />
+            <span class="text">YEAR OF THE HORSE</span>
+            <span class="line" />
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -328,7 +362,8 @@ const fallbackBlessingsByLength: Record<BlessingLengthMode, string[]> = {
 }
 
 const isGenerating = ref(false)
-const isSoundOn = ref(true)
+const isSoundOn = ref(false)
+const showBgmModal = ref(false)
 const currentBlessing = ref(fallbackBlessingsByLength.medium[0])
 const wishFading = ref(false)
 const iconPulse = ref(false)
@@ -472,24 +507,41 @@ const getOrCreateBgmAudio = () => {
 
   const audio = document.createElement('audio')
   audio.src = newYearBgmSrc
+  audio.autoplay = true
   audio.preload = 'auto'
   audio.loop = true
   audio.volume = BGM_VOLUME
   audio.setAttribute('playsinline', 'true')
   audio.setAttribute('webkit-playsinline', 'true')
+  audio.style.display = 'none'
+  audio.setAttribute('aria-hidden', 'true')
+  document.body.appendChild(audio)
   bgmAudioRef.value = audio
   return audio
 }
 
-const playBgm = async () => {
+const playBgm = async (allowMutedFallback = false) => {
   const audio = getOrCreateBgmAudio()
+  audio.muted = false
   audio.volume = BGM_VOLUME
 
   try {
     await audio.play()
     return true
   } catch {
-    return false
+    if (!allowMutedFallback) return false
+
+    try {
+      // Fallback for strict autoplay policies: start muted first, then restore volume.
+      audio.muted = true
+      audio.volume = 0
+      await audio.play()
+      audio.muted = false
+      audio.volume = BGM_VOLUME
+      return true
+    } catch {
+      return false
+    }
   }
 }
 
@@ -547,14 +599,23 @@ const toggleSound = async () => {
   removeBgmUnlockListeners()
 }
 
-const tryAutoPlayBgm = async () => {
-  if (!isSoundOn.value) return
+const handleEnableBgmFromModal = async () => {
+  showBgmModal.value = false
+  isSoundOn.value = true
 
-  const played = await playBgm()
+  const played = await playBgm(true)
   if (!played) {
     setupBgmUnlockOnFirstInteraction()
+    ElMessage.warning('浏览器限制自动播放，点击页面任意位置后将自动播放')
     return
   }
+  removeBgmUnlockListeners()
+}
+
+const handleSkipBgmFromModal = () => {
+  showBgmModal.value = false
+  isSoundOn.value = false
+  pauseBgm()
   removeBgmUnlockListeners()
 }
 
@@ -821,12 +882,15 @@ const formatCopiedAt = (value: string) => {
 
 onMounted(() => {
   loadRecentFromStorage()
-  void tryAutoPlayBgm()
+  showBgmModal.value = true
 })
 
 onBeforeUnmount(() => {
   pauseBgm()
   removeBgmUnlockListeners()
+  if (bgmAudioRef.value?.parentNode) {
+    bgmAudioRef.value.parentNode.removeChild(bgmAudioRef.value)
+  }
   bgmAudioRef.value = null
   clearGenerateDebounce()
   timerPool.forEach((id) => clearTimeout(id))
@@ -1617,6 +1681,7 @@ onBeforeUnmount(() => {
     transform 0.28s ease,
     opacity 0.28s ease;
   z-index: 40;
+  font-size: 14px;
 }
 
 .toast.show {
@@ -1626,6 +1691,210 @@ onBeforeUnmount(() => {
 
 .toast-icon {
   color: #52c26d;
+}
+
+.bgm-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(34, 30, 16, 0.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.bgm-modal {
+  position: relative;
+  width: min(560px, 100%);
+  border-radius: 16px;
+  border: 2px solid rgba(242, 185, 13, 0.3);
+  background: linear-gradient(135deg, #b91c1c 0%, #7f1d1d 100%);
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+}
+
+.bgm-modal-pattern {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.2;
+  background-image: radial-gradient(circle at 2px 2px, rgba(242, 185, 13, 0.2) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.bgm-corner {
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-color: #f2b90d;
+  opacity: 0.85;
+  z-index: 2;
+}
+
+.bgm-corner-tl {
+  top: 0;
+  left: 0;
+  border-top: 4px solid currentColor;
+  border-left: 4px solid currentColor;
+  border-top-left-radius: 16px;
+}
+
+.bgm-corner-tr {
+  top: 0;
+  right: 0;
+  border-top: 4px solid currentColor;
+  border-right: 4px solid currentColor;
+  border-top-right-radius: 16px;
+}
+
+.bgm-corner-bl {
+  bottom: 0;
+  left: 0;
+  border-bottom: 4px solid currentColor;
+  border-left: 4px solid currentColor;
+  border-bottom-left-radius: 16px;
+}
+
+.bgm-corner-br {
+  right: 0;
+  bottom: 0;
+  border-right: 4px solid currentColor;
+  border-bottom: 4px solid currentColor;
+  border-bottom-right-radius: 16px;
+}
+
+.bgm-modal-content {
+  position: relative;
+  z-index: 3;
+  padding: 42px 30px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.bgm-icon-wrap {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.bgm-icon-glow {
+  position: absolute;
+  inset: -12px;
+  border-radius: 999px;
+  background: rgba(242, 185, 13, 0.3);
+  filter: blur(18px);
+}
+
+.bgm-icon-core {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  border: 1px solid rgba(242, 185, 13, 0.45);
+  background: rgba(242, 185, 13, 0.14);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #f2b90d;
+}
+
+.bgm-icon-core .material-icons {
+  font-size: 50px;
+}
+
+.bgm-icon-spark {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  font-size: 22px !important;
+}
+
+.bgm-title {
+  margin: 0;
+  color: #f2b90d;
+  font-size: clamp(30px, 5vw, 38px);
+  line-height: 1.2;
+  letter-spacing: 0.12em;
+  font-family: 'Ma Shan Zheng', cursive;
+}
+
+.bgm-description {
+  margin: 12px 0 0;
+  max-width: 390px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 17px;
+  line-height: 1.75;
+}
+
+.bgm-actions {
+  margin-top: 28px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.bgm-btn {
+  min-height: 50px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.bgm-btn:hover {
+  transform: translateY(-1px);
+}
+
+.bgm-btn:active {
+  transform: translateY(0);
+}
+
+.bgm-btn-primary {
+  color: #221e10;
+  background: #f2b90d;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.22);
+}
+
+.bgm-btn-primary:hover {
+  background: #f8c63d;
+}
+
+.bgm-btn-ghost {
+  color: #f2b90d;
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(242, 185, 13, 0.4);
+}
+
+.bgm-btn-ghost:hover {
+  background: rgba(242, 185, 13, 0.12);
+  border-color: rgba(242, 185, 13, 0.65);
+}
+
+.bgm-footer-note {
+  margin-top: 18px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(242, 185, 13, 0.78);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.bgm-footer-note .line {
+  width: 34px;
+  height: 1px;
+  background: currentColor;
 }
 
 @keyframes sound-wave {
@@ -1819,6 +2088,19 @@ onBeforeUnmount(() => {
 
   .knowledge-content h3 {
     font-size: 24px;
+  }
+
+  .bgm-modal-content {
+    padding: 34px 18px 22px;
+  }
+
+  .bgm-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .bgm-btn {
+    min-height: 46px;
+    font-size: 16px;
   }
 }
 </style>
