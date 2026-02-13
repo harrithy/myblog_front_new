@@ -77,6 +77,11 @@ const routes: RouteRecordRaw[] = [
       title: 'Me',
     },
   },
+  {
+    path: '/happy',
+    name: 'happyNewYear',
+    component: () => import('../views/activity/happy_new_year/index.vue'),
+  },
 ]
 
 const router = createRouter({
