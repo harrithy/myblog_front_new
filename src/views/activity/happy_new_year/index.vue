@@ -103,13 +103,40 @@
             >
               {{ option.label }}
             </button>
-            <span class="length-hint">{{ selectedLengthRule.hint }}</span>
+            <span class="length-hint">{{ lengthHintText }}</span>
+          </div>
+
+          <div class="style-control">
+            <span class="style-title">文案风格</span>
+            <button
+              v-for="option in blessingStyleOptions"
+              :key="option.value"
+              class="style-chip"
+              :class="{
+                active: selectedBlessingStyle === option.value,
+                abstract: option.value === 'abstract',
+              }"
+              :disabled="isGenerating"
+              @click="setBlessingStyle(option.value)"
+            >
+              <span v-if="option.value === 'abstract'" class="material-icons style-chip-icon"
+                >casino</span
+              >
+              {{ option.label }}
+            </button>
+            <span class="style-hint">{{ selectedStyleHint }}</span>
           </div>
 
           <div class="action-row">
             <button class="primary-button" :disabled="isGenerating" @click="handleGenerate">
               <span class="material-icons">shuffle</span>
-              {{ isGenerating ? '生成中...' : '生成贺词' }}
+              {{
+                isGenerating
+                  ? '生成中...'
+                  : selectedBlessingStyle === 'abstract'
+                    ? '生成抽象贺词'
+                    : '生成贺词'
+              }}
             </button>
             <button class="secondary-button" @click="handleCopyCurrent">
               <span class="material-icons">content_copy</span>
@@ -181,8 +208,23 @@
                   <span class="material-icons">check_circle</span>
                 </div>
                 <div class="recent-main">
-                  <p class="recent-text">"{{ record.text }}"</p>
+                  <p
+                    class="recent-text"
+                    :class="{ 'recent-text-clamp': !isRecentTextExpanded(record.id) }"
+                    :title="record.text"
+                    :ref="(el) => setRecentTextRef(record.id, el)"
+                  >
+                    "{{ record.text }}"
+                  </p>
                   <span class="recent-time">{{ formatCopiedAt(record.copiedAt) }}</span>
+                  <button
+                    v-if="isRecentTextOverflow(record.id) || isRecentTextExpanded(record.id)"
+                    class="recent-expand-btn"
+                    :aria-label="isRecentTextExpanded(record.id) ? '收起贺词全文' : '查看完整贺词'"
+                    @click="toggleRecentTextExpanded(record.id)"
+                  >
+                    {{ isRecentTextExpanded(record.id) ? '收起' : '查看全文' }}
+                  </button>
                 </div>
                 <button
                   class="copy-button"
@@ -222,7 +264,11 @@
       @click.self="closeSharePreviewModal"
     >
       <div class="share-preview-modal">
-        <button class="share-preview-close-btn" aria-label="关闭预览" @click="closeSharePreviewModal">
+        <button
+          class="share-preview-close-btn"
+          aria-label="关闭预览"
+          @click="closeSharePreviewModal"
+        >
           <span class="material-icons">close</span>
         </button>
 
@@ -295,7 +341,15 @@ defineOptions({
   name: 'HappyNewYearPage',
 })
 
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  watch,
+  type ComponentPublicInstance,
+} from 'vue'
 import { ElMessage } from 'element-plus'
 import { aiApi } from '@/api/ai'
 import {
@@ -308,6 +362,7 @@ import BlessingShareCard from './components/BlessingShareCard.vue'
 
 type BlessingSource = 'generated' | 'hot' | 'recent'
 type BlessingLengthMode = 'short' | 'medium' | 'long'
+type BlessingStyleMode = 'classic' | 'abstract'
 
 interface CopyRecord {
   id: string
@@ -330,6 +385,11 @@ interface BlessingLengthRule {
   hint: string
   min: number
   max: number
+}
+
+interface AbstractStyleVariant {
+  label: string
+  instruction: string
 }
 
 interface ShareCardImagePayload {
@@ -375,8 +435,71 @@ const blessingLengthOptions = [
   { value: 'long', label: '长' },
 ] as const
 
+const blessingStyleOptions = [
+  { value: 'classic', label: '经典' },
+  { value: 'abstract', label: '抽象随机' },
+] as const
+
+const ABSTRACT_STYLE_VARIANTS: AbstractStyleVariant[] = [
+  {
+    label: '热梗冲浪流',
+    instruction:
+      '融入当下最火网络热梗（如“尊嘟假嘟”“City不City”），可点缀表情包符号，语气像社交平台爆款文案，自带社交牛感。',
+  },
+  {
+    label: '二次元应援流',
+    instruction: '多用“守护”“永远的神”“羁绊”等中二词汇，感叹号密度更高，整体要元气、热血、破壁。',
+  },
+  {
+    label: '抽象反差流',
+    instruction:
+      '采用“开头一本正经，中段突然转折”的反差逻辑，用不合常理类比制造幽默，在荒诞表象里包裹温暖内核。',
+  },
+  {
+    label: '赛博弹幕流',
+    instruction:
+      '极短句、多重复，营造排队刷屏既视感，可用“前方高能”“前方核能”“高燃预警”等弹幕术语增强冲击。',
+  },
+  {
+    label: '发光文学流',
+    instruction:
+      '结合发疯文学的细腻与诗意，语序可轻微破碎，情绪要饱满，适度使用通感表达（如“听见光的颜色”），带电影感。',
+  },
+  {
+    label: '少年漫主角流',
+    instruction:
+      '模拟热血番主角独白，必须自然融入“宿命”“觉醒”“约定”等关键词，语气坚定，像在逆境中向世界告白。',
+  },
+  {
+    label: '赛博禅意流',
+    instruction:
+      '语气平和却带看透世界的疲惫感，融合科技词汇与禅意表达（如“数据皆幻象”“给心灵装散热器”），呈现平静疏离。',
+  },
+  {
+    label: '废话文学流',
+    instruction:
+      '表面逻辑严密，实则是正向废话，使用轻度循环句式（如“如果不开心那就先别太不开心”），营造解压和松弛幽默。',
+  },
+  {
+    label: '翻译腔调频流',
+    instruction:
+      '模仿老式译制片或机翻语感，可用“哦我的老伙计”“我发誓这太疯狂了”等句式，以生硬翻译味制造喜感。',
+  },
+  {
+    label: '智性恋理性流',
+    instruction:
+      '使用物理、数学、生物术语重构情感（如“多巴胺低熵排列”“情感量子纠缠”），整体显得冷静、克制但深情。',
+  },
+  {
+    label: '混搭乱炖流',
+    instruction: '随机融合流行语、抽象梗、二次元感，风格不固定且自然。',
+  },
+]
+
 const recommendStartIndex = ref(0)
 const selectedBlessingLength = ref<BlessingLengthMode>('medium')
+const selectedBlessingStyle = ref<BlessingStyleMode>('classic')
+const lastAbstractStyleLabel = ref('')
 
 const recommendedBlessings = computed<HorseYearRecommendMessage[]>(() => {
   const recommendSource = HORSE_YEAR_RECOMMEND_MESSAGES
@@ -413,6 +536,20 @@ const fallbackBlessingsByLength: Record<BlessingLengthMode, string[]> = {
   ],
 }
 
+const abstractFallbackBlessingsByLength: Record<BlessingLengthMode, string[]> = {
+  short: ['马年开挂，灵气满格！', '好运暴击，主角登场！', '马力拉满，快乐超频！'],
+  medium: [
+    '马年像番剧开新篇，愿你一路高能推进，烦恼统统掉线。',
+    '新春buff已叠满，愿你欧气连发，事业与快乐双双暴击。',
+    '祝你马年状态封神，灵感在线，生活每天都有名场面。',
+  ],
+  long: [
+    '马年副本正式开启，愿你带着主角光环一路通关，灵感和好运像连击一样不停触发，工作生活都能收获高光时刻。',
+    '新春版本已更新，愿你在马年把烦恼清空、把快乐拉满，既有二次元般热血冲劲，也有现实里的稳稳幸福与成长。',
+    '愿你在马年保持一点抽象的浪漫和一点勇敢的热血，遇事不内耗、逢难能反杀，日常有梗有笑，未来有光有盼。',
+  ],
+}
+
 const isGenerating = ref(false)
 const isSharingCard = ref(false)
 const isSoundOn = ref(false)
@@ -433,6 +570,9 @@ const showSharePreviewModal = ref(false)
 const sharePreviewBlob = ref<Blob | null>(null)
 const sharePreviewImageUrl = ref('')
 const sharePreviewFileName = ref('')
+const recentTextOverflowMap = ref<Record<string, boolean>>({})
+const recentTextExpandedMap = ref<Record<string, boolean>>({})
+const recentTextElementMap = new Map<string, HTMLElement>()
 const timerPool = new Set<number>()
 const bgmAudioRef = ref<HTMLAudioElement | null>(null)
 let bgmUnlockHandler: (() => void) | null = null
@@ -462,13 +602,88 @@ const createRecordId = () => {
 const randomPick = <T,>(items: T[]) => items[Math.floor(Math.random() * items.length)]
 
 const selectedLengthRule = computed(() => BLESSING_LENGTH_RULES[selectedBlessingLength.value])
+const lengthHintText = computed(() => {
+  if (selectedBlessingStyle.value === 'abstract') return '抽象模式不限制字数'
+  return selectedLengthRule.value.hint
+})
+const selectedStyleHint = computed(() => {
+  if (selectedBlessingStyle.value === 'classic') {
+    return '经典喜庆风格'
+  }
+
+  if (lastAbstractStyleLabel.value) {
+    return `抽象随机已开启 · 本次风格：${lastAbstractStyleLabel.value}`
+  }
+
+  return '抽象随机已开启 · 每次随机切换流行语/抽象梗/二次元风格'
+})
 
 const setBlessingLength = (mode: BlessingLengthMode) => {
   selectedBlessingLength.value = mode
 }
 
+const setBlessingStyle = (mode: BlessingStyleMode) => {
+  selectedBlessingStyle.value = mode
+  if (mode === 'classic') {
+    lastAbstractStyleLabel.value = ''
+  }
+}
+
 const formatRecommendStars = (stars: number) => {
   return `${'★'.repeat(stars)}${'☆'.repeat(Math.max(0, 5 - stars))}（${stars}颗星）`
+}
+
+const setRecentTextRef = (
+  recordId: string,
+  element: Element | ComponentPublicInstance | null,
+) => {
+  const resolved =
+    element instanceof HTMLElement
+      ? element
+      : element && '$el' in element && element.$el instanceof HTMLElement
+        ? element.$el
+        : null
+
+  if (resolved) {
+    recentTextElementMap.set(recordId, resolved)
+    return
+  }
+
+  recentTextElementMap.delete(recordId)
+}
+
+const refreshRecentTextOverflowState = async () => {
+  await nextTick()
+  const nextState: Record<string, boolean> = {}
+  const nextExpandedState: Record<string, boolean> = {}
+
+  for (const record of recentCopyRecords.value) {
+    const element = recentTextElementMap.get(record.id)
+    nextState[record.id] = Boolean(element && element.scrollHeight > element.clientHeight + 1)
+    if (recentTextExpandedMap.value[record.id]) {
+      nextExpandedState[record.id] = true
+    }
+  }
+
+  recentTextOverflowMap.value = nextState
+  recentTextExpandedMap.value = nextExpandedState
+}
+
+const isRecentTextOverflow = (recordId: string) => {
+  return Boolean(recentTextOverflowMap.value[recordId])
+}
+
+const isRecentTextExpanded = (recordId: string) => {
+  return Boolean(recentTextExpandedMap.value[recordId])
+}
+
+const toggleRecentTextExpanded = (recordId: string) => {
+  const expanded = isRecentTextExpanded(recordId)
+  recentTextExpandedMap.value = {
+    ...recentTextExpandedMap.value,
+    [recordId]: !expanded,
+  }
+  void refreshRecentTextOverflowState()
 }
 
 const countBlessingChars = (text: string) => {
@@ -497,30 +712,56 @@ const pushGeneratedBlessingHistory = (text: string) => {
   )
 }
 
-const buildHorseYearBlessingPrompt = (mode: BlessingLengthMode, historyBlessings: string[]) => {
-  const { hint } = BLESSING_LENGTH_RULES[mode]
+const pickRandomAbstractStyleVariant = () => randomPick(ABSTRACT_STYLE_VARIANTS)
+
+const buildHorseYearBlessingPrompt = (
+  mode: BlessingLengthMode,
+  historyBlessings: string[],
+  styleMode: BlessingStyleMode,
+  abstractStyleVariant: AbstractStyleVariant | null,
+) => {
   const promptLines = [
     '你是一位资深中文节庆文案作者。',
     '请创作1条马年新春祝贺语，语气真挚、喜庆、文采自然。',
-    `字数要求：${hint}`,
   ]
+
+  if (styleMode === 'classic') {
+    const { hint } = BLESSING_LENGTH_RULES[mode]
+    promptLines.push(`字数要求：${hint}`)
+  }
+
+  if (styleMode === 'abstract') {
+    promptLines.push('当前生成模式：抽象随机模式。')
+    promptLines.push('请融合当下流行语、抽象幽默表达、二次元语感等元素，但不要固定为某一种风格。')
+
+    if (abstractStyleVariant) {
+      promptLines.push(`本次随机风格：${abstractStyleVariant.label}`)
+      promptLines.push(`风格说明：${abstractStyleVariant.instruction}`)
+    }
+
+    promptLines.push('允许玩梗和适度反差，但必须保持新年祝福语属性，内容正向、友善，不低俗不冒犯。')
+  }
 
   if (historyBlessings.length > 0) {
     promptLines.push('以下是之前已返回的贺词，请避免和它们过于相似：')
     promptLines.push(...historyBlessings.map((item, index) => `${index + 1}. ${item}`))
-    promptLines.push(
-      '请确保新贺词在关键词、句式和意象上与以上内容明显不同，不要仅做近义词替换。',
-    )
+    promptLines.push('请确保新贺词在关键词、句式和意象上与以上内容明显不同，不要仅做近义词替换。')
   }
 
   promptLines.push('只返回最终贺词正文，不要标题、解释、引号、序号、markdown。')
   return promptLines.join('\n')
 }
 
-const pickFallbackBlessing = (mode: BlessingLengthMode) => {
-  const matched = fallbackBlessingsByLength[mode].filter((item) =>
-    isBlessingLengthMatched(item, mode),
-  )
+const pickFallbackBlessing = (mode: BlessingLengthMode, styleMode: BlessingStyleMode) => {
+  if (styleMode === 'abstract') {
+    const abstractPool = Object.values(abstractFallbackBlessingsByLength).flat()
+    if (abstractPool.length > 0) return randomPick(abstractPool)
+    return randomPick(fallbackBlessingsByLength.medium)
+  }
+
+  const fallbackPoolByLength = fallbackBlessingsByLength
+
+  const matched = fallbackPoolByLength[mode].filter((item) => isBlessingLengthMatched(item, mode))
   if (matched.length > 0) return randomPick(matched)
 
   const recommendPool = HORSE_YEAR_RECOMMEND_MESSAGES.map((item) => item.text).filter((item) =>
@@ -528,7 +769,7 @@ const pickFallbackBlessing = (mode: BlessingLengthMode) => {
   )
 
   if (recommendPool.length > 0) return randomPick(recommendPool)
-  return randomPick(fallbackBlessingsByLength.medium)
+  return randomPick(fallbackPoolByLength.medium)
 }
 
 const extractBlessingText = (payload: unknown): string => {
@@ -879,7 +1120,11 @@ const requestGenerateBlessing = async () => {
   if (isGenerating.value) return
 
   const targetLengthMode = selectedBlessingLength.value
+  const targetStyleMode = selectedBlessingStyle.value
   const historyBlessings = getPromptHistoryBlessings()
+  const abstractStyleVariant =
+    targetStyleMode === 'abstract' ? pickRandomAbstractStyleVariant() : null
+  lastAbstractStyleLabel.value = abstractStyleVariant?.label ?? ''
 
   isGenerating.value = true
   lastGenerateStartedAt = Date.now()
@@ -896,18 +1141,27 @@ const requestGenerateBlessing = async () => {
   }
 
   try {
-    const aiPrompt = buildHorseYearBlessingPrompt(targetLengthMode, historyBlessings)
-    const aiResult = await aiApi.getAIContent(aiPrompt, {
+    const aiPrompt = buildHorseYearBlessingPrompt(
+      targetLengthMode,
       historyBlessings,
-      maxHistory: MAX_GENERATE_HISTORY,
-    })
+      targetStyleMode,
+      abstractStyleVariant,
+    )
+    const aiMessages = [
+      ...historyBlessings.map((item) => ({ role: 'assistant', content: item })),
+      { role: 'user', content: aiPrompt },
+    ]
+    const aiResult = await aiApi.getAIContent(aiPrompt, aiMessages)
     const normalizedBlessing = normalizeBlessingText(extractBlessingText(aiResult))
 
     if (!normalizedBlessing) {
       throw new Error('AI 返回内容为空')
     }
 
-    if (!isBlessingLengthMatched(normalizedBlessing, targetLengthMode)) {
+    if (
+      targetStyleMode !== 'abstract' &&
+      !isBlessingLengthMatched(normalizedBlessing, targetLengthMode)
+    ) {
       const { hint } = BLESSING_LENGTH_RULES[targetLengthMode]
       throw new Error(`AI 返回字数不符合 ${hint}`)
     }
@@ -916,11 +1170,15 @@ const requestGenerateBlessing = async () => {
     pushGeneratedBlessingHistory(normalizedBlessing)
   } catch (error) {
     console.error('AI 生成贺词失败:', error)
-    const fallbackBlessing = pickFallbackBlessing(targetLengthMode)
+    const fallbackBlessing = pickFallbackBlessing(targetLengthMode, targetStyleMode)
     applyBlessingWithFade(fallbackBlessing)
     pushGeneratedBlessingHistory(fallbackBlessing)
-    const { hint } = BLESSING_LENGTH_RULES[targetLengthMode]
-    ElMessage.warning(`AI生成失败，已切换为${hint}贺词`)
+    if (targetStyleMode === 'abstract') {
+      ElMessage.warning('AI生成失败，已切换为抽象随机贺词')
+    } else {
+      const { hint } = BLESSING_LENGTH_RULES[targetLengthMode]
+      ElMessage.warning(`AI生成失败，已切换为${hint}贺词`)
+    }
   } finally {
     runAfter(() => {
       isGenerating.value = false
@@ -1040,15 +1298,30 @@ const formatCopiedAt = (value: string) => {
   return target.toLocaleDateString('zh-CN')
 }
 
+const handleRecentTextResize = () => {
+  void refreshRecentTextOverflowState()
+}
+
+watch(
+  recentCopyRecords,
+  () => {
+    void refreshRecentTextOverflowState()
+  },
+  { flush: 'post', immediate: true },
+)
+
 onMounted(() => {
   loadRecentFromStorage()
   showBgmModal.value = true
+  window.addEventListener('resize', handleRecentTextResize)
 })
 
 onBeforeUnmount(() => {
   pauseBgm()
   removeBgmUnlockListeners()
   revokeSharePreviewUrl()
+  recentTextElementMap.clear()
+  window.removeEventListener('resize', handleRecentTextResize)
   if (bgmAudioRef.value?.parentNode) {
     bgmAudioRef.value.parentNode.removeChild(bgmAudioRef.value)
   }
@@ -1550,6 +1823,79 @@ onBeforeUnmount(() => {
   font-weight: 600;
 }
 
+.style-control {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.style-title {
+  font-size: 13px;
+  color: #8d6550;
+  font-weight: 700;
+}
+
+.style-chip {
+  min-height: 36px;
+  min-width: 86px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(201, 24, 43, 0.25);
+  background: #fff;
+  color: #7e4633;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.style-chip:hover:not(:disabled) {
+  border-color: rgba(201, 24, 43, 0.45);
+}
+
+.style-chip.abstract {
+  border-color: rgba(37, 99, 235, 0.28);
+  color: #1d4ed8;
+}
+
+.style-chip.active {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(to right, var(--primary), var(--primary-hover));
+  box-shadow: 0 6px 14px rgba(201, 24, 43, 0.22);
+}
+
+.style-chip.abstract.active {
+  background: linear-gradient(120deg, #2563eb 0%, #0ea5e9 100%);
+  box-shadow: 0 6px 16px rgba(30, 64, 175, 0.28);
+}
+
+.style-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.style-chip-icon {
+  font-size: 16px;
+}
+
+.style-hint {
+  font-size: 12px;
+  color: #7d5c74;
+  font-weight: 600;
+}
+
 .action-row {
   width: 100%;
   display: flex;
@@ -1708,6 +2054,15 @@ onBeforeUnmount(() => {
   word-break: break-word;
 }
 
+.recent-text-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: calc(1.72em * 7);
+}
+
 .item-meta {
   margin-top: 10px;
   display: flex;
@@ -1770,6 +2125,23 @@ onBeforeUnmount(() => {
   display: block;
   color: #907b70;
   font-size: 12px;
+}
+
+.recent-expand-btn {
+  margin-top: 8px;
+  min-height: 30px;
+  border: 0;
+  background: transparent;
+  color: var(--primary);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.recent-expand-btn:hover {
+  color: var(--primary-hover);
 }
 
 .empty-state {
@@ -2280,6 +2652,33 @@ onBeforeUnmount(() => {
     font-size: 11px;
   }
 
+  .recent-text-clamp {
+    -webkit-line-clamp: 5;
+    max-height: calc(1.72em * 5);
+  }
+
+  .style-control {
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .style-title {
+    width: 100%;
+    font-size: 12px;
+  }
+
+  .style-chip {
+    min-width: 0;
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 12px;
+  }
+
+  .style-hint {
+    width: 100%;
+    font-size: 11px;
+  }
+
   .action-row {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -2337,6 +2736,7 @@ onBeforeUnmount(() => {
     min-height: 46px;
     font-size: 15px;
   }
+
 }
 
 @media (max-width: 480px) {
@@ -2358,6 +2758,11 @@ onBeforeUnmount(() => {
     text-align: left;
   }
 
+  .style-title,
+  .style-hint {
+    text-align: left;
+  }
+
   .action-row {
     gap: 6px;
   }
@@ -2372,6 +2777,11 @@ onBeforeUnmount(() => {
 
   .action-row .material-icons {
     font-size: 18px;
+  }
+
+  .recent-text-clamp {
+    -webkit-line-clamp: 4;
+    max-height: calc(1.72em * 4);
   }
 
   .knowledge-content h3 {
@@ -2408,5 +2818,6 @@ onBeforeUnmount(() => {
     top: 6px;
     right: 6px;
   }
+
 }
 </style>
