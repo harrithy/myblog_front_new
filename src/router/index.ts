@@ -81,6 +81,9 @@ const routes: RouteRecordRaw[] = [
     path: '/happy',
     name: 'happyNewYear',
     component: () => import('../views/activity/happy_new_year/index.vue'),
+    meta: {
+      title: 'Happy New Year - harrio',
+    },
   },
 ]
 
