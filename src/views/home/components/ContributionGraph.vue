@@ -1,7 +1,7 @@
 <template>
   <div class="contribution-graph">
     <!-- <h4>年度贡献图</h4> -->
-    <div class="graph-container">
+    <div class="graph-container" :style="{ '--weeks-count': totalWeeks }">
       <div class="months-header">
         <div
           class="month"
@@ -61,6 +61,7 @@ interface MonthHeader {
 
 const contributionData = ref<ContributionDay[]>([])
 const months = ref<MonthHeader[]>([])
+const totalWeeks = ref(53)
 
 const colors = [
   'rgba(255, 255, 255, 0.4)', // 接近透明
@@ -101,38 +102,43 @@ const getColor = (day: ContributionDay): string => {
 const generateData = async () => {
   const data: ContributionDay[] = []
   const monthNames = [
-    'Jan',
-    'Feb',
-    'Mar',
-    'Apr',
-    'May',
-    'Jun',
-    'Jul',
-    'Aug',
-    'Sep',
-    'Oct',
-    'Nov',
-    'Dec',
+    '1月',
+    '2月',
+    '3月',
+    '4月',
+    '5月',
+    '6月',
+    '7月',
+    '8月',
+    '9月',
+    '10月',
+    '11月',
+    '12月',
   ]
-  const today = new Date()
-  const endDate = new Date(today)
-  const startDate = new Date(today)
-  startDate.setDate(startDate.getDate() - 365)
+  const currentYear = new Date().getFullYear()
+  const startDate = new Date(currentYear, 0, 1)
+  const endDate = new Date(currentYear, 11, 31)
+  const gridStartDate = new Date(startDate)
+  const millisecondsPerDay = 24 * 60 * 60 * 1000
 
-  let currentWeek = 0
+  gridStartDate.setDate(gridStartDate.getDate() - gridStartDate.getDay())
+
   const monthHeaders: MonthHeader[] = []
   let lastMonth = -1
-
-  // Find the first Sunday to align the grid
-  const dayOffset = startDate.getDay()
-  startDate.setDate(startDate.getDate() - dayOffset)
+  totalWeeks.value =
+    Math.floor((endDate.getTime() - gridStartDate.getTime()) / millisecondsPerDay / 7) + 1
 
   // 创建日期到访问次数的映射
   const visitCountMap = new Map<string, number>()
 
   try {
     // 获取访问统计数据
-    const response = (await visitApi.getOwnerVisits(365).send()) as OwnerVisitStatsResponse['data']
+    const today = new Date()
+    const daysSinceYearStart =
+      Math.floor((today.getTime() - startDate.getTime()) / millisecondsPerDay) + 1
+    const response = (await visitApi
+      .getOwnerVisits(Math.min(daysSinceYearStart, 365))
+      .send()) as OwnerVisitStatsResponse['data']
     console.log(response.visit_stats)
     const responseWithStats = response.visit_stats
     responseWithStats.forEach((stat) => {
@@ -144,15 +150,12 @@ const generateData = async () => {
 
   for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
     const dayOfWeek = d.getDay() // 0=Sun, 1=Mon, ..., 6=Sat
-
-    if (dayOfWeek === 0) {
-      // Start of a new week (Sunday)
-      currentWeek++
-    }
+    const weekOfYear =
+      Math.floor((d.getTime() - gridStartDate.getTime()) / millisecondsPerDay / 7) + 1
 
     if (d.getMonth() !== lastMonth) {
       lastMonth = d.getMonth()
-      monthHeaders.push({ name: monthNames[lastMonth], start: currentWeek })
+      monthHeaders.push({ name: monthNames[lastMonth], start: weekOfYear })
     }
 
     const dateStr = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA') // 使用 'en-CA' 格式 (YYYY-MM-DD)
@@ -162,7 +165,7 @@ const generateData = async () => {
       date: dateStr,
       count: count, // 使用API返回的数据，如果没有则为0
       dayOfWeek: dayOfWeek + 1, // CSS grid-row starts at 1
-      weekOfYear: currentWeek,
+      weekOfYear,
       isSnake: false,
     })
   }
@@ -179,7 +182,7 @@ let gameInterval: number | undefined // 游戏循环的定时器
 
 // 将 contributionData 转换为一个二维网格以便于访问
 const getGrid = (): (ContributionDay | undefined)[][] => {
-  const grid: (ContributionDay | undefined)[][] = Array(54)
+  const grid: (ContributionDay | undefined)[][] = Array(totalWeeks.value + 1)
     .fill(null)
     .map(() => Array(8).fill(undefined))
   contributionData.value.forEach((day) => {
@@ -221,7 +224,7 @@ const moveSnake = () => {
     const nextY = head.y + dir.y
 
     // 检查边界和是否为空格子
-    if (nextX > 0 && nextX < 54 && nextY > 0 && nextY < 8) {
+    if (nextX > 0 && nextX <= totalWeeks.value && nextY > 0 && nextY < 8) {
       const nextCell = grid[nextX] && grid[nextX][nextY]
       if (
         nextCell &&
@@ -305,7 +308,7 @@ onUnmounted(() => {
 
   .months-header {
     display: grid;
-    grid-template-columns: repeat(53, var(--cell-size));
+    grid-template-columns: repeat(var(--weeks-count), var(--cell-size));
     grid-gap: var(--cell-gap);
     margin-bottom: 5px;
     padding-left: var(--label-width);
@@ -318,7 +321,7 @@ onUnmounted(() => {
 
   .days-grid {
     display: grid;
-    grid-template-columns: var(--label-width) repeat(53, var(--cell-size));
+    grid-template-columns: var(--label-width) repeat(var(--weeks-count), var(--cell-size));
     grid-template-rows: repeat(7, var(--cell-size));
     grid-auto-flow: column;
     grid-gap: var(--cell-gap);
