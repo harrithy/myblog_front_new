@@ -323,11 +323,13 @@ const handleFanFocusOut = (event: FocusEvent) => {
 
 <style scoped lang="scss">
 .showcase {
+  --tabs-visual-shift: 28px;
+  --fan-visual-lift: -220px;
   position: relative;
   overflow: visible;
   display: grid;
   grid-template-columns: clamp(148px, 16vw, 196px) minmax(0, 1fr);
-  align-items: stretch;
+  align-items: center;
   column-gap: clamp(22px, 3vw, 40px);
   padding: clamp(12px, 1.6vw, 18px) 0;
   border: none;
@@ -351,9 +353,10 @@ const handleFanFocusOut = (event: FocusEvent) => {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  align-self: stretch;
+  align-self: center;
   justify-content: center;
-  padding: 18px 0;
+  padding: 0;
+  transform: translateY(var(--tabs-visual-shift));
 }
 
 .showcase__tabs::before {
@@ -463,7 +466,7 @@ const handleFanFocusOut = (event: FocusEvent) => {
 
 .showcase__fan::after {
   left: 50%;
-  bottom: 28px;
+  bottom: calc(28px + var(--fan-visual-lift));
   width: min(560px, 78%);
   height: 140px;
   border-radius: 50%;
@@ -498,7 +501,7 @@ const handleFanFocusOut = (event: FocusEvent) => {
 .showcase__ring {
   position: absolute;
   left: 50%;
-  bottom: 46px;
+  bottom: calc(46px + var(--fan-visual-lift));
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--showcase-accent) 14%, white);
   transform: translateX(-50%);
@@ -521,7 +524,7 @@ const handleFanFocusOut = (event: FocusEvent) => {
 
 .showcase-card {
   position: absolute;
-  bottom: 48px;
+  bottom: calc(48px + var(--fan-visual-lift));
   left: 50%;
   width: clamp(168px, 22vw, 236px);
   aspect-ratio: 2 / 3;
@@ -660,14 +663,28 @@ const handleFanFocusOut = (event: FocusEvent) => {
 
 .showcase-card__meta {
   position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
   padding: 22px 18px 18px;
-  background:
-    linear-gradient(180deg, transparent, rgba(10, 8, 10, 0.92)),
-    linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.08));
   text-align: left;
+}
+
+.showcase-card__meta::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(10, 8, 10, 0) 46%, rgba(10, 8, 10, 0.92) 100%),
+    linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.08));
+  pointer-events: none;
+}
+
+.showcase-card__meta > * {
+  position: relative;
+  z-index: 1;
 }
 
 .showcase-card__meta p {
@@ -761,6 +778,8 @@ const handleFanFocusOut = (event: FocusEvent) => {
 
 @media (max-width: 880px) {
   .showcase {
+    --tabs-visual-shift: 0px;
+    --fan-visual-lift: 0px;
     grid-template-columns: 1fr;
     row-gap: 12px;
     padding: 8px 0;
@@ -772,6 +791,7 @@ const handleFanFocusOut = (event: FocusEvent) => {
     gap: 10px;
     align-self: start;
     padding: 0;
+    transform: none;
   }
 
   .showcase__tabs::before {
