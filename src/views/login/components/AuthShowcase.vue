@@ -4,7 +4,7 @@ defineOptions({
 })
 
 import { computed, onBeforeUnmount, onMounted, shallowRef, watch, type CSSProperties } from 'vue'
-import type { AuthShowcaseBand, AuthShowcaseCharacter } from '../types'
+import type { AuthShowcaseBand, AuthShowcaseBandId, AuthShowcaseCharacter } from '../types'
 import type { AuthShowcaseCopy } from '../loginCopy'
 
 interface LaidOutCard {
@@ -25,6 +25,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   expandedChange: [expanded: boolean]
+  showcaseInteract: [bandId: AuthShowcaseBandId]
 }>()
 
 const petals = [
@@ -162,7 +163,7 @@ const petalStyle = (petal: (typeof petals)[number]): CSSProperties => ({
   animationDelay: petal.delay,
 })
 
-const selectBand = (bandId: string) => {
+const selectBand = (bandId: AuthShowcaseBandId) => {
   const band = props.bands.find((item) => item.id === bandId)
 
   if (!band) {
@@ -177,6 +178,8 @@ const selectBand = (bandId: string) => {
     isFanHovered.value = false
     isFanFocused.value = false
   }
+
+  emit('showcaseInteract', band.id)
 }
 
 const selectCharacter = (characterId: string) => {
@@ -184,6 +187,10 @@ const selectCharacter = (characterId: string) => {
 
   if (!supportsHoverInteraction.value) {
     previewedCharacterId.value = characterId
+  }
+
+  if (activeBand.value) {
+    emit('showcaseInteract', activeBand.value.id)
   }
 }
 

@@ -1,4 +1,4 @@
-import type { AuthShowcaseBand, LoginLocale } from './types'
+import type { AuthShowcaseBand, AuthShowcaseBandId, LoginLocale } from './types'
 
 const asset = (fileName: string) => `/auth-showcase/${fileName}`
 
@@ -10,7 +10,7 @@ interface BaseCharacterData {
 }
 
 interface BaseBandData {
-  id: string
+  id: AuthShowcaseBandId
   accent: string
   sourceHref: string
   featuredId: string

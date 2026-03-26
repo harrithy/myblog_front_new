@@ -3,13 +3,14 @@ defineOptions({
   name: 'OwnerLogin',
 })
 
-import { computed, shallowRef, watchEffect } from 'vue'
+import { computed, onMounted, shallowRef, watchEffect } from 'vue'
 import { useAuthSession } from '@/composables/useAuthSession'
 import AuthPanel from './components/AuthPanel.vue'
 import AuthShowcase from './components/AuthShowcase.vue'
 import { authPageCopyByLocale, localeNames, loginLocaleOrder } from './loginCopy'
+import { useShowcaseBgm } from './composables/useShowcaseBgm'
 import { getAuthShowcaseBands } from './showcaseContent'
-import type { LoginLocale } from './types'
+import type { AuthShowcaseBandId, LoginLocale } from './types'
 
 const locale = shallowRef<LoginLocale>('zh')
 const pageCopy = computed(() => authPageCopyByLocale[locale.value])
@@ -21,9 +22,19 @@ const nextLocale = computed(() => {
   return loginLocaleOrder[(currentIndex + 1) % loginLocaleOrder.length]
 })
 const nextLocaleLabel = computed(() => localeNames[nextLocale.value])
+const { autoplayTrack, playTrack } = useShowcaseBgm()
 
 watchEffect(() => {
   document.title = `${pageCopy.value.page.documentTitle}-harrio`
+})
+
+onMounted(() => {
+  const initialBandId = showcaseBands.value[0]?.id
+  if (!initialBandId) {
+    return
+  }
+
+  void autoplayTrack(initialBandId)
 })
 
 const {
@@ -40,6 +51,10 @@ const {
 
 const cycleLocale = () => {
   locale.value = nextLocale.value
+}
+
+const handleShowcaseInteract = (bandId: AuthShowcaseBandId) => {
+  void playTrack(bandId)
 }
 </script>
 
@@ -62,6 +77,7 @@ const cycleLocale = () => {
         :copy="pageCopy.showcase"
         class="auth-shell__showcase"
         @expanded-change="showcaseExpanded = $event"
+        @showcase-interact="handleShowcaseInteract"
       />
       <AuthPanel
         v-model:mode="mode"

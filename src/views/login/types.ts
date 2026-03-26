@@ -1,5 +1,6 @@
 export type AuthMode = 'login' | 'register'
 export type LoginLocale = 'ja' | 'zh' | 'en'
+export type AuthShowcaseBandId = 'kon' | 'bocchi' | 'gbc' | 'mygo'
 
 export interface LoginFormState {
   account: string
@@ -24,7 +25,7 @@ export interface AuthShowcaseCharacter {
 }
 
 export interface AuthShowcaseBand {
-  id: string
+  id: AuthShowcaseBandId
   label: string
   eyebrow: string
   description: string
