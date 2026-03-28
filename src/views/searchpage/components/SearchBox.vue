@@ -44,8 +44,8 @@ const searchCategories = debounce(async (value: string) => {
     return
   }
   const params = { keyword: value }
-  const res = await categoryApi.getCategories(params)
-  searchResults.value = (res as SearchResult[]) || []
+  const res = await categoryApi.getCategories<SearchResult[]>(params)
+  searchResults.value = res || []
 }, 500)
 
 // 监听关键词变化

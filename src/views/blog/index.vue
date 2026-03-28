@@ -143,10 +143,8 @@ const fetchArticle = async () => {
     startLoading()
     loading.value = true
 
-    const res = (await categoryApi.getCategoryById(id)) as unknown as {
-      data?: ArticleDetail
-    } & ArticleDetail
-    article.value = res.data || res
+    const res = await categoryApi.getCategoryById<ArticleDetail>(id)
+    article.value = res
 
     if (article.value?.url) {
       const textRes = await fetch(getProxiedUrl(article.value.url))

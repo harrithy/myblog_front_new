@@ -48,7 +48,7 @@ const fetchCategories = async () => {
   loading.value = true
   try {
     const data = await categoryApi.getCategories()
-    categories.value = data as Category[]
+    categories.value = data
     // 默认选中第一个分类
     if (categories.value.length > 0) {
       handleArticleSelect(categories.value[0])
