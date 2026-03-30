@@ -5,7 +5,7 @@ import type { Category } from '@/types/Category'
 type CategoryId = string | number
 
 const CATEGORY_BASE_PATH = '/categories'
-const PUBLIC_REQUEST_META = { skipAuth: true } as const
+const PUBLIC_REQUEST_META = { skipAuth: true, skipErrorMessage: true } as const
 
 // 创建分类请求数据
 export interface CreateCategoryData {

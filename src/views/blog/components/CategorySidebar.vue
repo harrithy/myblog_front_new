@@ -2,8 +2,12 @@
   <aside class="sidebar" v-loading="loading">
     <!-- 头部分类名称 -->
     <div class="sidebar-header">Categories</div>
+    <p v-if="errorMessage" class="sidebar-feedback sidebar-feedback--error">
+      {{ errorMessage }}
+    </p>
+    <p v-else-if="!loading && categories.length === 0" class="sidebar-feedback">暂无分类内容</p>
     <!-- 分类列表 - 使用递归组件支持无限层级 -->
-    <nav class="nav-list">
+    <nav v-else class="nav-list">
       <CategoryItem
         v-for="category in categories"
         :key="category.id"
@@ -33,6 +37,7 @@ const emit = defineEmits<{
 // 状态
 const categories = ref<Category[]>([])
 const loading = ref(false)
+const errorMessage = ref('')
 const activeId = ref<number | null>(null)
 const expandedIds = ref<number[]>([]) // 已展开的文件夹id列表
 const childrenMap = ref<Record<number, Category[]>>({}) // 子分类缓存 { parentId: children[] }
@@ -46,6 +51,7 @@ const handleArticleSelect = (category: Category) => {
 // 获取分类列表
 const fetchCategories = async () => {
   loading.value = true
+  errorMessage.value = ''
   try {
     const data = await categoryApi.getCategories()
     categories.value = data
@@ -54,6 +60,8 @@ const fetchCategories = async () => {
       handleArticleSelect(categories.value[0])
     }
   } catch (e) {
+    categories.value = []
+    errorMessage.value = '分类数据暂时不可用，请确认后端服务已启动。'
     console.error('Failed to load categories', e)
   } finally {
     loading.value = false
@@ -90,6 +98,23 @@ $shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
   letter-spacing: 0.05em;
   line-height: 1.5;
   font-weight: 700;
+}
+
+.sidebar-feedback {
+  margin: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(255, 255, 255, 0.78);
+  color: $text-secondary;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.sidebar-feedback--error {
+  border-color: rgba(251, 191, 36, 0.4);
+  background: rgba(255, 247, 237, 0.96);
+  color: #b45309;
 }
 
 .logo-wrapper {

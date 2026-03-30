@@ -218,7 +218,11 @@
       <!-- 热门标签 -->
       <div class="hot-tags">
         <h3 class="hot-tags-title">Popular Tags</h3>
-        <div class="tags-list">
+        <p v-if="hotTagsError" class="hot-tags-feedback hot-tags-feedback--error">
+          {{ hotTagsError }}
+        </p>
+        <p v-else-if="hotTags.length === 0" class="hot-tags-feedback">暂无热门标签</p>
+        <div v-else class="tags-list">
           <span v-for="tag in hotTags" :key="tag.id" class="tag-item">
             <span class="tag-hash">#</span>
             <span class="tag-name">{{ tag.name }}</span>
@@ -248,6 +252,7 @@ const currentCategory = ref<Category | null>(null)
 const breadcrumbPath = ref<Category[]>([])
 // 热门标签
 const hotTags = ref<Category[]>([])
+const hotTagsError = ref('')
 // 文章内容
 const articleContent = ref('')
 // 加载状态
@@ -348,10 +353,13 @@ const handleBreadcrumbClick = (index: number) => {
 
 // 获取热门标签
 const fetchHotTags = async () => {
+  hotTagsError.value = ''
   try {
     const data = await categoryApi.getHotTags()
     hotTags.value = data
   } catch (error) {
+    hotTags.value = []
+    hotTagsError.value = '热门标签暂时不可用，请确认后端服务已启动。'
     console.error('获取热门标签失败:', error)
   }
 }
@@ -1266,6 +1274,23 @@ onUnmounted(() => {
       margin: 0 0 16px 0;
       letter-spacing: 1px;
       text-transform: uppercase;
+    }
+
+    .hot-tags-feedback {
+      margin: 0;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px dashed #cbd5e1;
+      background: #f8fafc;
+      color: #64748b;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .hot-tags-feedback--error {
+      border-color: #fdba74;
+      background: #fff7ed;
+      color: #b45309;
     }
 
     .tags-list {
