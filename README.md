@@ -1,35 +1,61 @@
 # myblog_front_new
 
-一个基于 `Vue 3 + TypeScript + Vite` 的个人博客前端项目，包含登录鉴权、博客内容展示、个人主页、搜索页和节日活动页等模块。
+一个基于 Vue 3 构建的个人博客前端项目，包含登录鉴权、博客展示、个人主页、搜索页和节日活动页等内容。
+
+该仓库目前只包含前端代码，完整功能运行依赖对应的后端接口服务。
+
+## 项目亮点
+
+- 基于 `Vue 3 + TypeScript + Vite` 搭建
+- 使用 `Pinia` 管理用户状态
+- 使用 `Vue Router 4` 处理页面路由与鉴权跳转
+- 使用 `alova` 统一封装请求逻辑
+- 支持 GitHub OAuth 登录
+- 支持 Markdown 文章渲染
+- 包含动效首页、博客页、搜索页、个人页和活动页
 
 ## 技术栈
 
-- `Vue 3`
-- `TypeScript`
-- `Vite 7`
-- `Pinia`
-- `Vue Router 4`
-- `Element Plus`
-- `Tailwind CSS 4`
-- `alova`
-- `GSAP`
-- `markdown-it`
-- `typed.js`
+| 分类 | 技术 |
+| --- | --- |
+| 框架 | `Vue 3` |
+| 构建工具 | `Vite 7` |
+| 语言 | `TypeScript` |
+| 路由 | `Vue Router 4` |
+| 状态管理 | `Pinia` |
+| UI 组件 | `Element Plus` |
+| 样式能力 | `SCSS`、`Tailwind CSS 4` |
+| 请求层 | `alova` |
+| 动效 | `GSAP`、`typed.js` |
+| 内容渲染 | `markdown-it` |
 
-## 功能概览
+## 功能模块
 
-- 登录与注册
-  支持账号密码登录、GitHub OAuth 登录和本地登录态持久化。
-- 首页
-  包含动效展示、打字机文案和访客记录展示。
-- 博客模块
-  支持分类浏览、文章详情、Markdown 渲染、评论相关能力。
+### 1. 登录 / 注册
+
+- 账号密码登录
+- GitHub OAuth 登录
+- 登录态本地持久化
+- 登录页多语言切换
+
+### 2. 首页
+
+- 动效展示
+- 打字机文案
+- 访客记录展示
+
+### 3. 博客模块
+
+- 分类浏览
+- 文章详情展示
+- Markdown 渲染
+- 评论相关能力
+
+### 4. 其他页面
+
 - 搜索页
-  提供独立搜索入口和导航交互。
-- 个人页
-  展示个人介绍、经历和项目内容。
-- 活动页
-  当前包含新春祝福主题页面。
+- 个人主页
+- 新春活动页
 
 ## 页面路由
 
@@ -49,7 +75,7 @@
 ### 环境要求
 
 - `Node.js`: `^20.19.0 || >=22.12.0`
-- 包管理器: 推荐 `npm`
+- 推荐使用 `npm`
 
 ### 安装依赖
 
@@ -63,21 +89,19 @@ npm install
 npm run dev
 ```
 
-开发环境下，Vite 会将 `/api` 请求代理到 `.env.development` 中的 `VITE_API_PROXY_TARGET`。如果后端没有启动，登录、博客分类、热门标签等依赖接口的页面会进入降级展示。
-
 ### 类型检查
 
 ```bash
 npm run type-check
 ```
 
-### 构建生产包
+### 构建生产版本
 
 ```bash
 npm run build
 ```
 
-### 本地预览生产包
+### 本地预览构建结果
 
 ```bash
 npm run preview
@@ -87,38 +111,38 @@ npm run preview
 
 ### `.env`
 
-| 变量名 | 说明 |
-| --- | --- |
-| `VITE_APP_TITLE` | 应用标题 |
-| `VITE_APP_VERSION` | 应用版本 |
+```env
+VITE_APP_TITLE=harrio的小屋
+VITE_APP_VERSION=1.0.0
+```
 
 ### `.env.development`
 
-| 变量名 | 说明 |
-| --- | --- |
-| `VITE_API_BASE_URL` | 前端请求基地址，默认使用 `/api` |
-| `VITE_API_PROXY_TARGET` | 本地开发代理目标地址，示例为 `http://localhost:8080` |
+```env
+VITE_API_BASE_URL=/api
+VITE_API_PROXY_TARGET=http://localhost:8080
+```
 
 ### `.env.production`
 
-| 变量名 | 说明 |
-| --- | --- |
-| `VITE_API_BASE_URL` | 生产环境 API 地址 |
-| `VITE_GITHUB_CLIENT_ID` | GitHub OAuth Client ID |
+```env
+VITE_API_BASE_URL=https://your-api-domain/api
+VITE_GITHUB_CLIENT_ID=your_github_client_id
+```
 
 ## 常用脚本
 
 | 命令 | 说明 |
 | --- | --- |
-| `npm run dev` | 启动 Vite 开发服务器 |
-| `npm run build` | 先执行类型检查，再构建生产包 |
-| `npm run build-only` | 仅执行 Vite 构建 |
-| `npm run preview` | 本地预览构建结果 |
+| `npm run dev` | 启动开发服务器 |
+| `npm run build` | 类型检查 + 生产构建 |
+| `npm run build-only` | 仅执行构建 |
+| `npm run preview` | 预览构建结果 |
 | `npm run type-check` | 执行 `vue-tsc --build` |
 | `npm run lint` | 执行 ESLint 并自动修复 |
 | `npm run format` | 使用 Prettier 格式化 `src/` 目录 |
 
-## 目录结构
+## 项目结构
 
 ```text
 myblog_front_new/
@@ -132,7 +156,7 @@ myblog_front_new/
 │  ├─ router/             # 路由配置
 │  ├─ stores/             # Pinia 状态管理
 │  ├─ utils/              # 工具函数
-│  ├─ views/              # 页面级视图
+│  ├─ views/              # 页面视图
 │  ├─ App.vue
 │  └─ main.ts
 ├─ .env
@@ -144,13 +168,28 @@ myblog_front_new/
 
 ## 开发说明
 
-- 首页 `/` 启用了 `requiresAuth` 路由守卫，未登录会自动跳转到 `/login`。
-- 登录成功后，`token` 和 `userInfo` 会写入本地存储。
-- 博客详情页支持从外部 Markdown 地址拉取内容，并通过 `/image-proxy` 处理图片访问。
-- 当前仓库只包含前端项目，完整联调需要配套后端接口。
+- 首页 `/` 启用了路由鉴权，未登录会自动跳转到 `/login`
+- 登录成功后，`token` 和 `userInfo` 会写入本地存储
+- 博客详情页支持从外部 Markdown 地址拉取内容
+- 图片访问通过 `/image-proxy` 做转发处理
+- 当前仓库仅包含前端，联调时需要后端服务配合
 
-## 本地排查建议
+## 本地调试提示
 
-- 打开页面后直接跳到 `/login` 是正常行为，因为首页需要鉴权。
-- 如果博客页没有分类或热门标签，优先确认后端服务是否已在 `VITE_API_PROXY_TARGET` 对应地址启动。
-- 如果只想验证纯前端页面，可优先访问 `/login`、`/search`、`/me`、`/happy`。
+- 如果访问首页后直接跳到 `/login`，这是当前设计的正常行为
+- 如果博客页没有分类或热门标签，请优先确认后端服务是否已经启动
+- 如果只想查看纯前端页面，可优先访问 `/login`、`/search`、`/me`、`/happy`
+
+## 部署说明
+
+- 开发环境通过 Vite 代理 `/api` 请求到本地后端
+- 生产环境通过 `.env.production` 直接请求线上 API
+- `vercel.json` 已处理 SPA 路由回退和部分代理转发逻辑
+
+## 后续可补充
+
+- 在线预览地址
+- 项目截图或 GIF 演示
+- 后端仓库地址
+- 接口文档地址
+- License 信息
