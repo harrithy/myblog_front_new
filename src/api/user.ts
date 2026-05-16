@@ -47,12 +47,12 @@ export const userApi = {
       meta: { skipAuth: true },
     }),
 
-  getUserInfo: (userId: string | number) => http.get<UserInfo>(`/user/${userId}`),
+  getUserInfo: (userId: string | number) => http.get<UserInfo>(`/users/${userId}`),
 
   updateUser: (userId: string | number, userData: UserUpdateData) =>
-    http.put<UserInfo>(`/user/${userId}`, userData),
+    http.put<UserInfo>(`/users/${userId}`, userData),
 
-  deleteUser: (userId: string | number) => http.delete(`/user/${userId}`),
+  deleteUser: (userId: string | number) => http.delete(`/users/${userId}`),
 
   getGithubAuthUrl: () =>
     http.get<GithubAuthUrlResponse>('/auth/github', {

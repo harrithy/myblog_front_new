@@ -1,7 +1,6 @@
 <template>
   <Transition name="fade">
     <div v-show="visible" class="user-card">
-      <!-- 已登录状态 -->
       <template v-if="userStore.isLoggedIn">
         <div class="user-card-header">
           <div class="avatar-wrapper">
@@ -29,7 +28,7 @@
           <button class="logout-btn" @click="handleLogout">退出登录</button>
         </div>
       </template>
-      <!-- 未登录状态 -->
+
       <template v-else>
         <div class="login-prompt">
           <div class="login-title">欢迎访问</div>
@@ -49,27 +48,24 @@ defineOptions({
   name: 'UserCard',
 })
 
-import { useUserStore } from '@/stores/user'
-import defaultAvatar from '@/assets/source/avatar.gif'
 import { ref, watch } from 'vue'
+import { userApi } from '@/api/user'
+import { rememberAuthRedirect } from '@/composables/useAuthSession'
+import defaultAvatar from '@/assets/source/avatar.gif'
+import { useUserStore } from '@/stores/user'
 
-// Props
 defineProps<{
   visible: boolean
 }>()
 
-// Emits
 const emit = defineEmits<{
   logout: []
 }>()
 
-// 用户状态
 const userStore = useUserStore()
-
-// 图片加载状态
 const isAvatarLoading = ref(true)
+const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID || 'Ov23liSXz8pI9Z4PcnnO'
 
-// 监听用户信息变化，重置 loading 状态
 watch(
   () => userStore.userInfo?.avatar_url,
   () => {
@@ -81,23 +77,34 @@ const handleImageLoad = () => {
   isAvatarLoading.value = false
 }
 
-const handleImageError = (e: Event) => {
+const handleImageError = (event: Event) => {
   isAvatarLoading.value = false
-  const target = e.target as HTMLImageElement
+  const target = event.target as HTMLImageElement
   target.src = defaultAvatar
 }
 
-// GitHub 登录配置
-const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID || 'Ov23liSXz8pI9Z4PcnnO'
-
-// GitHub 登录
-const handleGithubLogin = () => {
+const buildGithubFallbackUrl = () => {
   const redirectUri = `${window.location.origin}/callback`
-  const authUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`
-  window.location.href = authUrl
+  const query = new URLSearchParams({
+    client_id: GITHUB_CLIENT_ID,
+    redirect_uri: redirectUri,
+    scope: 'user:email',
+  })
+
+  return `https://github.com/login/oauth/authorize?${query.toString()}`
 }
 
-// 退出登录
+const handleGithubLogin = async () => {
+  rememberAuthRedirect(`${window.location.pathname}${window.location.search}`)
+
+  try {
+    const result = (await userApi.getGithubAuthUrl()) as { url: string }
+    window.location.href = result.url || buildGithubFallbackUrl()
+  } catch {
+    window.location.href = buildGithubFallbackUrl()
+  }
+}
+
 const handleLogout = () => {
   userStore.logout()
   emit('logout')
@@ -268,7 +275,6 @@ const handleLogout = () => {
   }
 }
 
-// 过渡动画
 .fade-enter-active,
 .fade-leave-active {
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
