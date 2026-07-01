@@ -57,7 +57,14 @@ const menuList = [
     desc: '探索所有文章',
   },
   {
-    path: '/about',
+    path: '/timeline',
+    icon: 'calendar',
+    iconClass: 'timeline-icon',
+    title: '时间线',
+    desc: '记录岁月的足迹',
+  },
+  {
+    path: '/me',
     icon: 'user',
     iconClass: 'about-icon',
     title: '关于我',
@@ -206,6 +213,9 @@ const navigateTo = (path: string) => {
           }
           &.blog-icon {
             color: #0984e3;
+          }
+          &.timeline-icon {
+            color: #00b894;
           }
           &.about-icon {
             color: #e17055;

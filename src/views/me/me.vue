@@ -19,7 +19,7 @@ import {
 } from './meContent'
 
 const router = useRouter()
-const { pageRef } = useMePageMotion()
+useMePageMotion()
 
 defineOptions({
   name: 'MeView',

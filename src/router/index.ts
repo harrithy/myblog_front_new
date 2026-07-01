@@ -74,6 +74,15 @@ const routes: RouteRecordRaw[] = [
     },
   },
   {
+    path: '/timeline',
+    name: 'timeline',
+    alias: '/dateline',
+    component: () => import('../views/dateLine/dateLine.vue'),
+    meta: {
+      title: '时间线',
+    },
+  },
+  {
     path: '/happy',
     name: 'happyNewYear',
     component: () => import('../views/activity/happy_new_year/index.vue'),

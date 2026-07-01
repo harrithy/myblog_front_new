@@ -15,6 +15,7 @@
         <div class="nav-left">
           <router-link to="/" class="nav-item">Home</router-link>
           <router-link to="/blog" class="nav-item active">Articles</router-link>
+          <router-link to="/timeline" class="nav-item">Timeline</router-link>
           <router-link to="/me" class="nav-item">About</router-link>
           <a href="mailto:2656450899@qq.com" class="nav-item">Contact</a>
         </div>
